@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+REPO=`git remote -v | head -n 1 | sed 's/\origin.*git.*:\(.*\)\.git.*fetch.*/\1/'`
+DOMAIN=`git remote -v | head -n 1 | sed 's/\origin.*git@\(.*\):.*/\1/'`
+open http://$DOMAIN/$REPO

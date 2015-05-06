@@ -1,0 +1,29 @@
+# Unix
+alias ln='ln -v'
+alias mkdir='mkdir -p'
+alias ...='../..'
+alias ll='ls -al'
+alias lh='ls -Alh'
+alias vi='vim'
+alias vim='mvim -v'
+alias tar='gtar'
+
+
+# ruby
+alias be="bundle exec"
+
+git-files() {
+  git ls-tree --full-tree -r --name-only HEAD
+}
+
+re-ctags() {
+  if [ -f .tags ] ; then
+    rm .tags
+  fi
+  git-files | xargs ctags -a -f .tags -L
+}
+
+# set warning before jumping machines
+#
+# Include custom aliases
+[[ -f ~/.aliases.local ]] && source ~/.aliases.local
