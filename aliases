@@ -8,7 +8,6 @@ alias vi='vim'
 alias vim='mvim -v'
 alias tar='gtar'
 
-
 # ruby
 alias be="bundle exec"
 
@@ -21,6 +20,10 @@ re-ctags() {
     rm .tags
   fi
   git-files | xargs ctags -a -f .tags -L
+}
+
+gif() {
+ ffmpeg -i $1 -s 600x400 -pix_fmt rgb24 -r 10 -f gif - | gifsicle --optimize=3 --delay=3 > $2
 }
 
 # set warning before jumping machines

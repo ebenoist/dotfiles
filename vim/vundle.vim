@@ -21,7 +21,8 @@ Bundle "pangloss/vim-javascript"
 Bundle "nanotech/jellybeans.vim"
 Bundle 'Blackrush/vim-gocode'
 Bundle 'vim-ruby/vim-ruby'
-
+Bundle 'mustache/vim-mustache-handlebars'
+Bundle 'nsf/gocode', {'rtp': 'vim/'}
 
 filetype plugin indent on     " required!
 "

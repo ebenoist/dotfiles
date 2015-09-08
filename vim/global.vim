@@ -20,7 +20,7 @@ set vb t_vb=                               " Turn off bell
 set mouse=a                                " Enable the mouse
 set linespace=3                            " Spacing between lines
 set noswapfile                             " Disable creation of *.swp files
-set t_Co=256                               " Support for xterm with 256 colors (gets overriden in .gvimrc)
+"set t_Co=256                               " Support for xterm with 256 colors (gets overriden in .gvimrc)
 set autoread                               " Autoload files
 set tags+=tags                            " Set ctags
 set tags+=.tags
@@ -75,7 +75,7 @@ set smartcase                              " Switch to case sensitive mode if ne
 " DEFAULT COLOURS FOR VIM - GVIMRC OVERRIDES THIS
 "-------------------------------------------------
 
-colorscheme jellybeans
+colorscheme Tomorrow-Night
 set background=dark
 
 if has("mouse")
@@ -91,4 +91,3 @@ autocmd BufWritePre * :%s/\s\+$//e
 " Change cursor type for iTerm2
 let &t_SI = "\<Esc>]50;CursorShape=1\x7"
 let &t_EI = "\<Esc>]50;CursorShape=0\x7"
-
