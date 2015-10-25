@@ -42,7 +42,7 @@ let g:ctrlp_user_command = {
 " SYNTAX
 " let g:syntastic_ruby_checkers=['rubylint']
 let g:syntastic_mode_map = { 'mode': 'passive', 'active_filetypes': ['javascript', 'coffee'] }
-
+let g:syntastic_javascript_checkers = ["eslint"]
 
 " Rspec
 let g:rspec_command = "!bundle exec rspec -fd --tty --color {spec}"

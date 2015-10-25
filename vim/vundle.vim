@@ -23,6 +23,7 @@ Bundle 'Blackrush/vim-gocode'
 Bundle 'vim-ruby/vim-ruby'
 Bundle 'mustache/vim-mustache-handlebars'
 Bundle 'nsf/gocode', {'rtp': 'vim/'}
+Bundle 'mxw/vim-jsx'
 
 filetype plugin indent on     " required!
 "

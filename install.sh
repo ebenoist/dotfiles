@@ -9,7 +9,7 @@ for name in *; do
   else
     if [ "$name" != 'install.sh' ] && [ "$name" != 'README.md' ]; then
       echo "Creating $target"
-      ln -s "$PWD/$name" "$target"
+      ln -sf "$PWD/$name" "$target"
     fi
   fi
 done
