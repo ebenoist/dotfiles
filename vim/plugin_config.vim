@@ -41,7 +41,7 @@ let g:ctrlp_user_command = {
 
 " SYNTAX
 " let g:syntastic_ruby_checkers=['rubylint']
-let g:syntastic_mode_map = { 'mode': 'passive', 'active_filetypes': ['javascript', 'coffee'] }
+let g:syntastic_mode_map = { 'mode': 'passive', 'active_filetypes': ['javascript', 'coffee'], 'passive_filetype': ['go'] }
 let g:syntastic_javascript_checkers = ["eslint"]
 
 " Rspec
@@ -62,3 +62,11 @@ let g:SuperTabClosePreviewOnPopupClose = 1
 " GO
 let g:go_fmt_command = "goimports"
 let g:go_fmt_fail_silently = 1
+
+let g:go_highlight_functions = 1
+let g:go_highlight_methods = 1
+let g:go_highlight_structs = 1
+let g:go_highlight_operators = 1
+let g:go_highlight_build_constraints = 1
+
+let g:syntastic_go_checkers = ['golint', 'govet', 'errcheck']
