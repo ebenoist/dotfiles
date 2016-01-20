@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Git lets you use very readable time formats!
+cutoff_time="1 year ago"
+
+git for-each-ref refs/heads --format='%(refname)' | egrep -v 'master|other-whitelisted-branch' |
+while read branch; do
+    git reflog $branch
+    if [ "$(git reflog show -1 $branch | wc -l)" -eq 0 ]; then
+        echo "$branch"
+    fi
+done

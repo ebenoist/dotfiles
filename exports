@@ -5,7 +5,7 @@ export CLICOLOR=1
 if [ -n "$SSH_CLIENT" ]; then
   export PS1="\[\[$Green\]\$(vcprompt -f '[%b%u%m]')\[$Color_Off\][\[$Yellow\]\h:\w\[$Color_Off\]\[$Color_Off\]]❥ \]"
 else
-  export PS1="\[\[$Green\]\$(vcprompt -f '[%b%u%m]')\[$Color_Off\][\w]❥ \]"
+  export PS1="\[$Green\]\$(vcprompt -f '[%b%u%m]')\[$Color_Off\][\w]❥ "
 fi
 
 if [ $ITERM_SESSION_ID ]; then
@@ -13,21 +13,27 @@ if [ $ITERM_SESSION_ID ]; then
 fi
 
 # load
-export PATH="$HOME/.rbenv/bin:/usr/local/opt/maven/bin:$HOME/.bin:/usr/local/bin:/usr/local/sbin:$PATH"
+export PATH="/opt/chefdk/bin:$HOME/.rbenv/bin:/usr/local/opt/maven/bin:$HOME/.bin:/usr/local/bin:/usr/local/sbin:$PATH"
 
 export CDPATH=".:$HOME/dev/"
 export EDITOR="mvim -v"
 
 # GO
-export GOPATH="$HOME/development/go"
+export GOPATH="$HOME/dev/go"
 export PATH="$GOPATH/bin:$PATH"
 export CDPATH="$CDPATH:$HOME/development/go/src/github.com/ebenoist/"
-export CDPATH="$CDPATH:$HOME/development/go/src/github.groupondev.com/ebenoist/"
-export CDPATH="$CDPATH:$HOME/development/go/src/github.groupondev.com/grpn-stream/"
-export CDPATH="$CDPATH:$HOME/development/go/src/github.groupondev.com/goods-cim-eng/"
 
 # JAVA
 export PATH="$JAVA_HOME/bin:$PATH"
 
-#Boot2Docker
-eval $(boot2docker shellinit)
+#SPARK
+SPARK_HOME="/usr/local/Cellar/apache-spark/1.5.2"
+PATH=$PATH:$SCALA_HOME/bin
+
+# Boot2Docker
+# eval $(boot2docker shellinit)
+
+#
+# Include custom aliases
+[[ -f ~/.exports.local ]] && source ~/.exports.local
+

@@ -25,6 +25,9 @@ Bundle 'mustache/vim-mustache-handlebars'
 Bundle 'nsf/gocode', {'rtp': 'vim/'}
 Bundle 'mxw/vim-jsx'
 Bundle 'majutsushi/tagbar'
+Bundle 'editorconfig/editorconfig-vim'
+Bundle 'heartsentwined/vim-emblem'
+Bundle 'kchmck/vim-coffee-script'
 
 filetype plugin indent on     " required!
 "

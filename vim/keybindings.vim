@@ -4,8 +4,12 @@ let mapleader = ","
 " Yank from the cursor to the end of the line, to be consistent with C and D.
 nnoremap Y y$
 
+" jj for esc
+imap jj <Esc>
+
 " NERDTree: Open with F2
 nmap <Leader>N :NERDTreeToggle<CR>
+nmap <Leader>nf :NERDTreeFind<CR>
 
 " AckVim: <leader>f to search
 map <leader>f :Ack<Space>

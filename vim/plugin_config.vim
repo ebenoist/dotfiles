@@ -42,7 +42,8 @@ let g:ctrlp_user_command = {
 " SYNTAX
 " let g:syntastic_ruby_checkers=['rubylint']
 let g:syntastic_mode_map = { 'mode': 'passive', 'active_filetypes': ['javascript', 'coffee'], 'passive_filetype': ['go'] }
-let g:syntastic_javascript_checkers = ["eslint"]
+autocmd FileType javascript let b:syntastic_checkers = findfile('.eslintrc', '.;') != '' ? ['eslint'] : ['jshint']
+
 
 " Rspec
 let g:rspec_command = "!bundle exec rspec -fd --tty --color {spec}"
