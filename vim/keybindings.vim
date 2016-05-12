@@ -13,6 +13,7 @@ nmap <Leader>nf :NERDTreeFind<CR>
 
 " AckVim: <leader>f to search
 map <leader>f :Ack<Space>
+map <leader>s :Ack <cword><CR>
 
 " Toggle line numbers
 nmap <Leader>n :set number! number?<cr>
