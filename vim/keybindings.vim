@@ -7,7 +7,7 @@ nnoremap Y y$
 " jj for esc
 imap jj <Esc>
 
-" NERDTree: Open with F2
+" NERDTree
 nmap <Leader>N :NERDTreeToggle<CR>
 nmap <Leader>nf :NERDTreeFind<CR>
 
@@ -52,7 +52,7 @@ map <Leader>rl :call RunNearestSpec()<CR>
 map <Leader>rr :call RunLastSpec()<CR>
 map <Leader>ra :call RunAllSpecs()<CR>
 
-" Navigation
+" Quick Navigation
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-h> <C-w>h
@@ -70,4 +70,4 @@ au FileType go nmap <Leader>gd <Plug>(go-doc)
 au FileType go nmap <Leader>gv <Plug>(go-doc-vertical)
 
 " Tagbar
-nmap <F8> :TagbarToggle<CR>
+nmap <leader>T :TagbarToggle<CR>

@@ -32,11 +32,11 @@ let g:ctrlp_working_path_mode     = "ra"
 let g:ctrlp_match_window_reversed = 0
 
 let g:ctrlp_user_command = {
-      \ 'types': {
-         \ 1: ['.git', 'cd %s && git ls-files . --cached --exclude-standard --others | sed "/Godeps/d"'],
-       \ },
-      \ 'fallback': 'find %s -type f'
-    \ }
+  \ 'types': {
+     \ 1: ['.git', 'cd %s && git ls-files . --cached --exclude-standard --others | sed "/Godeps/d"'],
+   \ },
+  \ 'fallback': 'find %s -type f'
+\ }
 
 
 " SYNTAX
@@ -44,16 +44,11 @@ let g:ctrlp_user_command = {
 let g:syntastic_mode_map = { 'mode': 'passive', 'active_filetypes': ['javascript', 'coffee'], 'passive_filetype': ['go'] }
 autocmd FileType javascript let b:syntastic_checkers = findfile('.eslintrc', '.;') != '' ? ['eslint'] : ['jshint']
 
-
 " Rspec
 let g:rspec_command = "!bundle exec rspec -fd --tty --color {spec}"
 
 " Let ack/vim use ag for search
 let g:ackprg = 'ag --nogroup --nocolor --column'
-
-" Allow non solarized terms to use scheme
-let g:solarized_termcolors=256
-set background=dark
 
 " SuperTab
 set omnifunc=syntaxcomplete#Complete

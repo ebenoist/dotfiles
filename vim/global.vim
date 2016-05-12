@@ -20,9 +20,8 @@ set vb t_vb=                               " Turn off bell
 set mouse=a                                " Enable the mouse
 set linespace=3                            " Spacing between lines
 set noswapfile                             " Disable creation of *.swp files
-"set t_Co=256                               " Support for xterm with 256 colors (gets overriden in .gvimrc)
 set autoread                               " Autoload files
-set tags+=tags                            " Set ctags
+set tags+=tags                             " Set ctags
 set tags+=.tags
 set tags+=.gemtags                         " Set ctags
 set clipboard+=unnamed                     " Set system clipboard
@@ -53,7 +52,6 @@ set nostartofline                          " Avoid moving cursor to BOL when jum
 set scrolloff=3                            " Keep 3 context lines above and below the cursor
 set backspace=2                            " Allow backspacing over autoindent, EOL, and BOL
 set showmatch                              " Briefly jump to a paren once it's balanced
-set matchtime=2                            " (for only .2 seconds).
 
 " BACKUPS
 "-------------------------------------------------

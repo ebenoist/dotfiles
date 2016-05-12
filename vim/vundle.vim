@@ -6,28 +6,25 @@ call vundle#rc()
 
 " let Vundle manage Vundle required!
 Bundle 'gmarik/vundle'
-Bundle 'mileszs/ack.vim'
-Bundle 'scrooloose/nerdtree'
-Bundle 'scrooloose/nerdcommenter'
-Bundle 'kien/ctrlp.vim'
-Bundle 'tpope/vim-fugitive'
-Bundle 'tpope/vim-endwise'
+Bundle "pangloss/vim-javascript"
+Bundle 'editorconfig/editorconfig-vim'
 Bundle 'ervandew/supertab'
 Bundle 'fatih/vim-go'
-Bundle 'thoughtbot/vim-rspec'
-Bundle 'scrooloose/syntastic'
-Bundle 'othree/html5.vim'
-Bundle "pangloss/vim-javascript"
-Bundle "nanotech/jellybeans.vim"
-Bundle 'Blackrush/vim-gocode'
-Bundle 'vim-ruby/vim-ruby'
-Bundle 'mustache/vim-mustache-handlebars'
-Bundle 'nsf/gocode', {'rtp': 'vim/'}
-Bundle 'mxw/vim-jsx'
+Bundle 'kien/ctrlp.vim'
 Bundle 'majutsushi/tagbar'
-Bundle 'editorconfig/editorconfig-vim'
-Bundle 'heartsentwined/vim-emblem'
-Bundle 'kchmck/vim-coffee-script'
+Bundle 'mileszs/ack.vim'
+Bundle 'mustache/vim-mustache-handlebars'
+Bundle 'mxw/vim-jsx'
+Bundle 'nsf/gocode', {'rtp': 'vim/'}
+Bundle 'othree/html5.vim'
+Bundle 'scrooloose/nerdcommenter'
+Bundle 'scrooloose/nerdtree'
+Bundle 'scrooloose/syntastic'
+Bundle 'thoughtbot/vim-rspec'
+Bundle 'tpope/vim-endwise'
+Bundle 'tpope/vim-fugitive'
+Bundle 'tpope/vim-rails'
+Bundle 'vim-ruby/vim-ruby'
 
 filetype plugin indent on     " required!
 "
