@@ -30,5 +30,7 @@ export PATH="$JAVA_HOME/bin:$PATH"
 SPARK_HOME="/usr/local/Cellar/apache-spark/1.5.2"
 PATH=$PATH:$SCALA_HOME/bin
 
+export VAGRANT_DEFAULT_PROVIDER=vmware_fusion
+
 # Include custom aliases
 [[ -f ~/.exports.local ]] && source ~/.exports.local
