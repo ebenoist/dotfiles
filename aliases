@@ -1,15 +1,9 @@
 # Unix
 alias ln='ln -v'
 alias mkdir='mkdir -p'
-alias ...='../..'
-alias ll='ls -al'
-alias lh='ls -Alh'
 alias vi='vim'
 alias vim='mvim -v'
 alias tar='gtar'
-
-# ruby
-alias be="bundle exec"
 
 git-files() {
   git ls-tree --full-tree -r --name-only HEAD
@@ -25,6 +19,3 @@ re-ctags() {
 gif() {
  ffmpeg -i $1 -pix_fmt rgb24 -r 10 -f gif - | gifsicle --optimize=4 --delay=3 > $2
 }
-
-# Include custom aliases
-[[ -f ~/.aliases.local ]] && source ~/.aliases.local
