@@ -2,7 +2,7 @@
 alias ln='ln -v'
 alias mkdir='mkdir -p'
 alias vi='vim'
-alias vim='mvim -v'
+alias vim='nvim'
 alias tar='gtar'
 
 git-files() {

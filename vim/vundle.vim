@@ -1,38 +1,36 @@
-set nocompatible               " be iMproved
-filetype off                   " required!
+call plug#begin()
 
-set rtp+=~/.vim/bundle/vundle/
-call vundle#rc()
+" General
+Plug 'editorconfig/editorconfig-vim'
+Plug 'ervandew/supertab'
+Plug 'majutsushi/tagbar'
+Plug 'kien/ctrlp.vim'
+Plug 'mileszs/ack.vim'
+Plug 'scrooloose/nerdcommenter'
+Plug 'scrooloose/nerdtree'
+Plug 'scrooloose/syntastic'
+Plug 'tpope/vim-fugitive'
+Plug 'kassio/neoterm'
 
-" let Vundle manage Vundle required!
-Bundle 'gmarik/vundle'
-Bundle "pangloss/vim-javascript"
-Bundle 'editorconfig/editorconfig-vim'
-Bundle 'ervandew/supertab'
-Bundle 'fatih/vim-go'
-Bundle 'kien/ctrlp.vim'
-Bundle 'majutsushi/tagbar'
-Bundle 'mileszs/ack.vim'
-Bundle 'mustache/vim-mustache-handlebars'
-Bundle 'mxw/vim-jsx'
-Bundle 'nsf/gocode', {'rtp': 'vim/'}
-Bundle 'othree/html5.vim'
-Bundle 'scrooloose/nerdcommenter'
-Bundle 'scrooloose/nerdtree'
-Bundle 'scrooloose/syntastic'
-Bundle 'thoughtbot/vim-rspec'
-Bundle 'tpope/vim-endwise'
-Bundle 'tpope/vim-fugitive'
-Bundle 'tpope/vim-rails'
-Bundle 'vim-ruby/vim-ruby'
+function! DoRemote(arg)
+  UpdateRemotePlugins
+endfunction
+Plug 'Shougo/deoplete.nvim', {'do': function('DoRemote')}
 
-filetype plugin indent on     " required!
-"
-" Brief help
-" :BundleList          - list configured bundles
-" :BundleInstall(!)    - install(update) bundles
-" :BundleSearch(!) foo - search(or refresh cache first) for foo
-" :BundleClean(!)      - confirm(or auto-approve) removal of unused bundles
-"
-" see :h vundle for more details or wiki for FAQ
-" NOTE: comments after Bundle command are not allowed..
+" JS
+Plug 'pangloss/vim-javascript', {'for': 'javascript'}
+Plug 'mxw/vim-jsx', {'for': 'javascript'}
+Plug 'mustache/vim-mustache-handlebars', {'for': 'handlebars'}
+Plug 'othree/html5.vim', {'for': 'html'}
+
+" Go
+Plug 'fatih/vim-go', {'for': 'go'}
+Plug 'nsf/gocode', {'rtp': 'vim/'}
+
+" Ruby
+Plug 'thoughtbot/vim-rspec', {'for': 'ruby'}
+Plug 'tpope/vim-endwise', {'for': 'ruby'}
+Plug 'tpope/vim-rails', {'for': 'ruby'}
+Plug 'vim-ruby/vim-ruby', {'for': 'ruby'}
+
+call plug#end()
