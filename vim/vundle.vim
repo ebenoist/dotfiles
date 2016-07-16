@@ -11,11 +11,7 @@ Plug 'scrooloose/nerdtree'
 Plug 'scrooloose/syntastic'
 Plug 'tpope/vim-fugitive'
 Plug 'kassio/neoterm'
-
-function! DoRemote(arg)
-  UpdateRemotePlugins
-endfunction
-Plug 'Shougo/deoplete.nvim', {'do': function('DoRemote')}
+Plug 'Shougo/deoplete.nvim'
 
 " JS
 Plug 'pangloss/vim-javascript', {'for': 'javascript'}
@@ -25,12 +21,11 @@ Plug 'othree/html5.vim', {'for': 'html'}
 
 " Go
 Plug 'fatih/vim-go', {'for': 'go'}
-Plug 'nsf/gocode', {'rtp': 'vim/'}
+Plug 'zchee/deoplete-go', {'do': 'make', 'for': 'go'}
 
 " Ruby
 Plug 'thoughtbot/vim-rspec', {'for': 'ruby'}
 Plug 'tpope/vim-endwise', {'for': 'ruby'}
 Plug 'tpope/vim-rails', {'for': 'ruby'}
 Plug 'vim-ruby/vim-ruby', {'for': 'ruby'}
-
 call plug#end()

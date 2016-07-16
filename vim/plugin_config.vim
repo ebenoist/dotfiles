@@ -1,17 +1,7 @@
 " NERDTree:
-" Enable nice colors
 let NERDChristmasTree = 1
-
-" Make it easy to see where we are
 let NERDTreeHighlightCursorline = 1
-
-" Make bookmarks visible
-let NERDTreeShowBookmarks = 1
-
-" Show hidden files
 let NERDTreeShowHidden = 1
-
-" Don't hijack NETRW
 let NERDTreeHijackNetrw = 1
 let NERDTreeIgnore=['\.$', '\~$', '.DS_Store']
 
@@ -25,7 +15,7 @@ let NERDRemoveExtraSpaces = 1
 let NERDSpaceDelims = 1
 
 " CtrlP
-set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*Godeps/*
+set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*Godeps/*,*vendor/*
 let g:ctrlp_max_height = 40
 let g:ctrlp_clear_cache_on_exit   = 1
 let g:ctrlp_working_path_mode     = "ra"
@@ -41,8 +31,7 @@ let g:ctrlp_user_command = {
 
 " SYNTAX
 " let g:syntastic_ruby_checkers=['rubylint']
-let g:syntastic_mode_map = { 'mode': 'passive', 'active_filetypes': ['javascript', 'coffee'], 'passive_filetype': ['go'] }
-autocmd FileType javascript let b:syntastic_checkers = findfile('.eslintrc', '.;') != '' ? ['eslint'] : ['jshint']
+let g:syntastic_javascript_checkers = ['eslint']
 
 " Rspec
 let g:rspec_command = "!bundle exec rspec -fd --tty --color {spec}"
@@ -57,14 +46,13 @@ let g:SuperTabClosePreviewOnPopupClose = 1
 
 " GO
 let g:go_fmt_command = "goimports"
-let g:go_fmt_fail_silently = 1
-
 let g:go_highlight_functions = 1
 let g:go_highlight_methods = 1
 let g:go_highlight_structs = 1
 let g:go_highlight_operators = 1
 let g:go_highlight_build_constraints = 1
-
 let g:syntastic_go_checkers = ['golint', 'govet', 'errcheck']
-
 let g:deoplete#enable_at_startup = 1
+let g:go_list_type = "quickfix"
+set completeopt+=noinsert
+set completeopt+=noselect

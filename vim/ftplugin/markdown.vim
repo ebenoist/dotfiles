@@ -5,7 +5,6 @@ set wrap
 set linebreak
 set nolist  " list disables linebreak
 set columns=80
-autocmd VimResized * if (&columns > 80) | set columns=80 | endif
 
 " Spelling
 set spell
