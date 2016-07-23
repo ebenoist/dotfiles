@@ -14,10 +14,10 @@ Plug 'kassio/neoterm'
 Plug 'Shougo/deoplete.nvim'
 
 " JS
-Plug 'pangloss/vim-javascript', {'for': 'javascript'}
-Plug 'mxw/vim-jsx', {'for': 'javascript'}
-Plug 'mustache/vim-mustache-handlebars', {'for': 'handlebars'}
-Plug 'othree/html5.vim', {'for': 'html'}
+Plug 'pangloss/vim-javascript'
+Plug 'mxw/vim-jsx'
+Plug 'mustache/vim-mustache-handlebars'
+Plug 'othree/html5.vim'
 
 " Go
 Plug 'fatih/vim-go', {'for': 'go'}
