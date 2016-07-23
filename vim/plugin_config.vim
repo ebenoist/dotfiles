@@ -56,3 +56,4 @@ let g:deoplete#enable_at_startup = 1
 let g:go_list_type = "quickfix"
 set completeopt+=noinsert
 set completeopt+=noselect
+set completeopt-=preview
