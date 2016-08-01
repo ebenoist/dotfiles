@@ -12,6 +12,7 @@ Plug 'scrooloose/syntastic'
 Plug 'tpope/vim-fugitive'
 Plug 'kassio/neoterm'
 Plug 'Shougo/deoplete.nvim'
+Plug 'wakatime/vim-wakatime'
 
 " JS
 Plug 'pangloss/vim-javascript'
