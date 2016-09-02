@@ -28,11 +28,6 @@ let g:ctrlp_user_command = {
   \ 'fallback': 'find %s -type f'
 \ }
 
-
-" SYNTAX
-" let g:syntastic_ruby_checkers=['rubylint']
-let g:syntastic_javascript_checkers = ['eslint']
-
 " Rspec
 let g:rspec_command = "!bundle exec rspec -fd --tty --color {spec}"
 
@@ -51,7 +46,6 @@ let g:go_highlight_methods = 1
 let g:go_highlight_structs = 1
 let g:go_highlight_operators = 1
 let g:go_highlight_build_constraints = 1
-let g:syntastic_go_checkers = ['golint', 'govet', 'errcheck']
 let g:deoplete#enable_at_startup = 1
 let g:go_list_type = "quickfix"
 set completeopt+=noinsert
