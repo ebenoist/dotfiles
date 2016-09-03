@@ -19,3 +19,4 @@ autocmd BufRead,BufNewFile {*.md,*.mkd,*.markdown}                         set f
 autocmd BufRead,BufNewFile {COMMIT_EDITMSG}                                set ft=gitcommit
 autocmd BufRead,BufNewFile *.es6 setfiletype javascript
 autocmd! BufWritePost * Neomake
+autocmd bufwritepost .vimrc source $MYVIMRC

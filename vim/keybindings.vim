@@ -29,10 +29,8 @@ imap <Leader>w <esc>:w<cr>
 map <Leader>q :qall<cr>
 imap <Leader>q <esc>:qall<cr>
 
-" CtrlP
-nnoremap <Leader>t :CtrlP<CR>
-nnoremap <Leader>ff :CtrlPClearCache<CR>
-noremap <Leader>fb :CtrlPBuffer<CR>
+" FZF
+nnoremap <Leader>t :FZF<CR>
 
 " Copy/Paste
 map <Leader>cf :let @*=expand("%")<CR>
@@ -48,10 +46,10 @@ inoremap <c-x><c-]> <c-]>
 map <Leader>rt :!bash -ic re-ctags
 
 " Rspec
-map <Leader>rf :call RunCurrentSpecFile()<CR>
-map <Leader>rl :call RunNearestSpec()<CR>
-map <Leader>rr :call RunLastSpec()<CR>
-map <Leader>ra :call RunAllSpecs()<CR>
+nnoremap <silent> ,ra :call neoterm#test#run('all')<cr>
+nnoremap <silent> ,rf :call neoterm#test#run('file')<cr>
+nnoremap <silent> ,rl :call neoterm#test#run('current')<cr>
+nnoremap <silent> ,rr :call neoterm#test#rerun()<cr>
 
 " Quick Navigation
 nnoremap <C-j> <C-w>j

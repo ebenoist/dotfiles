@@ -14,19 +14,8 @@ let NERDDefaultNesting = 0
 let NERDRemoveExtraSpaces = 1
 let NERDSpaceDelims = 1
 
-" CtrlP
-set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*Godeps/*,*vendor/*
-let g:ctrlp_max_height = 40
-let g:ctrlp_clear_cache_on_exit   = 1
-let g:ctrlp_working_path_mode     = "ra"
-let g:ctrlp_match_window_reversed = 0
-
-let g:ctrlp_user_command = {
-  \ 'types': {
-     \ 1: ['.git', 'cd %s && git ls-files . --cached --exclude-standard --others | sed "/Godeps/d"'],
-   \ },
-  \ 'fallback': 'find %s -type f'
-\ }
+" FZF
+let $FZF_DEFAULT_COMMAND = 'ag -l -g ""'
 
 " Rspec
 let g:rspec_command = "!bundle exec rspec -fd --tty --color {spec}"
