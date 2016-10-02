@@ -30,4 +30,9 @@ Plug 'thoughtbot/vim-rspec', {'for': 'ruby'}
 Plug 'tpope/vim-endwise', {'for': 'ruby'}
 Plug 'tpope/vim-rails', {'for': 'ruby'}
 Plug 'vim-ruby/vim-ruby', {'for': 'ruby'}
+
+" C/C++/ObjC
+Plug 'zchee/deoplete-clang'
+Plug 'rhysd/vim-clang-format'
+
 call plug#end()

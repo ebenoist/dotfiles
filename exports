@@ -25,6 +25,7 @@ export PATH="$JAVA_HOME/bin:$PATH"
 #SPARK
 SPARK_HOME="/usr/local/Cellar/apache-spark/1.5.2"
 PATH=$PATH:$SCALA_HOME/bin
+PATH="/usr/local/opt/llvm/bin":$PATH
 
 # Include custom aliases
 [[ -f ~/.exports.local ]] && source ~/.exports.local
