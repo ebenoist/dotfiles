@@ -45,11 +45,12 @@ inoremap <c-x><c-]> <c-]>
 " New  Tags
 map <Leader>rt :!bash -ic re-ctags
 
-" Rspec
+" NeoTerm
 nnoremap <silent> ,ra :call neoterm#test#run('all')<cr>
 nnoremap <silent> ,rf :call neoterm#test#run('file')<cr>
 nnoremap <silent> ,rl :call neoterm#test#run('current')<cr>
 nnoremap <silent> ,rr :call neoterm#test#rerun()<cr>
+nnoremap <silent> ,th :call neoterm#close()<cr>
 
 " Quick Navigation
 nnoremap <C-j> <C-w>j
@@ -58,12 +59,10 @@ nnoremap <C-h> <C-w>h
 nnoremap <C-l> <C-w>l
 nnoremap <C-x> <C-w>q
 
-if has('nvim')
-  let $NVIM_TUI_ENABLE_CURSOR_SHAPE=1
-  " Hack to get C-h working in neovim
-  nmap <BS> <C-W>h
-  tnoremap <Esc> <C-\><C-n>
-endif
+" Neovim
+let $NVIM_TUI_ENABLE_CURSOR_SHAPE=1
+"Hack to get C-h working in neovim
+nmap <BS> <C-W>h
 
 " GO
 au FileType go nmap <leader>gr <Plug>(go-run)

@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+ENV=$1
+shift
+
+CMD=$1
+shift
+
+DIR_NAME=${PWD##*/}
+APP_NAME=$DIR_NAME-$ENV
+
+if [ "$ENV" == "production" ]; then
+  APP_NAME=$DIR_NAME
+fi
+
+LOGIN=$(echo '{
+  "unstable": "reverb-staging-1222177346.us-east-1.elb.amazonaws.com",
+  "production": "convox-production-2029365087.us-east-1.elb.amazonaws.com",
+  "prod": "convox-production-2029365087.us-east-1.elb.amazonaws.com",
+  "staging": "reverb-staging-1222177346.us-east-1.elb.amazonaws.com",
+  "sandbox": "convox-sandbox-628608395.us-east-1.elb.amazonaws.com"
+}' | jq .$ENV)
+
+bash -c "convox login $LOGIN"
+convox $CMD --app $APP_NAME $*

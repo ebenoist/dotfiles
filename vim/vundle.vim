@@ -12,7 +12,6 @@ Plug 'scrooloose/nerdtree'
 Plug 'neomake/neomake'
 Plug 'tpope/vim-fugitive'
 Plug 'kassio/neoterm'
-Plug 'Shougo/deoplete.nvim'
 Plug 'wakatime/vim-wakatime'
 
 " JS
@@ -23,6 +22,7 @@ Plug 'othree/html5.vim'
 
 " Go
 Plug 'fatih/vim-go', {'for': 'go'}
+Plug 'Shougo/deoplete.nvim', { 'for': 'go' }
 Plug 'zchee/deoplete-go', {'do': 'make', 'for': 'go'}
 
 " Ruby
