@@ -34,5 +34,6 @@ Plug 'vim-ruby/vim-ruby', {'for': 'ruby'}
 " C/C++/ObjC
 Plug 'zchee/deoplete-clang'
 Plug 'rhysd/vim-clang-format'
+Plug 'octol/vim-cpp-enhanced-highlight'
 
 call plug#end()
