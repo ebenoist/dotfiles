@@ -4,7 +4,6 @@
 set wrap
 set linebreak
 set nolist  " list disables linebreak
-set columns=80
 
 " Spelling
 set spell

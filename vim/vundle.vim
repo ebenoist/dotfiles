@@ -22,7 +22,7 @@ Plug 'othree/html5.vim'
 
 " Go
 Plug 'fatih/vim-go', {'for': 'go'}
-Plug 'Shougo/deoplete.nvim', { 'for': 'go' }
+Plug 'Shougo/deoplete.nvim', { 'for': ['go','c','c++'] }
 Plug 'zchee/deoplete-go', {'do': 'make', 'for': 'go'}
 
 " Ruby

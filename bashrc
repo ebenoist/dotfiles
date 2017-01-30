@@ -19,3 +19,6 @@ if [ -f `brew --prefix`/etc/bash_completion.d/git-prompt.sh ]; then
 fi
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+export NVM_DIR="/Users/ebenoist/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm

@@ -41,6 +41,8 @@ set completeopt+=noinsert
 set completeopt+=noselect
 set completeopt-=preview
 
+let g:deoplete#enable_profile = 1
+
 " C
 let g:deoplete#sources#clang#libclang_path = "/usr/local/Cellar/llvm/3.8.1/lib/libclang.dylib"
 let g:deoplete#sources#clang#clang_header = "/usr/local/Cellar/llvm/3.8.1/include/clang"
