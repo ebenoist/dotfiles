@@ -4,3 +4,4 @@ vim/plugged/
 vim/undodir/
 vim/autoload/plug.vim
 vim/.init.vim-rplugin~
+config/yarn
