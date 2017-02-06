@@ -12,7 +12,8 @@ Plug 'scrooloose/nerdtree'
 Plug 'neomake/neomake'
 Plug 'tpope/vim-fugitive'
 Plug 'kassio/neoterm'
-Plug 'wakatime/vim-wakatime'
+Plug 'xolox/vim-misc'
+Plug 'xolox/vim-notes'
 
 " JS
 Plug 'pangloss/vim-javascript'
