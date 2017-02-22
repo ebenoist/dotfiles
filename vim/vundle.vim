@@ -14,16 +14,18 @@ Plug 'tpope/vim-fugitive'
 Plug 'kassio/neoterm'
 Plug 'xolox/vim-misc'
 Plug 'xolox/vim-notes'
+Plug 'Shougo/deoplete.nvim'
 
 " JS
 Plug 'pangloss/vim-javascript'
 Plug 'mxw/vim-jsx'
 Plug 'mustache/vim-mustache-handlebars'
 Plug 'othree/html5.vim'
+Plug 'mhartington/nvim-typescript'
+Plug 'HerringtonDarkholme/yats.vim'
 
 " Go
 Plug 'fatih/vim-go', {'for': 'go'}
-Plug 'Shougo/deoplete.nvim', { 'for': ['go','c','c++'] }
 Plug 'zchee/deoplete-go', {'do': 'make', 'for': 'go'}
 
 " Ruby
