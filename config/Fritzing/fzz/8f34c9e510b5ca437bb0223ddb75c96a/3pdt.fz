@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module fritzingVersion="0.9.3b.04.19.5c895d327c44a3114e5fcc9d8260daf0cbb52806">
+    <views>
+        <view name="breadboardView" backgroundColor="#ffffff" gridSize="0.1in" showGrid="1" alignToGrid="1" viewFromBelow="0"/>
+        <view name="schematicView" backgroundColor="#ffffff" gridSize="0.1in" showGrid="1" alignToGrid="1" viewFromBelow="0"/>
+        <view name="pcbView" backgroundColor="#333333" gridSize="0.1in" showGrid="1" alignToGrid="1" viewFromBelow="0"/>
+    </views>
+    <instances>
+        <instance moduleIdRef="3pdtswitch_695747ccc7fdf8573a53e007f8a51229_5" modelIndex="85434313" path="/Users/ebenoist/Documents/Fritzing/parts/user/3pdtswitch_695747ccc7fdf8573a53e007f8a51229_5.fzp">
+            <title>S1</title>
+            <views>
+                <breadboardView layer="breadboard">
+                    <geometry z="2.5" x="-75.25" y="-130.5"/>
+                </breadboardView>
+                <schematicView layer="schematic">
+                    <geometry z="2.5" x="-0.43745" y="-5.06244">
+                        <transform m11="0" m12="1" m13="0" m21="-1" m22="0" m23="0" m31="63.9374" m32="27.0625" m33="1"/>
+                    </geometry>
+                    <titleGeometry visible="true" x="36.4375" y="-12.0624" z="6.5" xOffset="36.875" yOffset="-7" textColor="#000000" fontSize="5">
+                        <displayKey key=""/>
+                        <displayKey key="part number"/>
+                    </titleGeometry>
+                </schematicView>
+                <pcbView layer="copper0">
+                    <geometry z="5.5" x="427.875" y="-14"/>
+                    <titleGeometry visible="true" x="491.625" y="-21" z="12.5" xOffset="63.75" yOffset="-7" textColor="#000000" fontSize="5">
+                        <displayKey key=""/>
+                    </titleGeometry>
+                </pcbView>
+            </views>
+        </instance>
+    </instances>
+</module>

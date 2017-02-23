@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<svg baseProfile='tiny' version='1.2' height='0.315591in' width='0.256in' viewBox='0 0 256 315.591' >
+<g id='silkscreen'>
+<line id='vertical-left' stroke='white' stroke-width='10' x1='20' x2='20' y1='20' y2='305.591'/>
+<line id='bottom' stroke='white' stroke-width='10' x1='20' x2='236' y1='305.591' y2='305.591'/>
+<line id='vertical-right' stroke='white' stroke-width='10' x1='236' x2='236' y1='305.591' y2='20'/>
+<line id='top' stroke='white' stroke-width='10' x1='236' x2='20' y1='20' y2='20'/>
+<line id='mid-vertical' stroke='white' stroke-width='5' x1='196' x2='196' y1='305.591' y2='20'/>
+</g>
+<g id='copper1'>
+<g id='copper0'>
+<rect id='square' width='60' height='60' x='78' y='63.8976' fill='none' stroke='rgb(255, 191, 0)' stroke-width='20' />
+<circle cx='108' cy='93.8976' fill='none' id='connector0pin' r='30' stroke='rgb(255, 191, 0)' stroke-width='20'/>
+<circle cx='108' cy='231.693' fill='none' id='connector1pin' r='30' stroke='rgb(255, 191, 0)' stroke-width='20'/>
+</g>
+</g>
+</svg>

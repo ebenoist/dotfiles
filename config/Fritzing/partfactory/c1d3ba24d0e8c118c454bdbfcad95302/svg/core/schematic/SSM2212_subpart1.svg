@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1 Tiny//EN' 'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11-tiny.dtd'>
+<!-- Generator: Adobe Illustrator 16.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg xmlns:xml="http://www.w3.org/XML/1998/namespace" baseProfile="tiny" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" x="0px" version="1.1" y="0px" id="_x30_" viewBox="0 0 22.806 72.999" width="0.31675in" xml:space="preserve" height="1.01387in">
+    <g id="0.0.0" oldid="0.0">
+        <g id="0.0.0.0" oldid="0.0.0">SSM2220_Schematic.svg</g>
+    </g>
+    <g x1="43.6" x2="43.6" fill="none" stroke-width="0.25" id="connector1pin_1_" stroke="#FFFFFF" y1="11.301" y2="0.501"/>
+    <g id="subpart1">
+        <g transform="translate(-0.121,-0.208)">
+            <g>
+                <line x1="22.221" x2="22.221" fill="none" id="connector1pin" stroke="#000000" y1="0.708" y2="11.467"/>
+                <rect x="21.981" y="0.668" fill="none" id="connector1terminal" width="0.002" height="0.039"/>
+                <line x1="0.621" x2="11.882" fill="none" id="connector2pin" stroke="#000000" y1="36.731" y2="36.731"/>
+                <rect x="0.584" y="36.729" fill="none" id="connector2terminal" width="0.037" height="0.002"/>
+                <line x1="22.221" x2="22.221" fill="none" id="connector3pin" stroke="#000000" y1="72.707" y2="61.891"/>
+                <rect x="21.983" y="72.707" fill="none" id="connector3terminal" width="0.002" height="0.035"/>
+                <text font-family="'ArialMT'" id="_x30_.1.11" font-size="4" transform="matrix(0.8074 0 0 1 15.6826 6.4897)">C1</text>
+                <text font-family="'ArialMT'" id="_x30_.1.16" font-size="4" transform="matrix(0.8074 0 0 1 15.8828 67.8159)">E1</text>
+                <text font-family="'ArialMT'" id="_x30_.1.16_1_" font-size="4" transform="matrix(0.8074 0 0 1 3.7007 42.3257)">B1</text>
+                <g>
+                    <line x1="11.889" x2="11.889" fill="none" stroke="#000000" y1="29.542" y2="43.792"/>
+                    <line x1="11.889" x2="22.139" stroke-linecap="round" fill="none" stroke="#000000" y1="33.417" y2="18.48"/>
+                    <line x1="11.889" x2="22.221" stroke-linecap="round" fill="none" stroke="#000000" y1="39.792" y2="51.333"/>
+                    <line x1="22.221" x2="22.221" stroke-linecap="round" fill="none" stroke="#000000" y1="11.508" y2="18.751"/>
+                    <line x1="22.221" x2="22.221" stroke-linecap="round" fill="none" stroke="#000000" y1="50.875" y2="61.908"/>
+                    <polygon id="_x30_.5.1" points="15.137,47.046 18.781,43.785 20.625,49.537 &#x9;&#x9;"/>
+                </g>
+            </g>
+        </g>
+    </g>
+    <g id="subpart3">
+        <g x1="79.736" x2="79.736" fill="none" id="connector6pin" stroke="#000000" y1="72.742" y2="61.941"/>
+        <g x="79.734" y="72.667" fill="none" id="connector6terminal" width="0.002" height="0.074"/>
+        <g x1="90.537" x2="101.337" fill="none" id="connector7pin" stroke="#000000" y1="36.541" y2="36.541"/>
+        <g x="101.337" y="36.54" fill="none" id="connector7terminal" width="0.047" height="0.002"/>
+        <g x1="79.736" x2="79.736" fill="none" id="connector8pin" stroke="#000000" y1="11.491" y2="0.69"/>
+        <g x="79.974" y="0.663" fill="none" id="connector8terminal" width="0.002" height="0.045"/>
+        <g font-family="'ArialMT'" id="_x30_.1.9" font-size="4" transform="matrix(0.8074 0 0 1 81.5933 7.3003)">C2</g>
+        <g font-family="'ArialMT'" id="_x30_.1.19" font-size="4" transform="matrix(0.8074 0 0 1 81.5933 68.8491)">E2</g>
+        <g font-family="'ArialMT'" id="_x30_.1.20" font-size="4" transform="matrix(0.8074 0 0 1 93.5171 42.8413)">B2</g>
+        <g>
+            <g x1="90.07" x2="90.07" fill="none" stroke="#000000" y1="43.792" y2="29.542"/>
+            <g x1="79.82" x2="90.07" stroke-linecap="round" fill="none" stroke="#000000" y1="18.463" y2="33.417"/>
+            <g x1="79.736" x2="90.07" stroke-linecap="round" fill="none" stroke="#000000" y1="51.333" y2="39.792"/>
+            <g x1="79.736" x2="79.736" stroke-linecap="round" fill="none" stroke="#000000" y1="18.734" y2="11.491"/>
+            <g x1="79.736" x2="79.736" stroke-linecap="round" fill="none" stroke="#000000" y1="61.923" y2="50.875"/>
+            <g id="_x30_.5.1_1_" points="81.333,49.537 83.177,43.785 86.822,47.046 &#x9;&#x9;"/>
+        </g>
+    </g>
+    <g id="subpart2">
+        <g x1="36.324" x2="36.324" fill="none" id="connector4pin" stroke="#A7A5A6" y1="72.722" y2="58.341"/>
+        <g x="36.582" y="72.512" fill="none" id="connector4terminal" width="0.002" height="0.021"/>
+        <g x1="65.421" x2="65.421" fill="none" id="connector5pin" stroke="#A7A5A6" y1="72.72" y2="58.822"/>
+        <g x="65.66" y="72.738" fill="none" id="connector5terminal" width="0.043" height="0.004"/>
+        <g font-family="'ArialMT'" fill="#A7A5A6" id="_x30_.1.16_2_" font-size="4" transform="matrix(0.8074 0 0 1 34.584 55.3413)">NC</g>
+        <g font-family="'ArialMT'" fill="#A7A5A6" id="_x30_.1.16_3_" font-size="4" transform="matrix(0.8074 0 0 1 62.8823 55.3413)">NC</g>
+        <g font-family="'ArialMT'" id="_x30_.1.22" font-size="4" transform="matrix(0.9059 0 0 1 44.1001 32.8979)">SSM2212</g>
+    </g>
+</svg>

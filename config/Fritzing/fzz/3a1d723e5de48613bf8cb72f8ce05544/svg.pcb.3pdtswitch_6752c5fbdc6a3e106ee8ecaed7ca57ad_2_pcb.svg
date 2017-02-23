@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE svg>
+<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg xmlns="http://www.w3.org/2000/svg" width="0.708333in" height="0.680556in" xmlns:xml="http://www.w3.org/XML/1998/namespace" viewBox="0 0 51 49" x="0px"  y="0px" id="Layer_1" gorn="0" version="1.1" xml:space="preserve" enable-background="new 0 0 51 49">
+    <desc >
+        <referenceFile >sparkfun-electromechanical_ms_pcb.svg</referenceFile>
+    </desc>
+    <g  id="silkscreen" gorn="0.1">
+        <line fill="none"  stroke-linecap="round" y1="0" y2="49" stroke-width="2" stroke="#F0F0F0" x1="0" x2="0"/>
+        <line fill="none"  stroke-linecap="round" y1="49" y2="49" stroke-width="2" stroke="#F0F0F0" x1="0" x2="51"/>
+        <line fill="none"  stroke-linecap="round" y1="49" y2="0" stroke-width="2" stroke="#F0F0F0" x1="51" x2="51"/>
+        <line fill="none"  stroke-linecap="round" y1="0" y2="0" stroke-width="2" stroke="#F0F0F0" x1="51" x2="0"/>
+    </g>
+    <g  id="copper0" gorn="0.2">
+        <g  id="copper1" gorn="0.2.0">
+            <g >
+                <circle r="4.3" fill="none"  id="connector9pin_1_" cx="40.5" stroke-width="2" cy="37.9" gorn="0.2.0.0.0" stroke="#F7BD13"/>
+                <circle r="4.3" fill="none"  id="connector8pin_1_" cx="25.5" stroke-width="2" cy="37.9" gorn="0.2.0.0.1" stroke="#F7BD13"/>
+                <circle r="4.3" fill="none"  id="connector7pin_1_" cx="10.5" stroke-width="2" cy="37.9" gorn="0.2.0.0.2" stroke="#F7BD13"/>
+                <circle r="4.3" fill="none"  id="connector5pad_1_" cx="40.5" stroke-width="2" cy="24.5" gorn="0.2.0.0.3" stroke="#F7BD13"/>
+                <circle r="4.3" fill="none"  id="connector4pad_1_" cx="25.5" stroke-width="2" cy="24.5" gorn="0.2.0.0.4" stroke="#F7BD13"/>
+                <circle r="4.3" fill="none"  id="connector3pad_1_" cx="10.5" stroke-width="2" cy="24.5" gorn="0.2.0.0.5" stroke="#F7BD13"/>
+                <circle r="4.3" fill="none"  id="connector2pad_1_" cx="40.5" stroke-width="2" cy="11.2" gorn="0.2.0.0.6" stroke="#F7BD13"/>
+                <circle r="4.3" fill="none"  id="connector1pad_1_" cx="25.5" stroke-width="2" cy="11.2" gorn="0.2.0.0.7" stroke="#F7BD13"/>
+                <circle r="4.3" fill="none"  id="connector0pad_1_" cx="10.5" stroke-width="2" cy="11.2" gorn="0.2.0.0.8" stroke="#F7BD13"/>
+            </g>
+            <circle r="4.3" fill="none"  id="connector9pin" cx="40.5" stroke-width="2" cy="37.9" gorn="0.2.0.1" stroke="#F7BD13"/>
+            <circle r="4.3" fill="none"  id="connector8pin" cx="25.5" stroke-width="2" cy="37.9" gorn="0.2.0.2" stroke="#F7BD13"/>
+            <circle r="4.3" fill="none"  id="connector7pin" cx="10.5" stroke-width="2" cy="37.9" gorn="0.2.0.3" stroke="#F7BD13"/>
+            <circle r="4.3" fill="none"  id="connector5pad" cx="40.5" stroke-width="2" cy="24.5" gorn="0.2.0.4" stroke="#F7BD13"/>
+            <circle r="4.3" fill="none"  id="connector4pad" cx="25.5" stroke-width="2" cy="24.5" gorn="0.2.0.5" stroke="#F7BD13"/>
+            <circle r="4.3" fill="none"  id="connector3pad" cx="10.5" stroke-width="2" cy="24.5" gorn="0.2.0.6" stroke="#F7BD13"/>
+            <circle r="4.3" fill="none"  id="connector2pad" cx="40.5" stroke-width="2" cy="11.2" gorn="0.2.0.7" stroke="#F7BD13"/>
+            <circle r="4.3" fill="none"  id="connector1pad" cx="25.5" stroke-width="2" cy="11.2" gorn="0.2.0.8" stroke="#F7BD13"/>
+            <circle r="4.3" fill="none"  id="connector0pad" cx="10.5" stroke-width="2" cy="11.2" gorn="0.2.0.9" stroke="#F7BD13"/>
+        </g>
+    </g>
+</svg>
