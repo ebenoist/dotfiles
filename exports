@@ -8,7 +8,7 @@ if [ $ITERM_SESSION_ID ]; then
 fi
 
 # load
-export PATH="$HOME/.rbenv/bin:$HOME/.bin:node_modules/.bin/:/usr/local/bin:/usr/local/sbin:$PATH"
+export PATH="$HOME/.rbenv/bin:$HOME/.bin:node_modules/.bin:/usr/local/bin:/usr/local/sbin:$PATH"
 
 export CDPATH=".:$HOME/dev/"
 export EDITOR="nvim"

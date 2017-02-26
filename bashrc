@@ -1,5 +1,4 @@
 source ~/.colors;
-source ~/.exports;
 source ~/.aliases;
 
 eval "$(rbenv init -)"
@@ -22,3 +21,5 @@ fi
 
 export NVM_DIR="/Users/ebenoist/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+
+source ~/.exports;

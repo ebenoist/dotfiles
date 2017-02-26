@@ -51,4 +51,4 @@ autocmd FileType c ClangFormatAutoEnable
 autocmd FileType cpp ClangFormatAutoEnable
 
 " Notes
-let g:notes_directories = ['~/Documents/Notes', '~/Dropbox/Notes']
+let g:notes_directories = ['~/Dropbox/Notes']
