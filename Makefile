@@ -1,4 +1,4 @@
-EXCLUDE := README.md Makefile install.sh vscode-settings.json
+EXCLUDE := README.md Makefile Brewfile vscode-settings.json
 FILES := $(shell ls)
 SOURCES := $(filter-out $(EXCLUDE),$(FILES))
 DOTFILES := $(patsubst %, ${HOME}/.%, $(SOURCES))
