@@ -58,3 +58,6 @@ autocmd FileType cpp ClangFormatAutoEnable
 
 " Notes
 let g:notes_directories = ['~/Dropbox/Notes']
+
+" vim-test
+let test#strategy = "neoterm"

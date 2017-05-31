@@ -45,12 +45,12 @@ inoremap <c-x><c-]> <c-]>
 " New  Tags
 map <Leader>rt :!bash -ic re-ctags
 
-" NeoTerm
-nnoremap <silent> ,ra :call neoterm#test#run('all')<cr>
-nnoremap <silent> ,rf :call neoterm#test#run('file')<cr>
-nnoremap <silent> ,rl :call neoterm#test#run('current')<cr>
-nnoremap <silent> ,rr :call neoterm#test#rerun()<cr>
-nnoremap <silent> ,th :call neoterm#close()<cr>
+" Vim-Test
+nmap <silent> <leader>rl :TestNearest<CR>
+nmap <silent> <leader>rf :TestFile<CR>
+nmap <silent> <leader>ra :TestSuite<CR>
+nmap <silent> <leader>rr :TestLast<CR>
+nmap <silent> <leader>g :TestVisit<CR>
 
 " Quick Navigation
 nnoremap <C-j> <C-w>j
