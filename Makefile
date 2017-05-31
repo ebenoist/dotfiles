@@ -16,7 +16,7 @@ $(VS_CODE):
 	ln -s $(PWD)/vscode-settings.json $@
 
 $(VIM_PLUG):
-	@curl -sfLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+	@curl -sfLo $@ --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
 vim-install: $(VIM_PLUG)
 	@echo "Installing vim plugins"
