@@ -1,0 +1,35 @@
+// Place your settings in this file to overwrite the default settings
+{
+"files.trimTrailingWhitespace": true,
+    "vim.enableNeovim": true,
+    "vim.neovimPath": "/usr/local/bin/nvim",
+    "vim.disableAnnoyingNeovimMessage": true,
+    "C_Cpp.clang_format_style": "LLVM",
+    "typescript.check.tscVersion": false,
+    "editor.fontSize": 14,
+    "vim.useSystemClipboard": true,    "files.insertFinalNewline": true,
+    "vim.leader": ",",
+    "files.autoSave": "onFocusChange",
+    "vim.useCtrlKeys": true,
+    "vim.otherModesKeyBindingsNonRecursive": [
+        {
+            "before": ["<leader>","t"],
+            "commands": [{
+                "command": "workbench.action.quickOpen"
+            }]
+      },
+        {
+            "before": ["<C-h>"],
+            "after": [],
+            "commands": [{
+                "command": "workbench.action.focusPreviousGroup"
+            }]
+        },
+        {
+            "before": ["<C-l>"],
+            "commands": [{
+                "command": "workbench.action.focusNextGroup"
+            }]
+        }
+    ]
+}

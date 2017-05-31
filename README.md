@@ -1,23 +1,12 @@
 Erik's Dotfiles
-===================
+---
 
-Install
--------
-
-Clone onto your laptop:
-
-    git clone git://github.com/ebenoist/dotfiles.git
-
-Install:
-
-    cd dotfiles
-    ./install.sh
-
+## Install
 This will create symlinks for config files in your home directory.
 
-You can safely run `./install.sh` multiple times to update.
+* `git clone git@github.com:ebenoist/dotfiles.git`
+* `cd dotfiles`
+* `make`
 
-Credits
--------
-
-Thank you, [thoughtbot](https://github.com/thoughtbot/dotfiles/contributors)!
+## Update
+* `make update`
