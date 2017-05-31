@@ -22,5 +22,5 @@ vim-install: $(VIM_PLUG)
 	@echo "Installing vim plugins"
 	@vim +PlugInstall +qa
 
-update:
+update: all
 	@git pull
