@@ -8,10 +8,14 @@
     "editor.minimap.enabled": false,
     "typescript.check.tscVersion": false,
     "editor.fontSize": 14,
-    "vim.useSystemClipboard": true,    "files.insertFinalNewline": true,
+    "vim.useSystemClipboard": true,
+    "files.insertFinalNewline": true,
     "vim.leader": ",",
     "files.autoSave": "onFocusChange",
     "vim.useCtrlKeys": true,
+    "vim.handleKeys": {
+        "<C-h>": false
+    },
     "vim.otherModesKeyBindingsNonRecursive": [
         {
             "before": ["<leader>","t"],
