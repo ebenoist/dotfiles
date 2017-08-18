@@ -39,9 +39,6 @@ let g:go_highlight_operators = 1
 let g:go_highlight_structs = 1
 let g:go_highlight_types = 1
 let g:deoplete#enable_at_startup = 1
-let g:go_list_type = "quickfix"
-let g:go_auto_type_info = 1
-let g:go_auto_sameids = 1
 
 set completeopt+=noinsert
 set completeopt+=noselect

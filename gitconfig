@@ -14,7 +14,7 @@
   branch = auto
 [core]
   excludesfile = /opt/boxen/config/git/gitignore
-  editor = vim
+  editor = nvim
   autocrlf = input
 [apply]
   whitespace = nowarn

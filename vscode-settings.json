@@ -7,7 +7,7 @@
     "C_Cpp.clang_format_style": "LLVM",
     "editor.minimap.enabled": false,
     "typescript.check.tscVersion": false,
-    "editor.fontSize": 14,
+    "editor.fontSize": 16,
     "vim.useSystemClipboard": true,
     "files.insertFinalNewline": true,
     "vim.leader": ",",
