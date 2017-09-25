@@ -8,7 +8,6 @@ let NERDTreeIgnore=['\.$', '\~$', '.DS_Store']
 " RubyAndRails:
 " Highlight ruby operators
 let ruby_operators = 1
-
 " NERDCommenter:
 let NERDDefaultNesting = 0
 let NERDRemoveExtraSpaces = 1
@@ -52,9 +51,11 @@ let g:deoplete#sources#clang#clang_header = "/usr/local/Cellar/llvm/3.8.1/includ
 let g:neomake_cpp_clang_args = ["-std=c++11", "-Wextra", "-Wall", "-fsanitize=undefined","-g"]
 autocmd FileType c ClangFormatAutoEnable
 autocmd FileType cpp ClangFormatAutoEnable
-
-" Notes
-let g:notes_directories = ['~/Dropbox/Notes']
+let g:clang_format#code_style="chromium"
+let g:neomake_logfile="/Users/ebenoist/dev/neomake/log"
 
 " vim-test
 let test#strategy = "neoterm"
+
+" Notes
+let vim_markdown_preview_hotkey='<C-m>'

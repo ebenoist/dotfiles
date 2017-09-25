@@ -13,9 +13,8 @@ Plug 'neomake/neomake'
 Plug 'tpope/vim-fugitive'
 Plug 'kassio/neoterm'
 Plug 'janko-m/vim-test'
-Plug 'xolox/vim-misc'
-Plug 'xolox/vim-notes'
 Plug 'Shougo/deoplete.nvim'
+Plug 'JamshedVesuna/vim-markdown-preview'
 
 " JS
 Plug 'pangloss/vim-javascript'

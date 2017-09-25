@@ -10,7 +10,6 @@ fi
 
 # load
 export PATH="$HOME/.rbenv/bin:$HOME/.bin:node_modules/.bin:/usr/local/bin:/usr/local/sbin:$PATH"
-
 export CDPATH=".:$HOME/dev/"
 export EDITOR="nvim"
 
@@ -27,6 +26,14 @@ export PATH="$JAVA_HOME/bin:$PATH"
 SPARK_HOME="/usr/local/Cellar/apache-spark/1.5.2"
 PATH=$PATH:$SCALA_HOME/bin
 PATH="/usr/local/opt/llvm/bin":$PATH
+
+# EMSDK
+PATH=$PATH:"$HOME/dev/emsdk/emscripten/1.37.16"
+export EMSDK=$HOME/dev/emsdk
+export EM_CONFIG=$HOME/.emscripten
+
+# GNU
+PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
 
 # Include custom aliases
 [[ -f ~/.exports.local ]] && source ~/.exports.local
