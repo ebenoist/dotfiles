@@ -81,7 +81,7 @@ if has("mouse")
 endif
 
 " Save on FocusLost
-au FocusLost * :silent! wall
+" au FocusLost * :silent! wall
 
 " REMOVE TRAILING WHITESPACE
 autocmd BufWritePre * :%s/\s\+$//e
