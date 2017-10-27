@@ -55,12 +55,12 @@ set showmatch                              " Briefly jump to a paren once it's b
 
 " BACKUPS
 "-------------------------------------------------
-set backupdir=$HOME/.vim/backup
-set directory=$HOME/.vim/backup
+set backupdir=$HOME/.config/nvim/backup
+set directory=$HOME/.config/nvim/backup
 
 " PERSISTENT UNDO
 "-------------------------------------------------
-set undodir=$HOME/.vim/undodir
+set undodir=$HOME/.config/nvim/undodir
 set undofile
 set undolevels=10000
 set undoreload=10000

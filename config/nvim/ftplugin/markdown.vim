@@ -8,7 +8,7 @@ set nolist  " list disables linebreak
 " Spelling
 set spell
 set spelllang=en
-set spellfile=$HOME/.vim/spell/en.utf-8.add
+set spellfile=$HOME/.config/nvim/spell/en.utf-8.add
 
 " Remap navigation to be more familiar
 noremap  <buffer> <silent> k gk

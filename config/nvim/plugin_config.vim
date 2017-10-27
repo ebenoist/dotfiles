@@ -12,7 +12,6 @@ let ruby_operators = 1
 let NERDDefaultNesting = 0
 let NERDRemoveExtraSpaces = 1
 let NERDSpaceDelims = 1
-
 " FZF
 let $FZF_DEFAULT_COMMAND = 'ag -l -g ""'
 
@@ -52,7 +51,6 @@ let g:neomake_cpp_clang_args = ["-std=c++11", "-Wextra", "-Wall", "-fsanitize=un
 autocmd FileType c ClangFormatAutoEnable
 autocmd FileType cpp ClangFormatAutoEnable
 let g:clang_format#code_style="chromium"
-let g:neomake_logfile="/Users/ebenoist/dev/neomake/log"
 
 " vim-test
 let test#strategy = "neoterm"
