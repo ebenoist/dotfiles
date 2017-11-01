@@ -2,11 +2,6 @@
 export CLICOLOR=1
 export LSCOLORS="Exfxcxdxbxegedabagacad"
 
-# prompt
-export PS1="\[$Green\]\$(vcprompt -f '[%b%u%m]')\[$Color_Off\][\w]❥ "
-if [ $ITERM_SESSION_ID ]; then
-  export PROMPT_COMMAND='echo -ne "\033]0;${PWD##*/}\007"'
-fi
 
 # load
 export PATH="$HOME/.rbenv/shims:$HOME/.rbenv/bin:$HOME/.bin:node_modules/.bin:/usr/local/bin:/usr/local/sbin:$PATH"
@@ -34,6 +29,12 @@ export EM_CONFIG=$HOME/.emscripten
 
 # GNU
 PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
+
+# prompt
+export PS1="[\$(cvp -p)]\[$Green\]\$(vcprompt -f '[%b%u%m]')\[$Color_Off\][\w]❥ "
+if [ $ITERM_SESSION_ID ]; then
+  export PROMPT_COMMAND='echo -ne "\033]0;${PWD##*/}\007"'
+fi
 
 # Include custom aliases
 [[ -f ~/.exports.local ]] && source ~/.exports.local

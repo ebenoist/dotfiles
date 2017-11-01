@@ -76,9 +76,6 @@ au FileType go nmap <Leader>gv <Plug>(go-doc-vertical)
 
 " TypeScript
 au FileType typescript nmap <C-]> :TSDef<CR>
-au FileType typescript nmap <leader>td :TSDoc<CR>
-au FileType typescript nmap <leader>tr :TSRename<CR>
-au FileType typescript nmap <leader>ti :TSImport<CR>
 
 " Tagbar
 nmap <leader>T :TagbarToggle<CR>

@@ -8,3 +8,4 @@ config/yarn
 config/nvim/undodir
 config/nvim/plugged
 config/configstore/
+config/last_rack

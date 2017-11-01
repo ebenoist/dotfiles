@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+usage() {
+cat << EOF
+  usage: $0 options
+
+  OPTIONS:
+     -h  Show this message
+     -p  Show current rack
+     -l  List racks
+EOF
+}
+
+
+SHOW_RACK=0
+LIST_RACKS=0
+while getopts "hpl" OPTION
+do
+  case $OPTION in
+    h)
+      usage
+      exit 1
+      ;;
+    p)
+      SHOW_RACK=1
+      ;;
+    l)
+      LIST_RACKS=1
+      ;;
+    ?)
+      usage
+      exit
+      ;;
+  esac
+done
+
+shift $(($OPTIND-1))
+LOGIN_RACK=$1
+
+if [[ $LIST_RACKS -eq 1 ]]; then
+  bash -c "convox racks"
+fi
+
+if [[ $SHOW_RACK -eq 1 ]]; then
+  cat ~/.config/last_rack
+fi
+
+if [[ -n $LOGIN_RACK ]]; then
+  echo "logging into ${LOGIN_RACK}"
+  bash -c "convox switch reverb/${LOGIN_RACK}"
+  echo $LOGIN_RACK > ~/.config/last_rack
+fi
