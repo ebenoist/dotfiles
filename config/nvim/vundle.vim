@@ -12,14 +12,13 @@ Plug 'scrooloose/nerdtree'
 Plug 'neomake/neomake'
 Plug 'tpope/vim-fugitive'
 Plug 'kassio/neoterm'
-Plug 'janko-m/vim-test'
 Plug 'Shougo/deoplete.nvim'
 Plug 'JamshedVesuna/vim-markdown-preview'
+Plug 'diepm/vim-rest-console'
 
 " JS
 Plug 'pangloss/vim-javascript'
 Plug 'mxw/vim-jsx'
-Plug 'mustache/vim-mustache-handlebars'
 Plug 'othree/html5.vim'
 
 Plug 'mhartington/nvim-typescript'

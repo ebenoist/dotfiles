@@ -48,12 +48,6 @@ let g:deoplete#enable_profile = 1
 let g:deoplete#sources#clang#libclang_path = "/usr/local/Cellar/llvm/3.8.1/lib/libclang.dylib"
 let g:deoplete#sources#clang#clang_header = "/usr/local/Cellar/llvm/3.8.1/include/clang"
 let g:neomake_cpp_clang_args = ["-std=c++11", "-Wextra", "-Wall", "-fsanitize=undefined","-g"]
-autocmd FileType c ClangFormatAutoEnable
-autocmd FileType cpp ClangFormatAutoEnable
-let g:clang_format#code_style="chromium"
-
-" vim-test
-let test#strategy = "neoterm"
 
 " Notes
 let vim_markdown_preview_hotkey='<C-m>'

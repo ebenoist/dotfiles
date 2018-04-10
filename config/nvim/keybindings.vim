@@ -1,8 +1,7 @@
 " Map Leader: Reset from \ to ,
 let mapleader = ","
 
-" Yank from the cursor to the end of the line, to be consistent with C and D.
-nnoremap Y y$
+" Yank from the cursor to the end of the line, to be consistent with C and D.  nnoremap Y y$
 
 " jj for esc
 imap jj <Esc>
@@ -79,3 +78,6 @@ au FileType typescript nmap <C-]> :TSDef<CR>
 
 " Tagbar
 nmap <leader>T :TagbarToggle<CR>
+
+" NVIM Terminal escape
+tnoremap <Esc> <C-\><C-n>
