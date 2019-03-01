@@ -1,7 +1,7 @@
 # Unix
 alias ln='ln -v'
 alias mkdir='mkdir -p'
-alias vi='vim'
+alias vi='nvim'
 alias vim='nvim'
 alias tar='gtar'
 alias sed='gsed'
@@ -20,4 +20,8 @@ re-ctags() {
 
 gif() {
  ffmpeg -i $1 -pix_fmt rgb24 -r 10 -f gif - | gifsicle --optimize=4 --delay=3 > $2
+}
+
+git-clean() {
+  git branch --merged | egrep -v "(^\*|master|dev)" | xargs git branch -d
 }

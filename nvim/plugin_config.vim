@@ -44,10 +44,18 @@ set completeopt-=preview
 
 let g:deoplete#enable_profile = 1
 
-" C
-let g:deoplete#sources#clang#libclang_path = "/usr/local/Cellar/llvm/3.8.1/lib/libclang.dylib"
-let g:deoplete#sources#clang#clang_header = "/usr/local/Cellar/llvm/3.8.1/include/clang"
-let g:neomake_cpp_clang_args = ["-std=c++11", "-Wextra", "-Wall", "-fsanitize=undefined","-g"]
-
 " Notes
 let vim_markdown_preview_hotkey='<C-m>'
+
+" TSX
+" dark red
+" hi tsxTagName guifg=#E06C75
+
+" orange
+" hi tsxCloseString guifg=#F99575
+" hi tsxCloseTag guifg=#F99575
+" hi tsxAttributeBraces guifg=#F99575
+" hi tsxEqual guifg=#F99575
+
+" yellow
+" hi tsxAttrib guifg=#F8BD7F cterm=italic

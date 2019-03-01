@@ -62,6 +62,7 @@ nnoremap <C-x> <C-w>q
 let $NVIM_TUI_ENABLE_CURSOR_SHAPE=1
 "Hack to get C-h working in neovim
 nmap <BS> <C-W>h
+"tnoremap <Esc> <C-\><C-n>
 
 " GO
 au FileType go nmap <leader>gr <Plug>(go-run)
@@ -72,9 +73,6 @@ au FileType go nmap <Leader>ge <Plug>(go-rename)
 au FileType go nmap <Leader>gdb <Plug>(go-doc-browser)
 au FileType go nmap <Leader>gd <Plug>(go-doc)
 au FileType go nmap <Leader>gv <Plug>(go-doc-vertical)
-
-" TypeScript
-au FileType typescript nmap <C-]> :TSDef<CR>
 
 " Tagbar
 nmap <leader>T :TagbarToggle<CR>

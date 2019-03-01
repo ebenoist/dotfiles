@@ -30,11 +30,20 @@ export EM_CONFIG=$HOME/.emscripten
 # GNU
 PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
 
+# PISPI
+export PATH="$HOME/.local/bin:$PATH"
+
 # prompt
 export PS1="[\$(cvp -p)]\[$Green\]\$(vcprompt -f '[%b%u%m]')\[$Color_Off\][\w]❥ "
 if [ $ITERM_SESSION_ID ]; then
   export PROMPT_COMMAND='echo -ne "\033]0;${PWD##*/}\007"'
 fi
 
+# export GPG_TTY="$(tty)"
+# export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+# gpgconf --launch gpg-agent
+# gpg-connect-agent updatestartuptty /bye
+
+#
 # Include custom aliases
 [[ -f ~/.exports.local ]] && source ~/.exports.local
