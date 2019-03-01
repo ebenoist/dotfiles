@@ -1,10 +1,10 @@
-EXCLUDE := README.md Makefile Brewfile vscode-settings.json vscode-keybindings.json config
+EXCLUDE := README.md Makefile Brewfile vscode-settings.json vscode-keybindings.json
 FILES := $(shell ls)
 SOURCES := $(filter-out $(EXCLUDE),$(FILES))
 DOTFILES := $(patsubst %, ${HOME}/.%, $(SOURCES))
 VS_CODE_SETTINGS := ${HOME}/Library/Application\ Support/Code/User/settings.json
 VS_CODE_KEYBINDINGS := ${HOME}/Library/Application\ Support/Code/User/keybindings.json
-VIM_PLUG := ${HOME}/.vim/autoload/plug.vim
+VIM_PLUG := ${PWD}/nvim/autoload/plug.vim
 
 .PHONY: update vim-install
 
@@ -29,7 +29,7 @@ $(VIM_PLUG):
 
 vim-install: $(VIM_PLUG)
 	@echo "Installing vim plugins"
-	@vim +PlugInstall +qa
+	@nvim +PlugInstall +qa
 
 update: all
 	@git pull
