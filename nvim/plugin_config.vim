@@ -54,3 +54,5 @@ let g:ale_sign_error = '✘'
 let g:ale_sign_warning = '⚠'
 highlight ALEErrorSign ctermbg=NONE ctermfg=red
 highlight ALEWarningSign ctermbg=NONE ctermfg=yellow
+highlight ALEError ctermbg=none cterm=none
+highlight ALEWarning ctermbg=none cterm=none
