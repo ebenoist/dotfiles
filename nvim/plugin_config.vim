@@ -50,3 +50,7 @@ au FileType typescript.tsx nmap <C-]> :ALEGoToDefinition<CR>
 
 " Ale
 let g:ale_linters_ignore = {'typescript': ['eslint']}
+let g:ale_sign_error = '✘'
+let g:ale_sign_warning = '⚠'
+highlight ALEErrorSign ctermbg=NONE ctermfg=red
+highlight ALEWarningSign ctermbg=NONE ctermfg=yellow

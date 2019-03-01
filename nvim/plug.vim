@@ -10,6 +10,7 @@ Plug 'tpope/vim-fugitive'
 Plug 'w0rp/ale'
 Plug 'JamshedVesuna/vim-markdown-preview'
 Plug 'diepm/vim-rest-console'
+Plug 'jlanzarotta/bufexplorer'
 
 " JS
 Plug 'pangloss/vim-javascript'

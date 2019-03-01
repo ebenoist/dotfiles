@@ -55,9 +55,6 @@ au FileType go nmap <Leader>gdb <Plug>(go-doc-browser)
 au FileType go nmap <Leader>gd <Plug>(go-doc)
 au FileType go nmap <Leader>gv <Plug>(go-doc-vertical)
 
-" NVIM Terminal escape
-if has("nvim")
-  au TermOpen * tnoremap <Esc> <c-\><c-n>
-  " This can collide with fzf, don't
-  au FileType fzf tunmap <Esc>
-endif
+au TermOpen * tnoremap <Esc> <c-\><c-n>
+au BufEnter * tnoremap <Esc> <c-\><c-n>
+au FileType fzf tunmap <Esc>
