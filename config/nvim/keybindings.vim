@@ -73,9 +73,6 @@ au FileType go nmap <Leader>gdb <Plug>(go-doc-browser)
 au FileType go nmap <Leader>gd <Plug>(go-doc)
 au FileType go nmap <Leader>gv <Plug>(go-doc-vertical)
 
-" TypeScript
-au FileType typescript nmap <C-]> :TSDef<CR>
-
 " Tagbar
 nmap <leader>T :TagbarToggle<CR>
 

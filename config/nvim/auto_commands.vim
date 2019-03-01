@@ -20,3 +20,4 @@ autocmd BufRead,BufNewFile {COMMIT_EDITMSG}                                set f
 autocmd BufRead,BufNewFile *.es6 setfiletype javascript
 autocmd! BufWritePost * Neomake
 autocmd bufwritepost .vimrc source $MYVIMRC
+autocmd BufNewFile,BufRead *.tsx,*.jsx set filetype=typescript.tsx

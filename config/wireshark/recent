@@ -1,4 +1,4 @@
-# Recent settings file for Wireshark 2.0.3.
+# Recent settings file for Wireshark 2.2.1.
 #
 # This file is regenerated each time Wireshark is quit
 # and when changing configuration profile.
@@ -38,7 +38,7 @@ gui.statusbar_show: TRUE
 gui.packet_list_colorize: TRUE
 
 # Timestamp display format.
-# One of: RELATIVE, ABSOLUTE, ABSOLUTE_WITH_YMD, ABSOLUTE_WITH_YDOY, DELTA, DELTA_DIS, EPOCH, UTC, UTC_WITH_YMD, UTC_WITH_YDOY
+# One of: RELATIVE, ABSOLUTE, ABSOLUTE_WITH_YMD, ABSOLUTE_WITH_YDOY, ABSOLUTE_WITH_DATE, DELTA, DELTA_DIS, EPOCH, UTC, UTC_WITH_YMD, UTC_WITH_YDOY, UTC_WITH_DATE
 gui.time_format: RELATIVE
 
 # Timestamp display precision.
@@ -59,7 +59,7 @@ gui.bytes_view: 0
 
 # Main window upper (or leftmost) pane size.
 # Decimal number.
-gui.geometry_main_upper_pane: 137
+gui.geometry_main_upper_pane: 139
 
 # Main window middle pane size.
 # Decimal number.
@@ -72,10 +72,12 @@ column.width: %m, -1, %t, -1, %s, -1, %d, -1, %p, -1, %L, -1, %i, -1
 # Open conversation dialog tabs.
 # List of conversation names, e.g. "TCP", "IPv6".
 gui.conversation_tabs: 
+	""
 
 # Open endpoint dialog tabs.
 # List of endpoint names, e.g. "TCP", "IPv6".
 gui.endpoint_tabs: 
+	""
 
 # For RLC stats, whether to use RLC PDUs found inside MAC frames.
 # TRUE or FALSE (case-insensitive).

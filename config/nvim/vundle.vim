@@ -12,7 +12,12 @@ Plug 'scrooloose/nerdtree'
 Plug 'neomake/neomake'
 Plug 'tpope/vim-fugitive'
 Plug 'kassio/neoterm'
-Plug 'Shougo/deoplete.nvim'
+
+if has('nvim')
+  Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+  Plug 'mhartington/nvim-typescript'
+endif
+
 Plug 'JamshedVesuna/vim-markdown-preview'
 Plug 'diepm/vim-rest-console'
 
@@ -21,7 +26,6 @@ Plug 'pangloss/vim-javascript'
 Plug 'mxw/vim-jsx'
 Plug 'othree/html5.vim'
 
-Plug 'mhartington/nvim-typescript'
 Plug 'HerringtonDarkholme/yats.vim'
 
 " Go
@@ -38,5 +42,7 @@ Plug 'vim-ruby/vim-ruby', {'for': 'ruby'}
 Plug 'zchee/deoplete-clang'
 Plug 'rhysd/vim-clang-format'
 Plug 'octol/vim-cpp-enhanced-highlight'
+
+source ~/.config/nvim/local-plugin.vim
 
 call plug#end()
