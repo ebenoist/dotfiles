@@ -8,7 +8,6 @@ Plug 'scrooloose/nerdcommenter'
 Plug 'scrooloose/nerdtree'
 Plug 'tpope/vim-fugitive'
 Plug 'w0rp/ale'
-Plug 'Shougo/deoplete.nvim'
 Plug 'JamshedVesuna/vim-markdown-preview'
 Plug 'diepm/vim-rest-console'
 
@@ -24,6 +23,7 @@ Plug 'leafgarland/typescript-vim'
 " Go
 Plug 'fatih/vim-go', {'for': 'go'}
 Plug 'zchee/deoplete-go', {'do': 'make', 'for': 'go'}
+Plug 'Shougo/deoplete.nvim', { 'for': ['go', 'ruby'] }
 
 " Ruby
 Plug 'thoughtbot/vim-rspec', {'for': 'ruby'}
