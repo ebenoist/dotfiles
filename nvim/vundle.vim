@@ -1,4 +1,4 @@
-call plug#begin()
+call plug#begin('~/.config/nvim/plugged')
 
 " General
 Plug 'editorconfig/editorconfig-vim'
@@ -20,9 +20,8 @@ Plug 'diepm/vim-rest-console'
 Plug 'pangloss/vim-javascript'
 Plug 'mxw/vim-jsx'
 Plug 'othree/html5.vim'
-
-Plug 'mhartington/nvim-typescript'
-Plug 'HerringtonDarkholme/yats.vim'
+Plug 'peitalin/vim-jsx-typescript'
+Plug 'leafgarland/typescript-vim'
 
 " Go
 Plug 'fatih/vim-go', {'for': 'go'}
@@ -33,10 +32,5 @@ Plug 'thoughtbot/vim-rspec', {'for': 'ruby'}
 Plug 'tpope/vim-endwise', {'for': 'ruby'}
 Plug 'tpope/vim-rails', {'for': 'ruby'}
 Plug 'vim-ruby/vim-ruby', {'for': 'ruby'}
-
-" C/C++/ObjC
-Plug 'zchee/deoplete-clang'
-Plug 'rhysd/vim-clang-format'
-Plug 'octol/vim-cpp-enhanced-highlight'
 
 call plug#end()
