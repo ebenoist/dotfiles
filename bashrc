@@ -5,6 +5,8 @@ eval "$(rbenv init -)"
 eval "$(nodenv init -)"
 bind 'set completion-ignore-case on'
 
+[[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
+
 # `brew install bash-completion`
 if [ -f $(brew --prefix)/etc/bash_completion ]; then
   . $(brew --prefix)/etc/bash_completion
