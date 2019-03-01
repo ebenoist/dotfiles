@@ -8,15 +8,14 @@ let NERDTreeIgnore=['\.$', '\~$', '.DS_Store']
 " RubyAndRails:
 " Highlight ruby operators
 let ruby_operators = 1
+"
 " NERDCommenter:
 let NERDDefaultNesting = 0
 let NERDRemoveExtraSpaces = 1
 let NERDSpaceDelims = 1
+"
 " FZF
 let $FZF_DEFAULT_COMMAND = 'ag -l -g ""'
-
-" Rspec
-let g:rspec_command = "!bundle exec rspec -fd --tty --color {spec}"
 
 " Let ack/vim use ag for search
 let g:ackprg = 'ag --nogroup --nocolor --column'
@@ -42,20 +41,11 @@ set completeopt+=noinsert
 set completeopt+=noselect
 set completeopt-=preview
 
-let g:deoplete#enable_profile = 1
-
 " Notes
 let vim_markdown_preview_hotkey='<C-m>'
 
-" TSX
-" dark red
-" hi tsxTagName guifg=#E06C75
+au FileType typescript nmap <C-]> :ALEGoToDefinition<CR>
+au FileType typescript.tsx nmap <C-]> :ALEGoToDefinition<CR>
 
-" orange
-" hi tsxCloseString guifg=#F99575
-" hi tsxCloseTag guifg=#F99575
-" hi tsxAttributeBraces guifg=#F99575
-" hi tsxEqual guifg=#F99575
-
-" yellow
-" hi tsxAttrib guifg=#F8BD7F cterm=italic
+" Ale
+let g:ale_linters_ignore = {'typescript': ['eslint']}

@@ -1,10 +1,7 @@
 " Map Leader: Reset from \ to ,
 let mapleader = ","
 
-" Yank from the cursor to the end of the line, to be consistent with C and D.  nnoremap Y y$
-
-" jj for esc
-imap jj <Esc>
+nnoremap Y y$
 
 " NERDTree
 nmap <Leader>N :NERDTreeToggle<CR>
@@ -20,18 +17,10 @@ nmap <Leader>n :set number! number?<cr>
 " Toggle search highlights
 nmap <Leader>h :set hlsearch! hlsearch?<cr>
 
-" Shortcuts for writing the file...
-map <Leader>w :w<cr>
-imap <Leader>w <esc>:w<cr>
-
-" and quitting
-map <Leader>q :qall<cr>
-imap <Leader>q <esc>:qall<cr>
-
 " FZF
 nnoremap <Leader>t :FZF<CR>
 
-" Copy/Paste
+" Copy/Paste Current Directory
 map <Leader>cf :let @*=expand("%")<CR>
 map <Leader>cff :let @*=expand("%:p")<CR>
 
@@ -41,15 +30,8 @@ map <leader>gb :Gblame<CR>
 "Autocomplete
 inoremap <c-x><c-]> <c-]>
 
-" New  Tags
+" New Tags
 map <Leader>rt :!bash -ic re-ctags
-
-" Vim-Test
-nmap <silent> <leader>rl :TestNearest<CR>
-nmap <silent> <leader>rf :TestFile<CR>
-nmap <silent> <leader>ra :TestSuite<CR>
-nmap <silent> <leader>rr :TestLast<CR>
-nmap <silent> <leader>g :TestVisit<CR>
 
 " Quick Navigation
 nnoremap <C-j> <C-w>j
@@ -62,7 +44,6 @@ nnoremap <C-x> <C-w>q
 let $NVIM_TUI_ENABLE_CURSOR_SHAPE=1
 "Hack to get C-h working in neovim
 nmap <BS> <C-W>h
-"tnoremap <Esc> <C-\><C-n>
 
 " GO
 au FileType go nmap <leader>gr <Plug>(go-run)
@@ -74,8 +55,9 @@ au FileType go nmap <Leader>gdb <Plug>(go-doc-browser)
 au FileType go nmap <Leader>gd <Plug>(go-doc)
 au FileType go nmap <Leader>gv <Plug>(go-doc-vertical)
 
-" Tagbar
-nmap <leader>T :TagbarToggle<CR>
-
 " NVIM Terminal escape
-tnoremap <Esc> <C-\><C-n>
+if has("nvim")
+  au TermOpen * tnoremap <Esc> <c-\><c-n>
+  " This can collide with fzf, don't
+  au FileType fzf tunmap <Esc>
+endif

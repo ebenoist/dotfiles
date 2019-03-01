@@ -13,7 +13,6 @@
   status = auto
   branch = auto
 [core]
-  excludesfile = /opt/boxen/config/git/gitignore
   editor = nvim
   autocrlf = input
 [apply]
@@ -33,6 +32,3 @@
 [user]
 	name = Erik Benoist
 	email = ebenoist@gmail.com
-
-[credential]
-  helper = /opt/boxen/bin/boxen-git-credential

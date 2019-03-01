@@ -2,16 +2,12 @@ call plug#begin('~/.config/nvim/plugged')
 
 " General
 Plug 'editorconfig/editorconfig-vim'
-Plug 'ervandew/supertab'
-Plug 'majutsushi/tagbar'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-Plug 'junegunn/fzf.vim'
 Plug 'mileszs/ack.vim'
 Plug 'scrooloose/nerdcommenter'
 Plug 'scrooloose/nerdtree'
-Plug 'neomake/neomake'
 Plug 'tpope/vim-fugitive'
-Plug 'kassio/neoterm'
+Plug 'w0rp/ale'
 Plug 'Shougo/deoplete.nvim'
 Plug 'JamshedVesuna/vim-markdown-preview'
 Plug 'diepm/vim-rest-console'
@@ -20,6 +16,8 @@ Plug 'diepm/vim-rest-console'
 Plug 'pangloss/vim-javascript'
 Plug 'mxw/vim-jsx'
 Plug 'othree/html5.vim'
+
+" TS
 Plug 'peitalin/vim-jsx-typescript'
 Plug 'leafgarland/typescript-vim'
 

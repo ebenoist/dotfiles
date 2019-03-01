@@ -18,6 +18,4 @@ autocmd BufRead,BufNewFile {Gemfile,Rakefile,Capfile,*.rake,config.ru,*.god}    
 autocmd BufRead,BufNewFile {*.md,*.mkd,*.markdown}                         set ft=markdown
 autocmd BufRead,BufNewFile {COMMIT_EDITMSG}                                set ft=gitcommit
 autocmd BufRead,BufNewFile *.es6 setfiletype javascript
-autocmd! BufWritePost * Neomake
-autocmd bufwritepost .vimrc source $MYVIMRC
 autocmd BufNewFile,BufRead *.tsx,*.jsx set filetype=typescript.tsx
