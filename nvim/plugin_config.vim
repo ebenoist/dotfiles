@@ -36,7 +36,6 @@ let g:go_highlight_operators = 1
 let g:go_highlight_structs = 1
 let g:go_highlight_types = 1
 let g:deoplete#enable_at_startup = 1
-let g:ale_completion_enabled = 1
 
 set completeopt+=noinsert
 set completeopt+=noselect
@@ -45,10 +44,12 @@ set completeopt-=preview
 " Notes
 let vim_markdown_preview_hotkey='<C-m>'
 
+" Ale + TS
 au FileType typescript nmap <C-]> :ALEGoToDefinition<CR>
 au FileType typescript.tsx nmap <C-]> :ALEGoToDefinition<CR>
 
 " Ale
+let g:ale_completion_enabled = 1 " Ale autocomplete (just TS)
 let g:ale_linters_ignore = {'typescript': ['eslint']}
 let g:ale_sign_error = '✘'
 let g:ale_sign_warning = '⚠'
