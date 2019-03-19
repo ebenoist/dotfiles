@@ -11,6 +11,7 @@ Plug 'w0rp/ale'
 Plug 'JamshedVesuna/vim-markdown-preview'
 Plug 'diepm/vim-rest-console'
 Plug 'jlanzarotta/bufexplorer'
+Plug 'ervandew/supertab'
 
 " JS
 Plug 'pangloss/vim-javascript'
@@ -23,8 +24,6 @@ Plug 'leafgarland/typescript-vim'
 
 " Go
 Plug 'fatih/vim-go', {'for': 'go'}
-Plug 'zchee/deoplete-go', {'do': 'make', 'for': 'go'}
-Plug 'Shougo/deoplete.nvim', { 'for': ['go', 'ruby'] }
 
 " Ruby
 Plug 'thoughtbot/vim-rspec', {'for': 'ruby'}

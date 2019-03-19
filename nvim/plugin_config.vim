@@ -21,9 +21,10 @@ let $FZF_DEFAULT_COMMAND = 'ag -l -g ""'
 let g:ackprg = 'ag --nogroup --nocolor --column'
 
 " SuperTab
-set omnifunc=syntaxcomplete#Complete
 au FileType go let g:SuperTabDefaultCompletionType = "context"
+
 let g:SuperTabClosePreviewOnPopupClose = 1
+
 
 " GO
 let g:go_fmt_command = "goimports"
@@ -35,7 +36,7 @@ let g:go_highlight_methods = 1
 let g:go_highlight_operators = 1
 let g:go_highlight_structs = 1
 let g:go_highlight_types = 1
-let g:deoplete#enable_at_startup = 1
+let g:go_def_mode = "gopls"
 
 set completeopt+=noinsert
 set completeopt+=noselect
@@ -49,7 +50,7 @@ au FileType typescript nmap <C-]> :ALEGoToDefinition<CR>
 au FileType typescript.tsx nmap <C-]> :ALEGoToDefinition<CR>
 
 " Ale
-let g:ale_completion_enabled = 1 " Ale autocomplete (just TS)
+au FileType typescript let g:ale_completion_enabled = 1 " Ale autocomplete (just TS)
 let g:ale_linters_ignore = {'typescript': ['eslint']}
 let g:ale_sign_error = '✘'
 let g:ale_sign_warning = '⚠'
