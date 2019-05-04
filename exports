@@ -3,7 +3,7 @@ export CLICOLOR=1
 export LSCOLORS="Exfxcxdxbxegedabagacad"
 
 # load
-export PATH="$HOME/.rbenv/shims:$HOME/.rbenv/bin:$HOME/.bin:node_modules/.bin:/usr/local/bin:/usr/local/sbin:$PATH"
+export PATH="$HOME/.pyenv/shims:$HOME/.rbenv/shims:$HOME/.rbenv/bin:$HOME/.bin:node_modules/.bin:/usr/local/bin:/usr/local/sbin:$PATH"
 export CDPATH=".:$HOME/dev/"
 export VISUAL="nvim"
 export GIT_EDITOR="nvim"
@@ -15,6 +15,10 @@ export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
 # GO
 export GOPATH="$HOME/dev/go"
 export PATH="$GOPATH/bin:$PATH"
+
+# Python
+export LDFLAGS="-L/usr/local/opt/zlib/lib -L/usr/local/opt/sqlite/lib"
+export CPPFLAGS="-I/usr/local/opt/zlib/include -I/usr/local/opt/sqlite/include"
 
 # prompt
 export PS1="[\$(cvp -p)]\[$Green\]\$(vcprompt -f '[%b%u%m]')\[$Color_Off\][\w]❥ "
