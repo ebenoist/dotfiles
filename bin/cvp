@@ -38,7 +38,7 @@ shift $(($OPTIND-1))
 LOGIN_RACK=$1
 
 if [[ $LIST_RACKS -eq 1 ]]; then
-  bash -c "convox racks"
+  cat ~/.convox/auth | jq '. |=keys'
 fi
 
 if [[ $SHOW_RACK -eq 1 ]]; then
@@ -46,7 +46,8 @@ if [[ $SHOW_RACK -eq 1 ]]; then
 fi
 
 if [[ -n $LOGIN_RACK ]]; then
-  echo "logging into ${LOGIN_RACK}"
-  bash -c "convox switch reverb/${LOGIN_RACK}"
+  RACK_NAME=$(cat ~/.convox/auth | jq -r '. |=keys' | grep -E "(convox|reverb)-${LOGIN_RACK}" | sed s/[\,\"\ ]//g)
+  echo "logging into ${RACK_NAME}"
+  bash -c "convox login ${RACK_NAME}"
   echo $LOGIN_RACK > ~/.config/last_rack
 fi
