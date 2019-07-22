@@ -45,6 +45,9 @@ let $NVIM_TUI_ENABLE_CURSOR_SHAPE=1
 "Hack to get C-h working in neovim
 nmap <BS> <C-W>h
 
+" Hellow new MBP
+inoremap jj <esc>
+
 " GO
 au FileType go nmap <leader>gr <Plug>(go-run)
 au FileType go nmap <leader>gb <Plug>(go-build)
