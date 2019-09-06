@@ -25,7 +25,11 @@ export CPPFLAGS="-I/usr/local/opt/zlib/include -I/usr/local/opt/sqlite/include"
 export PATH="/usr/local/opt/protobuf@3.6/bin:$PATH"
 
 # prompt
-export PS1="[\$(cvp -p)]\[$Green\]\$(vcprompt -f '[%b%u%m]')\[$Color_Off\][\w]❥ "
+export PS1="\[$Green\]\$(vcprompt -f '[%b%u%m]')\[$Color_Off\][\w]❥ "
+if [ -f "~/.config/last_rack" ]; then
+  export PS1="[\$(cvp -p)]\[$Green\]\$(vcprompt -f '[%b%u%m]')\[$Color_Off\][\w]❥ "
+fi
+
 if [ $ITERM_SESSION_ID ]; then
   export PROMPT_COMMAND='echo -ne "\033]0;${PWD##*/}\007"'
 fi
