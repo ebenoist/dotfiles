@@ -51,7 +51,6 @@ au FileType typescript.tsx nmap <C-]> :ALEGoToDefinition<CR>
 
 " Ale
 au FileType typescript let g:ale_completion_enabled = 1 " Ale autocomplete (just TS)
-let g:ale_linters_ignore = {'typescript': ['eslint']}
 let g:ale_sign_error = '✘'
 let g:ale_sign_warning = '⚠'
 highlight ALEErrorSign ctermbg=NONE ctermfg=red
