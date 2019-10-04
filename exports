@@ -26,7 +26,7 @@ export PATH="/usr/local/opt/protobuf@3.6/bin:$PATH"
 
 # prompt
 export PS1="\[$Green\]\$(vcprompt -f '[%b%u%m]')\[$Color_Off\][\w]❥ "
-if [ -f "~/.config/last_rack" ]; then
+if [ -f "$HOME/.config/last_rack" ]; then
   export PS1="[\$(cvp -p)]\[$Green\]\$(vcprompt -f '[%b%u%m]')\[$Color_Off\][\w]❥ "
 fi
 

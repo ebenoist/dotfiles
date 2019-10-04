@@ -15,6 +15,7 @@
 [core]
   editor = nvim
   autocrlf = input
+	excludesfile = /Users/erik/.gitignore
 [apply]
   whitespace = nowarn
 [web]
