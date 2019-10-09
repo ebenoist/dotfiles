@@ -10,12 +10,15 @@ VIM_PLUG := ${PWD}/nvim/autoload/plug.vim
 
 install: all
 
-all: $(DOTFILES) ${HOME}/.config/nvim  vim-install
+all: $(DOTFILES) ${HOME}/.config/nvim  vim-install ${HOME}/.config/kitty
 
 $(DOTFILES): $(addprefix ${HOME}/., %) : ${PWD}/%
 	ln -s $< $@
 
 ${HOME}/.config/nvim: ${PWD}/nvim
+	ln -s $< $@
+
+${HOME}/.config/kitty: ${PWD}/kitty
 	ln -s $< $@
 
 $(VS_CODE_SETTINGS):

@@ -23,5 +23,7 @@ fi
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
+source <(kitty + complete setup bash)
+
 source ~/.exports;
 
