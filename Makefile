@@ -30,6 +30,12 @@ $(VS_CODE_KEYBINDINGS):
 $(VIM_PLUG):
 	@curl -sfLo $@ --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
+${HOME}/.gituser:
+	@read -p "Enter Your Full Name for Git Commits: " name; \
+		read -p "Enter Your Email for Git Commits: " email; \
+		git config -f ~/.gituser user.name "$$name"; \
+		git config -f ~/.gituser user.email "$$email"
+
 vim-install: $(VIM_PLUG)
 	@echo "Installing vim plugins"
 	@nvim +PlugInstall +qa
