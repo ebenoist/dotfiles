@@ -34,6 +34,9 @@ if [ -f "$HOME/.config/last_rack" ]; then
 fi
 
 export PROMPT_COMMAND='echo -ne "\033]0;${PWD##*/}\007"'
+if [ $TERM == "xterm-kitty" ]; then
+  export TERMINFO="/Applications/kitty.app/Contents/Frameworks/kitty/terminfo/"
+fi
 
 # Include custom aliases
 [[ -f ~/.exports.local ]] && source ~/.exports.local
