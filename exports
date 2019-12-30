@@ -20,6 +20,9 @@ export PATH="$GOPATH/bin:$PATH"
 export LDFLAGS="-L/usr/local/opt/zlib/lib -L/usr/local/opt/sqlite/lib"
 export CPPFLAGS="-I/usr/local/opt/zlib/include -I/usr/local/opt/sqlite/include"
 
+# Postgres
+export PATH="/usr/local/opt/postgresql@11/bin:$PATH"
+
 # Protobuf 3.6
 # https://github.com/protocolbuffers/protobuf/issues/6209
 export PATH="/usr/local/opt/protobuf@3.6/bin:$PATH"
@@ -34,3 +37,5 @@ export PROMPT_COMMAND='echo -ne "\033]0;${PWD##*/}\007"'
 
 # Include custom aliases
 [[ -f ~/.exports.local ]] && source ~/.exports.local
+
+export DOCKER_COMPOSE_FLAGS=''

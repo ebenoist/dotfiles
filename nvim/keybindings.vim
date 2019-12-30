@@ -45,7 +45,7 @@ let $NVIM_TUI_ENABLE_CURSOR_SHAPE=1
 "Hack to get C-h working in neovim
 nmap <BS> <C-W>h
 
-" Hellow new MBP
+" Hello new MBP
 inoremap jj <esc>
 
 " GO
@@ -61,3 +61,6 @@ au FileType go nmap <Leader>gv <Plug>(go-doc-vertical)
 au TermOpen * tnoremap <Esc> <c-\><c-n>
 au BufEnter * tnoremap <Esc> <c-\><c-n>
 au FileType fzf tunmap <Esc>
+
+" Markdown
+nmap <leader>m <Plug>MarkdownPreview
