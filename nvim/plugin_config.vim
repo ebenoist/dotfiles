@@ -42,9 +42,6 @@ set completeopt+=noinsert
 set completeopt+=noselect
 set completeopt-=preview
 
-" Notes
-let vim_markdown_preview_hotkey='<C-m>'
-
 " Ale + TS
 au FileType typescript nmap <C-]> :ALEGoToDefinition<CR>
 au FileType typescript.tsx nmap <C-]> :ALEGoToDefinition<CR>
@@ -57,3 +54,16 @@ highlight ALEErrorSign ctermbg=NONE ctermfg=red
 highlight ALEWarningSign ctermbg=NONE ctermfg=yellow
 highlight ALEError ctermbg=none cterm=none
 highlight ALEWarning ctermbg=none cterm=none
+
+let g:mkdp_markdown_css = '/Users/erik/dev/dotfiles/gdocs.css'
+
+let g:mkdp_preview_options = {
+    \ 'mkit': {},
+    \ 'katex': {},
+    \ 'uml': { 'server': 'http://erikbenoist.com:8181'},
+    \ 'maid': {},
+    \ 'disable_sync_scroll': 1,
+    \ 'sync_scroll_type': 'middle',
+    \ 'hide_yaml_meta': 1,
+    \ 'sequence_diagrams': {}
+    \ }
