@@ -33,7 +33,6 @@ if [ -f "$HOME/.config/last_rack" ]; then
   export PS1="[\$(cvp -p)]\[$Green\]\$(vcprompt -f '[%b%u%m]')\[$Color_Off\][\w]❥ "
 fi
 
-export PROMPT_COMMAND='echo -ne "\033]0;${PWD##*/}\007"'
 if [ $TERM == "xterm-kitty" ]; then
   export TERMINFO="/Applications/kitty.app/Contents/Frameworks/kitty/terminfo/"
 fi
