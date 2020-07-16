@@ -3,11 +3,13 @@ export CLICOLOR=1
 export LSCOLORS="Exfxcxdxbxegedabagacad"
 
 # load
-export PATH="$HOME/.pyenv/shims:$HOME/.rbenv/shims:$HOME/.rbenv/bin:$HOME/.bin:node_modules/.bin:/usr/local/bin:/usr/local/sbin:$PATH"
+export PATH="$HOME/.pyenv/shims:$HOME/.rbenv/shims:$HOME/.rbenv/bin:$HOME/.bin:/usr/local/bin:node_modules/.bin:/usr/local/sbin:$PATH"
 export CDPATH=".:$HOME/dev/"
 export VISUAL="nvim"
 export GIT_EDITOR="nvim"
 export EDITOR="$VISUAL"
+
+alias chrome="/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
 
 # GNU
 export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"

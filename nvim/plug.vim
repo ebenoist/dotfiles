@@ -11,6 +11,8 @@ Plug 'w0rp/ale'
 Plug 'diepm/vim-rest-console'
 Plug 'jlanzarotta/bufexplorer'
 Plug 'ervandew/supertab'
+Plug 'tpope/vim-unimpaired'
+Plug 'tpope/vim-repeat'
 
 " JS
 Plug 'pangloss/vim-javascript'

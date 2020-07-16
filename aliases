@@ -25,3 +25,7 @@ gif() {
 git-clean() {
   git branch --merged | egrep -v "(^\*|master|dev)" | xargs git branch -d
 }
+
+alias icat="kitty +kitten icat"
+
+alias chrome="/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"

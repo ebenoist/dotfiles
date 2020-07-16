@@ -4,8 +4,8 @@ source ~/.aliases;
 eval "$(rbenv init -)"
 eval "$(nodenv init -)"
 eval "$(pyenv init -)"
-bind 'set completion-ignore-case on'
 
+bind 'set completion-ignore-case on'
 [[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
 
 if [ -f $(brew --prefix)/etc/bash_completion ]; then
@@ -21,7 +21,6 @@ if [ -f `brew --prefix`/etc/bash_completion.d/git-prompt.sh ]; then
 fi
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
-
 source <(kitty + complete setup bash)
 
 source ~/.exports;

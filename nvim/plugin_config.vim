@@ -37,6 +37,10 @@ let g:go_highlight_operators = 1
 let g:go_highlight_structs = 1
 let g:go_highlight_types = 1
 let g:go_def_mode = "gopls"
+" let g:go_highlight_diagnostic_errors = 0
+" let g:go_highlight_diagnostic_warnings = 0
+let g:go_rename_command = 'gopls'
+let g:go_metalinter_autosave_enabled = ['typecheck', 'golint']
 
 set completeopt+=noinsert
 set completeopt+=noselect
@@ -52,8 +56,8 @@ let g:ale_sign_error = '✘'
 let g:ale_sign_warning = '⚠'
 highlight ALEErrorSign ctermbg=NONE ctermfg=red
 highlight ALEWarningSign ctermbg=NONE ctermfg=yellow
-highlight ALEError ctermbg=none cterm=none
-highlight ALEWarning ctermbg=none cterm=none
+highlight ALEError ctermbg=NONE cterm=NONE
+highlight ALEWarning ctermbg=NONE cterm=NONE
 
 let g:mkdp_markdown_css = '/Users/erik/dev/dotfiles/gdocs.css'
 
