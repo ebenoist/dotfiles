@@ -2,10 +2,13 @@
 
 TTL=$((20*60))
 NOW=$(date +%s)
-LAST_UPDATED=$(date +%s -r ~/.op-cache)
+LAST_UPDATED=$(date +%s -r $HOME/.op-cache)
 ELAPSED=$(($NOW - $LAST_UPDATED))
 
-if [[ $ELAPSED -gt $TTL ]]; then
+if [[ ! -f "$HOME/.op-cache" ]]; then
+  echo "no-cache"
+  op signin my > ~/.op-cache
+elif [[ $ELAPSED -gt $TTL ]]; then
   echo "cache expired"
   op signin my > ~/.op-cache
 else
