@@ -5,7 +5,7 @@ export GPG_TTY=$(tty)
 export COLORTERM=truecolor
 
 # load
-export PATH="/usr/local/opt/postgresql@9.6/bin:$HOME/.pyenv/shims:$HOME/.rbenv/shims:$HOME/.rbenv/bin:$HOME/.bin:/usr/local/bin:node_modules/.bin:/usr/local/sbin:$PATH"
+export PATH="$HOME/.bin:$HOME/.local/bin:node_modules/.bin:$PATH"
 export CDPATH=".:$HOME/dev/"
 export VISUAL="nvim"
 export GIT_EDITOR="nvim"
@@ -41,3 +41,6 @@ export PS0='\033]0;\w\007'
 export DOCKER_COMPOSE_FLAGS=''
 
 export SHELL="/usr/local/bin/bash"
+
+export DOCKER_COMPOSE_FLAGS=''
+unset LDFLAGS
