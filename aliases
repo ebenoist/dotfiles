@@ -4,8 +4,10 @@ alias mkdir='mkdir -p'
 alias vi='nvim'
 alias vim='nvim'
 alias tar='gtar'
-alias sed='gsed'
-alias ls='ls -GF'
+#alias sed='gsed'
+
+alias ls='ls --color'
+
 
 git-files() {
   git ls-tree --full-tree -r --name-only HEAD

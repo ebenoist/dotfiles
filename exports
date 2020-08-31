@@ -3,7 +3,7 @@ export CLICOLOR=1
 export LSCOLORS="Exfxcxdxbxegedabagacad"
 
 # load
-export PATH="$HOME/.pyenv/shims:$HOME/.rbenv/shims:$HOME/.rbenv/bin:$HOME/.bin:/usr/local/bin:node_modules/.bin:/usr/local/sbin:$PATH"
+export PATH="$HOME/.bin:$HOME/.local/bin:node_modules/.bin:$PATH"
 export CDPATH=".:$HOME/dev/"
 export VISUAL="nvim"
 export GIT_EDITOR="nvim"
@@ -17,10 +17,6 @@ export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
 # GO
 export GOPATH="$HOME/dev/go"
 export PATH="$GOPATH/bin:$PATH"
-
-# Python
-export LDFLAGS="-L/usr/local/opt/zlib/lib -L/usr/local/opt/sqlite/lib"
-export CPPFLAGS="-I/usr/local/opt/zlib/include -I/usr/local/opt/sqlite/include"
 
 # Postgres
 export PATH="/usr/local/opt/postgresql@11/bin:$PATH"
@@ -43,3 +39,5 @@ fi
 [[ -f ~/.exports.local ]] && source ~/.exports.local
 
 export DOCKER_COMPOSE_FLAGS=''
+
+unset LDFLAGS

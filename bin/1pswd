@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+TTL=$((20*60))
+NOW=$(date +%s)
+LAST_UPDATED=$(date +%s -r ~/.op-cache)
+ELAPSED=$(($NOW - $LAST_UPDATED))
+
+if [[ $ELAPSED -gt $TTL ]]; then
+  echo "cache expired"
+  op signin my > ~/.op-cache
+else
+  echo "logged in, will expire in $(($TTL - $ELAPSED)) seconds"
+fi
+
+eval $(cat ~/.op-cache)
+
+LOGIN=$(op list items |\
+  jq -C -c -r '.[] | {
+    title: .overview.title,
+    uuid,
+    createdAt
+  }' | fzf --ansi --preview="echo {} | jq -C ." | jq -r .uuid | op get item -)
+
+echo $LOGIN | jq -c -r '.details.fields | .[] | { designation, value }' |\
+  fzf --ansi --preview="echo {} | jq -C ." | jq -r .value | xclip -i -selection clipboard
