@@ -29,5 +29,4 @@ git-clean() {
 }
 
 alias icat="kitty +kitten icat"
-
-alias chrome="/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
+alias tilt="/usr/local/bin/tilt"

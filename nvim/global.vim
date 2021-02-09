@@ -24,7 +24,7 @@ set autoread                               " Autoload files
 set tags+=tags                             " Set ctags
 set tags+=.tags
 set tags+=.gemtags                         " Set ctags
-set clipboard+=unnamed                     " Set system clipboard
+set clipboard=unnamed                     " Set system clipboard
 scriptencoding utf-8
 
 " INDENTATION

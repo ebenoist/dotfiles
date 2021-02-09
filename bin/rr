@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+bin/rspec $(git ls-files spec/ | fzf --preview="bat --color=always {}")

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash -l
+
+while getopts ":n:sh" opt; do
+  case ${opt} in
+    n) # new note
+      nvim ~/Notes/$OPTARG
+      exit 0
+      ;;
+    s) # search in notes
+      nvim $(ls -t ~/Notes/* | fzf --preview="bat --color=always {}")
+      exit 0
+      ;;
+    h) echo "Usage: notes [-n] [-s]"
+      ;;
+    *)
+      echo "Usage: notes [-n] [-s]"
+      exit 1
+      ;;
+  esac
+done
+
+nvim $(ls -t ~/Notes/* | fzf --preview="bat --color=always {}")

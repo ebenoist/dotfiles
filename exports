@@ -1,9 +1,11 @@
 # enable colored output from ls, etc
 export CLICOLOR=1
 export LSCOLORS="Exfxcxdxbxegedabagacad"
+export GPG_TTY=$(tty)
+export COLORTERM=truecolor
 
 # load
-export PATH="$HOME/.bin:$HOME/.local/bin:node_modules/.bin:$PATH"
+export PATH="/usr/local/opt/postgresql@9.6/bin:$HOME/.pyenv/shims:$HOME/.rbenv/shims:$HOME/.rbenv/bin:$HOME/.bin:/usr/local/bin:node_modules/.bin:/usr/local/sbin:$PATH"
 export CDPATH=".:$HOME/dev/"
 export VISUAL="nvim"
 export GIT_EDITOR="nvim"
@@ -32,12 +34,13 @@ if [ -f "$HOME/.config/last_rack" ]; then
 fi
 
 if [ $TERM == "xterm-kitty" ]; then
-  export TERMINFO="/Applications/kitty.app/Contents/Frameworks/kitty/terminfo/"
+  export TERMINFO="/Applications/kitty.app/Contents/Resources/kitty/terminfo/"
 fi
+
+export PS0='\033]0;\w\007'
 
 # Include custom aliases
 [[ -f ~/.exports.local ]] && source ~/.exports.local
 
 export DOCKER_COMPOSE_FLAGS=''
-
-unset LDFLAGS
+export SHELL="/usr/local/bin/bash"
