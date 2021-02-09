@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+echo "sudo $@, eh? are you sure (y|n)"
+read doit
+
+if [ $doit == "y" ]; then
+ /usr/bin/sudo $@
+else
+  echo "yeah didn't think so... maybe try taking a walk"
+fi

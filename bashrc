@@ -5,7 +5,7 @@ eval "$(rbenv init -)"
 eval "$(nodenv init -)"
 eval "$(pyenv init -)"
 
-bind 'set completion-ignore-case on'
+bind 'set completion-ignore-case on' 2>/dev/null
 [[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
 
 if [ -f $(brew --prefix)/etc/bash_completion ]; then

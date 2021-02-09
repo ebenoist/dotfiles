@@ -22,9 +22,7 @@ let g:ackprg = 'ag --nogroup --nocolor --column'
 
 " SuperTab
 au FileType go let g:SuperTabDefaultCompletionType = "context"
-
 let g:SuperTabClosePreviewOnPopupClose = 1
-
 
 " GO
 let g:go_fmt_command = "goimports"
@@ -58,9 +56,11 @@ highlight ALEErrorSign ctermbg=NONE ctermfg=red
 highlight ALEWarningSign ctermbg=NONE ctermfg=yellow
 highlight ALEError ctermbg=NONE cterm=NONE
 highlight ALEWarning ctermbg=NONE cterm=NONE
-
+let g:ale_fixers = {
+    \ 'javascript': ['eslint'],
+    \ 'typescript': ['eslint']
+    \ }
 let g:mkdp_markdown_css = '/Users/erik/dev/dotfiles/gdocs.css'
-
 let g:mkdp_preview_options = {
     \ 'mkit': {},
     \ 'katex': {},
