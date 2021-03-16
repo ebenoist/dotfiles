@@ -20,4 +20,4 @@ autocmd BufRead,BufNewFile {COMMIT_EDITMSG} set ft=gitcommit
 autocmd BufRead,BufNewFile *.es6 setfiletype javascript
 autocmd BufRead,BufNewFile Tiltfile set ft=python
 autocmd BufNewFile,BufRead *.tsx,*.jsx set filetype=typescript.tsx
-autocmd BufWritePost *.js,*.jsx,*.ts,*.tsx ALEFix
+" autocmd BufWritePost *.js,*.jsx,*.ts,*.tsx ALEFix
