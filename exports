@@ -29,10 +29,6 @@ export PATH="/usr/local/opt/protobuf@3.6/bin:$PATH"
 
 # prompt
 export PS1="\[$Green\]\$(vcprompt -f '[%b%u%m]')\[$Color_Off\][\w]❥ "
-if [ -f "$HOME/.config/last_rack" ]; then
-  export PS1="[\$(cvp -p)]\[$Green\]\$(vcprompt -f '[%b%u%m]')\[$Color_Off\][\w]❥ "
-fi
-
 if [ $TERM == "xterm-kitty" ]; then
   export TERMINFO="/Applications/kitty.app/Contents/Resources/kitty/terminfo/"
 fi
@@ -43,4 +39,5 @@ export PS0='\033]0;\w\007'
 [[ -f ~/.exports.local ]] && source ~/.exports.local
 
 export DOCKER_COMPOSE_FLAGS=''
+
 export SHELL="/usr/local/bin/bash"

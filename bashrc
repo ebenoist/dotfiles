@@ -36,4 +36,7 @@ export HISTCONTROL=ignorespace:erasedups
 export DBHISTORY=true
 export DBHISTORYFILE=$HOME/.dbhist.sql
 
+export FLYCTL_INSTALL="/home/erik/.fly"
+export PATH="$FLYCTL_INSTALL/bin:$PATH"
+
 source ~/.dbhist.sh;
