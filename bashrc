@@ -24,6 +24,7 @@ if [ -x "$(command -v brew)" ]; then
   fi
 fi
 
+eval $(keychain -q --eval id_rsa)
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 source <(kitty + complete setup bash)
 

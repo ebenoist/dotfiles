@@ -35,6 +35,4 @@
 	name = Erik Benoist
 	email = ebenoist@gmail.com
 [pull]
-	rebase = false
-[init]
-	defaultBranch = main
+	ff = only
