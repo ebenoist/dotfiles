@@ -34,9 +34,6 @@
 [user]
 	name = Erik Benoist
 	email = ebenoist@gmail.com
-	signingkey = C64482C40CBC11E4
-[commit]
-	gpgsign = true
 [pull]
 	rebase = false
 [init]
