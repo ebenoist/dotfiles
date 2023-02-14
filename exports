@@ -35,6 +35,9 @@ fi
 
 export PS0='\033]0;\w\007'
 
+export FLYCTL_INSTALL="/home/erik/.fly"
+export PATH="$FLYCTL_INSTALL/bin:$PATH"
+
 # Include custom aliases
 [[ -f ~/.exports.local ]] && source ~/.exports.local
 

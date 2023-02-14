@@ -28,6 +28,8 @@ eval $(keychain -q --eval id_rsa)
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 source <(kitty + complete setup bash)
 
+xset +dpms
+
 source ~/.exports;
 export HISTSIZE=$HOME/.bash_history
 export HISTFILESIZE=1000
