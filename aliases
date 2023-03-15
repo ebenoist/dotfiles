@@ -5,6 +5,8 @@ alias vi='nvim'
 alias vim='nvim'
 alias tar='gtar'
 #alias sed='gsed'
+alias cat="batcat"
+alias bat="batcat"
 
 alias ls='ls --color'
 
@@ -25,7 +27,7 @@ gif() {
 }
 
 git-clean() {
-  git branch --merged | egrep -v "(^\*|master|dev)" | xargs git branch -d
+  git branch --merged | egrep -v "(^\*|master|dev|main)" | xargs git branch -d
 }
 
 alias icat="kitty +kitten icat"
