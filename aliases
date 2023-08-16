@@ -3,13 +3,14 @@ alias ln='ln -v'
 alias mkdir='mkdir -p'
 alias vi='nvim'
 alias vim='nvim'
-alias tar='gtar'
+#alias tar='gtar'
 #alias sed='gsed'
-alias cat="batcat"
 alias bat="batcat"
+alias android-studio="$HOME/android-studio/bin/studio.sh"
+alias pbcopy="xclip -i -selection clipboard"
+alias pbpaste="xclip -o -selection clipboard"
 
 alias ls='ls --color'
-
 
 git-files() {
   git ls-tree --full-tree -r --name-only HEAD

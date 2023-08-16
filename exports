@@ -6,7 +6,7 @@ export COLORTERM=truecolor
 
 # load
 export PATH="$HOME/.bin:$HOME/.local/bin:node_modules/.bin:$PATH"
-export CDPATH=".:$HOME/dev/"
+export CDPATH=".:$HOME/dev/:$HOME/dev/go-bike-go/"
 export VISUAL="nvim"
 export GIT_EDITOR="nvim"
 export EDITOR="$VISUAL"
@@ -32,6 +32,9 @@ export PS1="\[$Green\]\$(vcprompt -f '[%b%u%m]')\[$Color_Off\][\w]❥ "
 if [ $TERM == "xterm-kitty" ]; then
   export TERMINFO="/Applications/kitty.app/Contents/Resources/kitty/terminfo/"
 fi
+if [[ -n $SSH_CLIENT ]]; then
+  export PS1="\[$Green\]\$(vcprompt -f '[%b%u%m]')\[$Color_Off\][\w]@\h ❥ "
+fi
 
 export PS0='\033]0;\w\007'
 
@@ -47,3 +50,10 @@ export SHELL="/usr/local/bin/bash"
 
 export DOCKER_COMPOSE_FLAGS=''
 unset LDFLAGS
+
+export ANDROID_HOME=${HOME}/Android/Sdk
+export PATH=${ANDROID_HOME}/tools:${PATH}
+export PATH=${ANDROID_HOME}/emulator:${PATH}
+export PATH=${ANDROID_HOME}/platform-tools:${PATH}
+
+export PATH="$HOME/.tfenv/bin:$PATH"

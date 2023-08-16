@@ -22,17 +22,21 @@
   browser = open
 [merge]
 	conflictstyle = diff3
-[include]
-  path = ~/.gituser
-[url "git@github.com:"]
-	insteadOf = https://github.com/
-	insteadOf = https://github.com/
 [filter "lfs"]
 	clean = git-lfs clean %f
 	smudge = git-lfs smudge %f
 	required = true
 [user]
-	name = Erik Benoist
-	email = ebenoist@gmail.com
+  name = Erik Benoist
+  email = ebenoist@gmail.com
+  signingkey = AA3DF02E8CD91069
+[includeIf "gitdir:~/dev/nilcoast/"]
+  path = ~/dev/nilcoast/.gitconfig
+[includeIf "gitdir:~/dev/songfinch/"]
+  path = ~/dev/songfinch/.gitconfig
 [pull]
 	ff = only
+[commit]
+	gpgsign = true
+[init]
+	defaultBranch = main

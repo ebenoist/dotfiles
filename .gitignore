@@ -2,3 +2,4 @@
 !bin
 nvim/undodir
 nvim/plugged
+node_modules

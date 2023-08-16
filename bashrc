@@ -25,10 +25,13 @@ if [ -x "$(command -v brew)" ]; then
 fi
 
 eval $(keychain -q --eval id_rsa)
+eval $(keychain -q --eval id_nilcoast)
+eval $(keychain -q --eval id_songfinch)
+
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 source <(kitty + complete setup bash)
 
-xset +dpms
+xset s on && xset +dpms
 
 source ~/.exports;
 export HISTSIZE=$HOME/.bash_history
@@ -43,3 +46,13 @@ export FLYCTL_INSTALL="/home/erik/.fly"
 export PATH="$FLYCTL_INSTALL/bin:$PATH"
 
 source ~/.dbhist.sh;
+
+complete -C /usr/bin/terraform terraform
+export GPG_TTY=$(tty) # for gpg
+
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/home/erik/google-cloud-sdk/path.bash.inc' ]; then . '/home/erik/google-cloud-sdk/path.bash.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/home/erik/google-cloud-sdk/completion.bash.inc' ]; then . '/home/erik/google-cloud-sdk/completion.bash.inc'; fi

@@ -41,6 +41,8 @@ Plug 'vim-python/python-syntax', { 'for': 'python' }
 
 " Docs
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install'  }
+Plug 'hashivim/vim-terraform'
+Plug 'wakatime/vim-wakatime'
 
 call plug#end()
 
@@ -270,7 +272,7 @@ let g:ale_linters = {
     \ }
 
 " MARKDOWN
-let g:mkdp_markdown_css = '/Users/erik/dev/dotfiles/gdocs.css'
+let g:mkdp_markdown_css = '/home/erik/dev/dotfiles/gdocs.css'
 let g:mkdp_preview_options = {
     \ 'mkit': {},
     \ 'katex': {},
