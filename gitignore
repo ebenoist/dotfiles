@@ -13,3 +13,4 @@ tmp/**/*
 !tmp/cache/.keep
 zeus.json
 .tags
+.cache/

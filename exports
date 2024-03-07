@@ -36,8 +36,14 @@ export PS1="\[$Green\]\$(vcprompt -f '[%b%u%m]')\[$Color_Off\][\w]❥ "
 if [ $TERM == "xterm-kitty" ]; then
   export TERMINFO="/Applications/kitty.app/Contents/Resources/kitty/terminfo/"
 fi
+if [[ -n $SSH_CLIENT ]]; then
+  export PS1="\[$Green\]\$(vcprompt -f '[%b%u%m]')\[$Color_Off\][\w]@\h❥ "
+fi
 
 export PS0='\033]0;\w\007'
 
 # Include custom aliases
 [[ -f ~/.exports.local ]] && source ~/.exports.local
+export PATH="/usr/local/opt/openjdk/bin:$PATH"
+
+export NVIM_LISTEN_ADDRESS=/tmp/nvimsocket

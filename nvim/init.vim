@@ -13,9 +13,9 @@ Plug 'tpope/vim-rhubarb'
 Plug 'w0rp/ale'
 Plug 'diepm/vim-rest-console'
 Plug 'jlanzarotta/bufexplorer'
-Plug 'ervandew/supertab'
 Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-repeat'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 " JS
 Plug 'pangloss/vim-javascript'
@@ -190,9 +190,22 @@ let $FZF_DEFAULT_COMMAND = 'ag -l -g ""'
 " Let ack/vim use ag for search
 let g:ackprg = 'ag --nogroup --nocolor --column'
 
-" SuperTab
-au FileType go let g:SuperTabDefaultCompletionType = "context"
-let g:SuperTabClosePreviewOnPopupClose = 1
+" COC
+inoremap <silent><expr> <TAB>
+      \ coc#pum#visible() ? coc#pum#next(1) :
+      \ CheckBackspace() ? "\<Tab>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
+
+" Make <CR> to accept selected completion item or notify coc.nvim to format
+" <C-g>u breaks current undo, please make your own choice
+inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm()
+                              \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+
+function! CheckBackspace() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
 
 " GO
 let g:go_fmt_command = "goimports"
@@ -259,7 +272,7 @@ function! <SID>StripTrailingWhitespaces()
 endfunction
 
 autocmd BufWritePre *.rb,*.haml :call <SID>StripTrailingWhitespaces()
-autocmd BufRead,BufNewFile {Gemfile,Rakefile,Capfile,*.rake,config.ru,*.god} set ft=ruby
+autocmd BufRead,BufNewFile {Fastfile,Appfile,Gemfile,Rakefile,Capfile,*.rake,config.ru,*.god} set ft=ruby
 autocmd BufRead,BufNewFile {*.md,*.mkd,*.markdown} set ft=markdown
 autocmd BufRead,BufNewFile {COMMIT_EDITMSG} set ft=gitcommit
 autocmd BufRead,BufNewFile {Tiltfile} set ft=python

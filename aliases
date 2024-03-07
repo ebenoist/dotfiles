@@ -4,7 +4,7 @@ alias mkdir='mkdir -p'
 alias vi='nvim'
 alias vim='nvim'
 alias tar='gtar'
-alias sed='gsed'
+alias sed='/usr/bin/sed'
 alias ls='ls -GF'
 
 git-files() {
@@ -28,3 +28,7 @@ git-clean() {
 
 alias icat="kitty +kitten icat"
 alias tilt="/usr/local/bin/tilt"
+
+if [ -n "${NVIM}" ]; then
+  alias vim="nvr --remote"
+fi

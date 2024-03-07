@@ -33,3 +33,4 @@ export DBHISTORY=true
 export DBHISTORYFILE=$HOME/.dbhist.sql
 
 source ~/.dbhist.sh;
+. "$HOME/.cargo/env"

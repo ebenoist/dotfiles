@@ -22,19 +22,19 @@
   browser = open
 [merge]
 	conflictstyle = diff3
-[include]
-  path = ~/.gituser
-[url "git@github.com:"]
-	insteadOf = https://github.com/
-	insteadOf = https://github.com/
 [filter "lfs"]
 	clean = git-lfs clean %f
 	smudge = git-lfs smudge %f
 	required = true
-[user]
-	name = Erik Benoist
-	email = ebenoist@gmail.com
+[includeIf "gitdir:~/dev/"]
+  path = ~/dev/.gitconfig
+[includeIf "gitdir:~/dev/nilcoast/"]
+  path = ~/dev/nilcoast/.gitconfig
+[includeIf "gitdir:~/dev/melt-sounds/"]
+  path = ~/dev/nilcoast/.gitconfig
+[includeIf "gitdir:~/dev/ebenoist/"]
+  path = ~/dev/ebenoist/.gitconfig
 [pull]
-	rebase = false
+	ff = only
 [init]
 	defaultBranch = main
