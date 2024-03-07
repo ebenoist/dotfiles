@@ -4,7 +4,7 @@ alias mkdir='mkdir -p'
 alias vi='nvim'
 alias vim='nvim'
 alias tar='gtar'
-alias sed='/usr/bin/sed'
+alias sed='gsed' # can cause compatibility issues
 alias ls='ls -GF'
 
 git-files() {

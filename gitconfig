@@ -15,7 +15,7 @@
 [core]
   editor = nvim
   autocrlf = input
-	excludesfile = /Users/erik/.gitignore
+	excludesfile = ~/.gitignore
 [apply]
   whitespace = nowarn
 [web]
@@ -34,6 +34,9 @@
   path = ~/dev/nilcoast/.gitconfig
 [includeIf "gitdir:~/dev/ebenoist/"]
   path = ~/dev/ebenoist/.gitconfig
+[user]
+	name = Erik Benoist
+	email = ebenoist@gmail.com
 [pull]
 	ff = only
 [init]
