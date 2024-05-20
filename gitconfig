@@ -29,14 +29,14 @@
 [user]
   name = Erik Benoist
   email = ebenoist@gmail.com
-  signingkey = AA3DF02E8CD91069
-[includeIf "gitdir:~/dev/nilcoast/"]
-  path = ~/dev/nilcoast/.gitconfig
-[includeIf "gitdir:~/dev/songfinch/"]
-  path = ~/dev/songfinch/.gitconfig
-[pull]
-	ff = only
+  singingkey = F244E084D30BBBF5
 [commit]
 	gpgsign = true
+[includeIf "gitdir:~/dev/nilcoast/"]
+  path = ~/dev/nilcoast/.gitconfig
+[includeIf "gitdir:~/dev/appfolio/"]
+  path = ~/dev/appfolio/.gitconfig
+[pull]
+	ff = only
 [init]
 	defaultBranch = main

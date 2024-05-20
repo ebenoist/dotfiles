@@ -1,5 +1,6 @@
 source ~/.colors;
 source ~/.aliases;
+source ~/.exports;
 
 export PATH="$HOME/.pyenv/bin:$HOME/.rbenv/bin:$HOME/.nodenv/bin:$PATH"
 
@@ -24,16 +25,14 @@ if [ -x "$(command -v brew)" ]; then
   fi
 fi
 
-eval $(keychain -q --eval id_rsa)
-eval $(keychain -q --eval id_nilcoast)
-eval $(keychain -q --eval id_songfinch)
+# eval $(keychain -q --eval id_rsa)
+# eval $(keychain -q --eval id_nilcoast)
+# eval $(keychain -q --eval id_songfinch)
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 source <(kitty + complete setup bash)
 
 xset s on && xset +dpms
-
-source ~/.exports;
 export HISTSIZE=$HOME/.bash_history
 export HISTFILESIZE=1000
 export HISTSIZE=1000

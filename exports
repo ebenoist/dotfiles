@@ -46,7 +46,7 @@ export PATH="$FLYCTL_INSTALL/bin:$PATH"
 
 export DOCKER_COMPOSE_FLAGS=''
 
-export SHELL="/usr/local/bin/bash"
+#export SHELL="/usr/bin/bash"
 
 export DOCKER_COMPOSE_FLAGS=''
 unset LDFLAGS

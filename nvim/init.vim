@@ -42,7 +42,7 @@ Plug 'vim-python/python-syntax', { 'for': 'python' }
 " Docs
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install'  }
 Plug 'hashivim/vim-terraform'
-Plug 'wakatime/vim-wakatime'
+" Plug 'wakatime/vim-wakatime'
 
 call plug#end()
 
@@ -206,7 +206,7 @@ let NERDSpaceDelims = 1
 let ruby_operators = 1
 
 " FZF
-let $FZF_DEFAULT_COMMAND = 'ag -l -g ""'
+let $FZF_DEFAULT_COMMAND = 'rg --files --no-ignore --hidden --follow --glob "!.git/*"'
 
 " Let ack/vim use ag for search
 let g:ackprg = 'ag --nogroup --nocolor --column'

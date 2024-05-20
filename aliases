@@ -5,11 +5,12 @@ alias vi='nvim'
 alias vim='nvim'
 #alias tar='gtar'
 #alias sed='gsed'
+alias gsed='sed'
 alias bat="batcat"
 alias android-studio="$HOME/android-studio/bin/studio.sh"
 alias pbcopy="xclip -i -selection clipboard"
 alias pbpaste="xclip -o -selection clipboard"
-
+alias awsume=". awsume"
 alias ls='ls --color'
 
 git-files() {
@@ -32,4 +33,4 @@ git-clean() {
 }
 
 alias icat="kitty +kitten icat"
-alias tilt="/usr/local/bin/tilt"
+alias tilt="$HOME/.local/bin/tilt"
