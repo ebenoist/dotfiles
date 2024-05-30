@@ -7,22 +7,22 @@ ELAPSED=$(($NOW - $LAST_UPDATED))
 
 if [[ ! -f "$HOME/.op-cache" ]]; then
   echo "no-cache"
-  op signin my > ~/.op-cache
+  op signin -f > ~/.op-cache
 elif [[ $ELAPSED -gt $TTL ]]; then
   echo "cache expired"
-  op signin my > ~/.op-cache
+  op signin -f > ~/.op-cache
 else
   echo "logged in, will expire in $(($TTL - $ELAPSED)) seconds"
 fi
 
 eval $(cat ~/.op-cache)
 
-LOGIN=$(op list items |\
-  jq -C -c -r '.[] | {
-    title: .overview.title,
-    uuid,
-    createdAt
-  }' | fzf --ansi --preview="echo {} | jq -C ." | jq -r .uuid | op get item -)
+LOGIN=$(op item list --format=json |\
+  jq -c -r '.[] | {
+    title,
+    id,
+    created_at
+  }' | fzf --ansi --preview="echo {} | jq -r ." | op item get --format=json -)
 
-echo $LOGIN | jq -c -r '.details.fields | .[] | { designation, value }' |\
+echo $LOGIN | jq -c -r '.fields | .[] | { label: .label, value: .value }' |\
   fzf --ansi --preview="echo {} | jq -C ." | jq -r .value | xclip -i -selection clipboard
