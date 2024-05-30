@@ -17,12 +17,12 @@ fi
 
 eval $(cat ~/.op-cache)
 
-LOGIN=$(op item list --format=json |\
+SELECT_ITEM=$(op item list --format=json |\
   jq -c -r '.[] | {
     title,
     id,
     created_at
   }' | fzf --ansi --preview="echo {} | jq -r ." | op item get --format=json -)
 
-echo $LOGIN | jq -c -r '.fields | .[] | { label: .label, value: .value }' |\
+echo $SELECT_ITEM | jq -c -r '.fields | .[] | { label: .label, value: .value }' |\
   fzf --ansi --preview="echo {} | jq -C ." | jq -r .value | xclip -i -selection clipboard
