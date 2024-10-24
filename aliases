@@ -12,6 +12,7 @@ alias pbcopy="xclip -i -selection clipboard"
 alias pbpaste="xclip -o -selection clipboard"
 alias awsume=". awsume"
 alias ls='ls --color'
+alias ls='exa'
 
 git-files() {
   git ls-tree --full-tree -r --name-only HEAD

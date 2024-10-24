@@ -12,4 +12,7 @@ tags
 tmp/**/*
 !tmp/cache/.keep
 zeus.json
-.tags
+*.tags
+tag
+.byebug_history
+.yarn

@@ -32,7 +32,6 @@ fi
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 source <(kitty + complete setup bash)
 
-xset s on && xset +dpms
 export HISTSIZE=$HOME/.bash_history
 export HISTFILESIZE=1000
 export HISTSIZE=1000

@@ -1,0 +1,23 @@
+font:
+  normal:
+    family: Fira Code
+    style: Medium
+
+  bold:
+    family: Fira Code
+    style: Bold
+
+  italic:
+    family: Fira Code
+    style: Retina
+
+  bold_italic:
+    family: Fira Code
+    style: SemiBold
+
+shell:
+  program: /bin/bash
+  args:
+    - -l
+    - -c
+    - zellij attach --index 0 || zellij

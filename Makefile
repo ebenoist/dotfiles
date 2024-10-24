@@ -21,6 +21,9 @@ ${HOME}/.config/nvim: ${PWD}/nvim
 ${HOME}/.config/kitty: ${PWD}/kitty
 	ln -s $< $@
 
+${HOME}/.config/alacritty: ${PWD}/alacritty
+	ln -s $< $@
+
 $(VS_CODE_SETTINGS):
 	ln -s $(PWD)/vscode-settings.json "$@"
 

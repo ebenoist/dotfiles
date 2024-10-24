@@ -206,7 +206,7 @@ let NERDSpaceDelims = 1
 let ruby_operators = 1
 
 " FZF
-let $FZF_DEFAULT_COMMAND = 'rg --files --no-ignore --hidden --follow --glob "!.git/*"'
+let $FZF_DEFAULT_COMMAND = 'rg --files --hidden --follow --glob "!.git/*"'
 
 " Let ack/vim use ag for search
 let g:ackprg = 'ag --nogroup --nocolor --column'
