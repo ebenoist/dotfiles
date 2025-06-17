@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+prompt="{\"model\": \"llama3.2\", \"messages\": [{\"role\": \"user\", \"content\": \"$1\"}] }"
+
+curl -s \
+     -H "Authorization: Bearer ${OLLAMA_KEY}" \
+     https://ollama.home.benoist.dev/v1/chat/completions \
+     --data "${prompt}" | jq -r .choices[0].message.content

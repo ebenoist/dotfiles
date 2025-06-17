@@ -1,0 +1,752 @@
+1/24
+---
+
+* So much typesense
+* Supporting launch efforts where I can
+* I think we're flipping DNS today
+
+1/23
+---
+
+* Homepage launch
+* Ran additional load tests
+* Investigated cache strategies for the ResourceExplorer: https://www.algolia.com/doc/guides/building-search-ui/going-further/server-side-rendering/react/#dynamic-routes
+* While migrating to typesense is still top of mind, moving to the SSR version of ReactInstantSearch should allow us to cache/SSG all the topic pages.
+* TypeSense does not have a UI, which would be missed. TypeSense cloud might.
+
+
+1/22
+---
+
+* Sentry clean up
+* Added cache clearing to the bot
+* Started work on typesense
+
+1/21
+---
+
+* Sentry for remaining properties caused a regression: we consumed A LOT of events over a 3 hour period that I should have been monitoring.
+* Large floods of errors should be presented in Sentry and either ignored, resolved, or put on a threshold. I'll document those here.
+    * https://1440-media.sentry.io/issues/6235605392/?project=4508676784193536&query=is%3Aunresolved%20issue.priority%3A%5Bhigh%2C%20medium%5D&referrer=issue-stream&statsPeriod=24h&stream_index=0&utc=true
+    * https://1440-media.sentry.io/issues/6235587167/?project=4508676784193536&query=is%3Aunresolved%20issue.priority%3A%5Bhigh%2C%20medium%5D&referrer=issue-stream&statsPeriod=24h&stream_index=1&utc=true
+    *
+
+1/20
+---
+
+MLK day, maybe 1/2 day billing?
+
+* Going to set up Sentry with Daniel
+
+
+1/18
+---
+
+* Responded to comments RE: Tech Roadmap
+* Deferred Sam's response until Monday (let's set up a 1:1 or equivalent to work some of this out)
+* Pricing out an A10 for GPU work loads for llama setup
+    * Fly.io - $1.50/hr - $1k/mo
+    * Vast.ai - $0.16/hr -$115/mo
+    * AWS (Tesla T4)
+        * (g4dn.2xlarge - 32gb)  - $1.05/hr - $720/mo
+        * (g4dn.xlarge - 16gb)  - $0.70/hr - $503/mo
+
+    * Digital Ocean
+        * (P6000 - ) - $1.10/hr
+        * (RTX4000 - 8gb) - $0.50/hr
+1/17 (not billing)
+---
+
+* TODO: Roadmap write up for 3:30pm on Friday
+
+## Image Caching Discussion
+
+```
+got it, you might be doing more work than you have to
+
+1:45
+If wordpress tells the image component that the TTL is 60s (via Cache-Control):
+It'll cache at the edge for 60s
+Calls after 60s should respect the modified-at and fall back to cache. So you're getting the HEAD of the file, but not streaming the whole damn thing again (or paying for the transform).
+Probably no need to double cache on the fetch side.
+1:46
+The "manual" caching that you're doing is likely pretty effective, but you're just re-doing the work of that image component (if I'm reading these docs correctly)
+1:46
+If you didn't control that backend (e.g. wordpress), your cache strategy would be the best option
+1:47
+We can test and measure of course, but that's my read
+1:49
+You also may be getting more cache invalidations because you're not normalizing the headers
+1:50
+the fetch strategy does make sense for json blobs and such that are expensive
+```
+
+1/16
+---
+
+* Wrapped up smoke tests
+* Wired up the bot
+* Worked through the production check list
+
+1/14
+---
+
+* Smoke tests, talk with Aaron about A/B testing
+* Added cards for A/B SPIKE
+* Getting two basic smoke tests in:
+
+    visit homepage -> and join1440
+    visit topics -> and join1440
+    visit video -> and play
+
+1/13
+---
+
+* Meeting at 1pm to discuss next steps for launch
+
+* There will be ads
+    * Placement of ads
+    * GoogleAdManager is going to be the adserver
+    * ads.txt file is exposed and whitelisted now
+    * These should be added to smoke tests via placeholders
+    * AI ad placement (do this on an hourly cadence)
+        /topics/index
+        /topics/slug
+        /topics/r/slug
+
+
+* Daniel may be blocked on some of this
+* Test google scrapping (let's just make sure)
+* Bing, Google, Slack,
+    * Facebook, Meta, LinkedIn, Meta, TikTok, Twitter, Instagram, Bluesky, YouTube, Google, iMessage, WhatsApp
+* Video Page lazy loading
+    * All gone
+
+* Newsletter image testing, can we test this
+
+* Category pages
+    * Have a grid of six images, we detect the image shade for overlays
+    * Take a look at cost there.
+
+* Premium Product
+    * 1k people with no ads
+    * WooCommerce for that
+    * Surface Area is not being pushed To
+    * No observability
+    * Emails are automated through that product
+
+* SNS Automated Email
+
+12/31
+---
+
+* Half day!
+
+I wrote the following:
+
+```
+I'm doing a couple of deploys before the day lets out. I'm merging changes to remove some of the RUM/datadog monitoring now that we've concluded the performance test. I may run another test once the Vercel monitoring is lit up correctly.
+
+I am going to be **out of town starting on the 2nd of January and will be back online for 1440 on 1/13/2025**. While our journey together so far has been short, thanks y'all for a fun month or so together!!!
+
+Good news first, the site is in good shape! Vercel does what it promises on the box. There are a few action items that I will send over to @Sam Brannon for when he gets back (@Aaron E-L I'll cc you for :eyes: ), but I didn't find anything that needs urgent attention.
+
+@Aaron E-L either wait until I get back or feel free to add @Sam Brannon yourself to the pager rotation on alerts@ . I think there's a really fun recording of me using @Aaron E-L as a selenium driver with moderate success.
+
+@Sam Brannon you SHOULD consider turning off the Vercel sites insights product. It's expensive. If we're getting utility out of it may be worth it, but I think we can get the same "insights" from our existing Sentry tooling without paying double.
+
+Otherwise I think we can safely just pause this performance work until I get back. The site will notify us if we're down, there are the basics of smoke tests written that I will probably wire up in the next 30 minutes or so. If I do, they won't cause anything to fail, but could end up alerting if there's a breakage. I'll make sure to add an "off" switch if it gets noisy. When I get back, I'll want to work with Sam on the final production walkthrough guide for Vercel:
+
+* Define an incident response plan for your team, including escalation paths, communication channels, and rollback strategies for deployments
+* Enable Monitoring to debug and optimize performance, investigate errors and traffic, and more
+* Familiarize team with the ability to promote and rollback
+* Ensure caching is configured if deploying using a monorepo to prevent unnecessary builds
+* Add a www subdomain and redirect your apex domain
+* ... [so many more :)](https://vercel.com/docs/production-checklist)
+
+Cheers to 2025! Espero que tengas un prespero aÒo nuevo.
+
+PS. I'll be AFK all of my time in Chile, but I will be contactable if there's any kind of emergency. I can't tell you how helpful I'll be, but I can of course bounce questions/answers if it's urgent.
+
+
+```
+
+
+12/30
+---
+
+* Full day, met with Aaron, talked about:
+    * Remove insight monitoring in Vercel
+    * Add emergency contacts to alerts@
+    * [] Need to replace SMTP server
+    * Remove dd-apm (from most things)
+
+12/23
+---
+
+All day performance testing (day 2). The load testing boxes are now scaled down at 0 cost to 1440, but are available if parameters change. Datadog monitoring is being actively removed now in order to better consolidate with Vercel's built-in monitoring options. This should avoid the need for an additinonal vendor.
+
+12/22
+---
+
+All day performance testing, we were able to move the website up to 25x the normal amount of traffic and observe Vercel's scaling. While there were a few hiccups (502s), relatively we should be scalable. I've been communicating cost scaling with Aaron-EL.
+
+
+12/20 - Half Day (billed)
+---
+
+## Support
+
+We did all our high holidays in the last few months, so I'm happy to keep an eye on things while people travel during the holidays. If there's an emergency (site is down & readers are impacted or an email can't send) please feel free to call me if I'm not online: (872) - 219 - 2006.
+
+@Sam Brannon
+ has my personal cell if for some reason that number doesn't work.
+I am planning on doing some controlled stress tests on the site Monday during business hours. The goal is just to see if we can handle the traffic planned for February. If there's any noticeable degradation on the site during that test, please let me know immediately. I will have eyes on it and the goal is 0 downtime during the test.
+
+Talked to Aaron about schedule, scaling, and more.
+
+12/18 - Start at 9am
+---
+
+## Major Routes in Topics Email
+
+_Note: Urls are shaped like this:_
+
+```mermaid
+block-beta
+columns 1
+  block:ID
+    domain["link.join1440.com"]
+    B["/click/x.y/"]
+    C["base64-encoded url"]
+    D["/"]
+    E["binary"]
+  end
+  space
+columns 1
+  block:foo
+    F["link.join1440.com"]
+    G["/click/37808295.118405/"]
+    H["aHR0cHM6Ly9wYWJsb2...."]
+    I["/"]
+    J["66c4ceec5d7..."]
+  end
+  space
+```
+
+### Examples
+
+<!-- target: example -->
+```bash
+head -n2 topics-links
+```
+
+<!-- name: example -->
+```bash
+https://link.join1440.com/click/37808295.118405/aHR0cHM6Ly9kaXNjb3Zlci5qb2luMTQ0MC5jb20vdG9waWNzL2NhcGl0YWwtZ2FpbnMvci9jYXBpdGFsLWFzc2V0cy1leHBsYWluZWQ_dXRtX3NvdXJjZT1qb2luMTQ0MCZ1dG1fbWVkaXVtPWVtYWlsJnV0bV9jYW1wYWlnbj10b3BpY3MtYnVzaW5lc3MtZmluYW5jZQ/66c4ceec5d78644b3ae795ebB1c884757
+https://link.join1440.com/click/37808295.118405/aHR0cHM6Ly9kaXNjb3Zlci5qb2luMTQ0MC5jb20vdG9waWNzL2NhcGl0YWwtZ2FpbnMvci90cmltLXlvdXItdGF4LWJpbGwtd2l0aC10YXgtbG9zcy1oYXJ2ZXN0aW5nP3V0bV9zb3VyY2U9am9pbjE0NDAmdXRtX21lZGl1bT1lbWFpbCZ1dG1fY2FtcGFpZ249dG9waWNzLWJ1c2luZXNzLWZpbmFuY2U/66c4ceec5d78644b3ae795ebB0661b85a
+```
+
+### Decode URI
+
+<!-- target: decode-1 -->
+```sh
+echo aHR0cHM6Ly9kaXNjb3Zlci5qb2luMTQ0MC5jb20vdG9waWNzL2NhcGl0YWwtZ2FpbnMvci90cmltLXlvdXItdGF4LWJpbGwtd2l0aC10YXgtbG9zcy1oYXJ2ZXN0aW5nP3V0bV9zb3VyY2U9am9pbjE0NDAmdXRtX21lZGl1bT1lbWFpbCZ1dG1fY2FtcGFpZ249dG9waWNzLWJ1c2luZXNzLWZpbmFuY2U | base64 --decode
+
+echo aHR0cHM6Ly93d3cuYXhpb=3MuY29tLzIwMjQvMTIvMTEvY3BpLXJlcG9ydC1ub3ZlbWJlci1pbmZsYXRpb24tZWNvbm9teT91d=G1fc291cmNlPWpvaW4xNDQwJnV0bV9tZWRpdW09ZW1haWwmdXRtX2NhbXBhaWduPXRvcGljcy1id=XNpbmVzcy1hbmQtZmluYW5jZQ | base64 --decode
+```
+
+__Note: There's probably a white space in the delimiter `/` or they're using a slightly custom encoding scheme__
+
+<!-- name: decode-1 -->
+```
+https://discover.join1440.com/topics/capital-gains/r/trim-your-tax-bill-with-tax-loss-harvesting?utm_source=join1440&utm_medium=email&utm_campaign=topics-business-financehttps://www.axi
+base64: invalid input
+base64: invalid input
+```
+
+### All Links
+
+<!-- target: all-links -->
+```bash
+cat topics-links | xargs -I% sh -c "echo % | base64 --decode"
+```
+
+```bash
+https://discover.join1440.com/topics/capital-gains/r/capital-assets-explained
+https://discover.join1440.com/topics/capital-gains/r/trim-your-tax-bill-with-tax-loss-harvesting?utm_source=join1440&utm_medium=email&utm_campaign=topics-business-finance
+https://discover.join1440.com/topics/capital-gains/r/short-vs-long-term-capital-gains?utm_source=join1440&utm_medium=email&utm_campaign=topics-business-finance
+https://discover.join1440.com/topics/capital-gains/r/understanding-federal-income-tax-rates?utm_source=join1440&utm_medium=email&utm_campaign=topics-business-finance
+https://discover.join1440.com/topics/capital-gains/r/the-ultimate-guide-to-529-college-savings-plans?utm_source=join1440&utm_medium=email&utm_campaign=topics-business-finance
+https://discover.join1440.com/topics/capital-gains/r/trim-your-tax-bill-with-tax-loss-harvesting?utm_source=join1440&utm_medium=email&utm_campaign=topics-business-finance
+https://discover.join1440.com/topics/capital-gains/r/inside-the-capital-gains-tax-policy-debate
+https://discover.join1440.com/topics/capital-gains/r/calculate-your-capital-gains-tax-bill
+https://discover.join1440.com/topics/capital-gains/r/the-weirdest-taxes-from-around-the-world?utm_source=join1440&utm_medium=email&utm_campaign=topics-business-finance
+https://discover.join1440.com/topics/capital-gains/r/the-weirdest-taxes-from-around-the-world?utm_source=join1440&utm_medium=email&utm_campaign=topics-business-finance
+https://discover.join1440.com/topics/capital-gainshttps://discover.join1440.com/topics/business-and-finance/r/what-s-cheaper-hotels-or-airbnbs
+https://discover.join1440.com/topics/business-and-finance/r/average-federal-student-loan-debt-by-state?utm_source=join1440&utm_medium=email&utm_campaign=topics-business-finance
+https://discover.join1440.com/topics/business-and-finance/r/inside-the-robert-burns-trial
+https://discover.join1440.com/topics/business-and-finance/r/what-is-an-employer-401-k-match?utm_source=join1440&utm_medium=email&utm_campaign=topics-business-finance
+https://discover.join1440.com/topics/business-and-finance/r/the-enduring-history-of-universal-basic-income?utm_source=join1440&utm_medium=email&utm_campaign=topics-business-finance
+https://discover.join1440.com/topics/generative-aihttps://discover.join1440.com/topics/blood?utm_source=join1440&utm_medium=email&utm_campaign=topics-business-finance
+https://discover.join1440.com/topics/nfl?utm_source=join1440&utm_medium=email&utm_campaign=topics-business-finance
+https://discover.join1440.com/topics/diabetes?utm_source=join1440&utm_medium=email&utm_campaign=topics-business-finance
+https://join1440.com/
+```
+
+
+
+### Topics Landing
+
+```
+```
+
+## Major Routes in Subscriber Email
+
+https://link.join1440.com/click/37889047.4701345/aHR0cHM6Ly9qb2luMTQ0MC5jb20vP3V0bV9zb3VyY2U9am9pbjE0NDAmdXRtX21lZGl1bT1lbWFpbCZ1dG1fY2FtcGFpZ249ZnQy/67620a960da742e452032b1dC74d5b3e4
+https://link.join1440.com/click/37889047.4701345/aHR0cHM6Ly9qb2luMTQ0MC5jb20vP3V0bV9zb3VyY2U9am9pbjE0NDAmdXRtX21lZGl1bT1lbWFpbCZ1dG1fY2FtcGFpZ249ZnQy/67620a960da742e452032b1dC74d5b3e4
+
+https://link.join1440.com/click/37889047.4701345/aHR0cHM6Ly9waHlzLm9yZy9uZXdzLzIwMjQtMTItYmluYXJ5LXN0YXItZ2FsYXh5LXN1cGVybWFzc2l2ZS1ibGFjay5odG1s/67620a960da742e452032b1dBee6dccc3
+
+https://link.join1440.com/click/37889047.4701345/aHR0cHM6Ly9wYWJsb2Nhcmxvc2J1ZGFzc2kuY29tLzIwMjEvMDUvbWlsa3ktd2F5LW1hcC5odG1s/67620a960da742e452032b1dB7dcca405
+
+https://link.join1440.com/click/37889047.4701345/aHR0cHM6Ly93d3cudXNhdG9kYXkuY29tL3N0b3J5L25ld3MvbmF0aW9uLzIwMjQvMTIvMTcvbmltYS1tb21lbmktY2FzaC1hcHAtYm9iLWxlZS1tdXJkZXItZ3VpbHR5Lzc3MDUxODAwMDA3Lw/67620a960da742e452032b1dB5d42cf5e
+
+https://link.join1440.com/click/37889047.4701345/aHR0cHM6Ly9wYXJ0bmVycy5kcmlua2xtbnQuY29tL2ZyZWUtZ2lmdC13aXRoLXB1cmNoYXNlP3Jmc249NDcyODI2Ny5mZTZiNWYmdXRtX21lZGl1bT1zcG9uc29yJnV0bV9zb3VyY2U9MTQ0MCZ1dG1fY2FtcGFpZ249YWd3cCZ1dG1fY29udGVudD0mdXRtX3Rlcm09JnJmc25fY249RVhDTFVTSVZFJTIwR0lGVCUyMEZPUiUyMFRIRSUyMDE0NDAlMjBDT01NVU5JVFk/67620a960da742e452032b1dE45481be4
+
+https://link.join1440.com/click/37889047.4701345/aHR0cHM6Ly9hcG5ld3MuY29tL2FydGljbGUvdW5pdGVkaGVhbHRoY2FyZS1jZW8ta2lsbGluZy1sdWlnaS1tYW5naW9uZS1mY2NjOWU4NzVlOTc2Yjk5MDFhMTIyYmMxNTY2OTQyNT91dG1fc291cmNlPWpvaW4xNDQwJnV0bV9tZWRpdW09ZW1haWwmdXRtX3BsYWNlbWVudD1uZXdzbGV0dGVy/67620a960da742e452032b1dB8f1ab851
+
+https://link.join1440.com/click/37889047.4701345/aHR0cHM6Ly93d3cuaWZsc2NpZW5jZS5jb20vZG8tYW5jaWVudC1oYW5nb3Zlci1jdXJlcy1zdGlsbC1zdGFuZC11cC03NzI2Nz91dG1fc291cmNlPWpvaW4xNDQwJnV0bV9tZWRpdW09ZW1haWwmdXRtX3BsYWNlbWVudD1uZXdzbGV0dGVy/67620a960da742e452032b1dB6b5599a8
+
+URL state is encoded in the links themselves, so sailthrough remains stateless, which means their redirects could never rely on any data from us.
+
+
+### ID of URL
+
+<!-- target: base -->
+```sh
+echo aHR0cHM6Ly93d3cuaWZsc2NpZW5jZS5jb20vZG8tYW5jaWVudC1oYW5nb3Zlci1jdXJlcy1zdGlsbC1zdGFuZC11cC03NzI2Nz91dG1fc291cmNlPWpvaW4xNDQwJnV0bV9tZWRpdW09ZW1haWwmdXRtX3BsYWNlbWVudD1uZXdzbGV0dGVy/67620a960da742e452032b1dB6b5599a8 | base64 --decode
+```
+
+### Decode Base64
+
+<!-- name: base -->
+```
+https://www.iflscience.com/do-ancient-hangover-cures-still-stand-up-77267?utm_source=join1440&utm_medium=email&utm_placement=newsletterˇÆ˙€FΩÎGZÔçû„ù¥ﬂfıtõÁü}k
+base64: invalid input
+```
+
+<!-- target: dns -->
+```sh
+dig link.join1440.com
+```
+
+<!-- name: dns -->
+```
+
+; <<>> DiG 9.18.28-0ubuntu0.24.04.1-Ubuntu <<>> link.join1440.com
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 35991
+;; flags: qr rd ra; QUERY: 1, ANSWER: 6, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 65494
+;; QUESTION SECTION:
+;link.join1440.com.		IN	A
+
+;; ANSWER SECTION:
+link.join1440.com.	106	IN	CNAME	cb.sailthru.com.
+cb.sailthru.com.	106	IN	CNAME	ha-link.sailthru.com.
+ha-link.sailthru.com.	28	IN	CNAME	haproxy-prod-link-nlb-9484743b55d7f6b1.elb.us-east-1.amazonaws.com.
+haproxy-prod-link-nlb-9484743b55d7f6b1.elb.us-east-1.amazonaws.com. 28 IN A 3.222.82.214
+haproxy-prod-link-nlb-9484743b55d7f6b1.elb.us-east-1.amazonaws.com. 28 IN A 3.226.166.212
+haproxy-prod-link-nlb-9484743b55d7f6b1.elb.us-east-1.amazonaws.com. 28 IN A 107.20.71.201
+
+;; Query time: 18 msec
+;; SERVER: 127.0.0.53#53(127.0.0.53) (UDP)
+;; WHEN: Wed Dec 18 08:48:02 CST 2024
+;; MSG SIZE  rcvd: 219
+```
+
+The link routes never land on origin, everything flows through the ESP who provides a link
+subdomain for all the clever analytics.
+
+```
+link.join1440.com -> cb.sailthru.com
+cb.sailthru.com - > ha-link.sailthru.com
+ha-link.sailthru.com ->	haproxy-prod-link-nlb-9484743b55d7f6b1.elb.us-east-1.amazonaws.com
+```
+
+<!-- target: resp -->
+```sh
+export URL=https://link.join1440.com/click/37889047.4701345/aHR0cHM6Ly9hcG5ld3MuY29tL2FydGljbGUvdW5pdGVkaGVhbHRoY2FyZS1jZW8ta2lsbGluZy1sdWlnaS1tYW5naW9uZS1mY2NjOWU4NzVlOTc2Yjk5MDFhMTIyYmMxNTY2OTQyNT91dG1fc291cmNlPWpvaW4xNDQwJnV0bV9tZWRpdW09ZW1haWwmdXRtX3BsYWNlbWVudD1uZXdzbGV0dGVy/67620a960da742e452032b1dB8f1ab851
+curl -w "%{http_code} - %{url_effective}\n" -I -L -s -S $URL -o /dev/null
+```
+
+Real 302s are issued from https://link.join1440.com. There is only one redirect and that will land us on the original article. 1440's infra is never touched.
+
+<!-- name: resp -->
+```
+200 - https://apnews.com/article/unitedhealthcare-ceo-killing-luigi-mangione-fccc9e875e976b9901a122bc15669425?utm_source=join1440&utm_medium=email&utm_placement=newsletter
+```
+
+
+12/17 - Start at 9am
+---
+
+- [] - set up k6.io
+
+- [] - wrap up datadog pricing
+- [x] - install dd-apm
+    - [x] - knowledgehub (may consider removing rum?)
+    - [x] - lp
+    - [x] - cms (is this working?!)
+    - [] - 1440next  ‚Äî not going to do this one?
+    - [] - wp-engine?! new relic only
+    - [x] - uptime
+
+- [] - document git crypt process in infra
+- [x] - start creating perf testing plan
+- [] - create a timeline for launch (markwhen)
+- [] - get final answer on where OSS goes
+
+
+* Could this be a retainer?!
+
+## Aaron discussion about scale and ongoing costs
+
+At some point we should also talk about ongoing support costs because of the number of applications, builds, and repositories that support the business. By my account you have 1.5 engineers supporting:
+~7 code bases (i added one, so i'm guilty)
+5 live apps
+legacy cms (wp-engine + fourteen40wordpress)
+homepage (fourteen40next)
+landing-pages (next app)
+knowledgehub-cms (next app on firebase)
+knowledgehub (next app)
+That's probably too much if those 1.5 engineers are doing product work in addition, which makes sense, you have me, I've got a handle on it atm, but the amount of surface area isn't trivial even if the apps themselves are relatively low complexity.
+[9:29 AM] Erik
+That also includes a big cloud of things that Daniel manages via changes in a UI (cloudflare, dns, traffic splitting, etc...)
+[9:30 AM] Erik
+All of the apps are really simple, but because you have so many things like wiring in an APM, adding monitoring, or even keeping packages up to date just magnifies.
+[9:30 AM] Erik
+My suggestion would be (at some point) to consolidate that surface area if you don't plan on hiring more devs.
+
+
+12/16 - Start at 9am
+---
+
+- [] - wrap up datadog pricing
+- [x] - install dd-apm
+    - [x] - knowledgehub (may consider removing rum?)
+    - [x] - lp
+    - [x] - cms (is this working?!)
+    - [] - 1440next
+    - [] - wp-engine?!
+    - [x] - uptime
+
+- [] - document git crypt process in infra
+- [] - start creating perf testing plan
+- [] - create a timeline for launch (markwhen)
+- [] - get final answer on where OSS goes
+
+## Client Call with Sam @ 2pm
+
+* Overview of datadog
+* Plans for remaining repositories
+* The overhead of maintaining so many repositories
+
+12/12 - Start at 9am
+---
+
+Not working a full day (and not billing), but did wrap up the datadog integration. We are getting logs and metrics from:
+
+    * Vercel
+    * Fly.io
+    * CloudFlare (soon)
+
+We've come to two larger decisions longer term:
+
+(tl;dr Do you want this done right or done fast?)
+
+### Notes to Aaron regarding Datadog, secrets, costs, etc...
+
+```
+With all things in life and business you can, "do it right" or "do it fast". When we start talking about monitoring tools, log aggregation, alerting, etc... I can give you all the best in class or the bare minimum. A tool like datadog and to some extent even tools like the uptime tracker aren't table stakes for doing business on the web, but they are both very very effective tools. (edited)
+10:23
+To right size things for you, I need to get a better understanding of what my budgetary bounds are and what the appetite for risk is on the business side.
+10:24
+I know 0 about this business so decisions like datadog or baseline security needs (like 1password, yubikeys) that come with a price tag are going to need to be something we talk about more closely now that I have a pretty good understanding of what y'all have and are operating.
+10:25
+Selfishly, I don't need to know much about the business and honestly being a step away has been fantastic for my personal life.
+10:27
+Everything I've done up to this point has been 0 cost beyond my labor, but that will change. I can handle that billing and offer it to you as a pass through if that's more effective for y'all.
+```
+
+## Chat with Aaron E @ 4pm
+
+Datadog pricing
+
+<!-- target: price -->
+```ruby
+number_of_hosts = 10
+amount_per_host_on_demand = 18
+amount_per_host = 15
+
+total_per_host =  number_of_hosts * amount_per_host
+total_per_host_on_demand =  number_of_hosts * amount_per_host_on_demand
+
+puts "Total **monthly** cost based on approximately #{number_of_hosts} hosts is:
+
+    * $#{total_per_host}/mo with a yearly contract
+    * $#{total_per_host_on_demand}/mo for a monthly contract"
+
+puts "
+
+Total contract estimate*:
+
+* On demand (1 year): $#{12 * total_per_host_on_demand}
+* On demand (6 month): $#{6 * total_per_host_on_demand}
+* On demand (3 month -- contract end): $#{3 * total_per_host_on_demand}
+
+* **With commitment** (1 year): $#{12 * total_per_host}
+
+*We're assuming that the number of hosts will not exceed 10 in the course of the year. Based on my current assesment this is close to what we will need if the business requirements remain completely static.
+"
+```
+
+<!-- name: price -->
+```ruby
+Total **monthly** cost based on approximately 10 hosts is:
+
+    * $150/mo with a yearly contract
+    * $180/mo for a monthly contract
+
+
+Total contract estimate*:
+
+* On demand (1 year): $2160
+* On demand (6 month): $1080
+* On demand (3 month -- contract end): $540
+
+* **With commitment** (1 year): $1800
+
+*We're assuming that the number of hosts will not exceed 10 in the course of the year. Based on my current assesment this is close to what we will need if the business requirements remain completely static.
+```
+
+12/11 - Start @ 9am
+---
+
+- [x] - get last ping in place for next -> wpengine
+- [x] - e2e testing
+- [] - price planning for infra (started)
+- [x] - evaluate other monitoring options
+- [x] - start plan for load testing
+- [] - clean up arch docs (started)
+- [x] - meet with Sam about what the hell i've built
+- [] - slack bot?
+- [x] - structured logs
+- [x] - need to review security for database (that i created and have since removed)
+
+12/10 - Start @ 9:30am
+---
+
+- [x] - initial diagram
+- [] - get all of the pings in place
+
+
+12/9 - Start @ 9am / need to duck out at 9:30 for a DR appointment / back at 10:30 / done at 6pm
+---
+
+- [] - write up diagram
+- [] - use safe localstorage
+- [] - review caching
+
+Provided some analysis for when and where we should be investing in monitoring called MTR (mean-"theron" resolution). It's honestly a good question for them, what can they afford to miss? How much does that cost?
+
+- [] - document tickets
+    * add db ping to lp. (no need)
+    * add db ping to discover.
+    * add db ping to subscribe/api (done)
+    * add smoke test for email adds (needs to be done)
+
+## Highlight Risk Areas
+
+* wordpress stack / php seems largely untested and monolithic
+* lots of custom crypto in there (likely to share secrets with the next frontend)
+
+
+## Accessing Value for Monitoring
+
+```
+It's really a question for the business. If you think you already have a solid mechanism for detecting impactful outages, I would continue using that. The goal with any tool like this should be to decrease your "mean time to resolution" (MTR). If changes are only done during the hours that people are paying attention, then most regressions will happen while people are watching.
+So when evaluating what the thresholds should be here, it should be somewhere around "your most online person" on your staff. I feel like at any given company there's at least one or two stakeholders who will KNOW when somethings is broken. Luckily my example is portable with this crowd: Theron.
+When we (read: I) broke the feed, Theron usually noticed before anyone else internal or externally would notice because his feed was more or less a real-time view into the inventory on reverb.com. If Theron's feed was broken, the feed was likely broken at least in some subtle way. So the goal was always: "can we notice something is wrong in an automated fashion that is as effective as Theron without needing to pay for Theron"
+```
+
+## Top Items
+
+* Email Signup
+    * Clean recpatcha
+    * How do we know when it fails?
+        * Currently some unit tests on the topics stack
+        * Might be tests in the wordpress
+        * Slack noise
+        * Nothing automated
+    * When I click submit it goes into the mysql database -> sailthrough ESP (marigold)
+
+* Homepage test (join1440.com)
+    * [pingdb]
+
+* Topics test (discovery.join1440.com)
+
+## WpEngine
+
+* API / endpoint (PR out)
+* subdomain to wp-admin ports
+
+join1440.com
+discover.join1440.com
+
+## Topics Stack
+-> firestore
+
+discover.join1440.com/topics/zoonotic-diseases
+
+## Subscribe API (needs to be working)
+
+* hosted via the worpdress site (wpengine)
+
+## Landing Pages
+
+/healthz -> wordpress database
+
+https://lp.join1440.com/241112/a
+
+
+## Topics (via email marketing)
+
+https://discover.join1440.com/topics/zoonotic-diseases/r/what-are-zoonotic-diseases -> primary landing from an email for a topic newsletter
+
+*-> (couldfront) -> (vercel) -> topics stack
+
+
+
+
+
+12/4 - Start @ 9:20am / actually getting started at closer to 11
+---
+
+[x] - wrap up final PR for wpengine app and adjust accordingly
+[x] - review Sentry
+    * cleaned up some major issues with some preloads
+    * [bug] caused a regression in the video player
+    * going back to node22, but will need to figure out which npm package bump broke videos
+        * likely upgrading next
+
+    * NEED SENTRY TO WORK and/or some smoke tests
+
+[] - review caching
+[] - clean up 1440next
+
+[] - use safe localstorage
+
+
+12/3 - Start @ 10am
+---
+
+[x] - cloudflare for internal1440.com
+[] - review alerts
+[x] - ship sourcemaps
+[x] - ship node updates
+[x] - productionalize uptime monitor
+    * cloudflare to return 200
+    * set up monitoring on _health endpoints
+[] - research 0 trust CF
+
+12/2 - Start @ 9am / Done @ 5pm ~ 8hrs
+---
+
+Getting access to:
+
+[x] vercel - support ticket opened (my twilio number doesn't work)
+[x] sentry
+[x] rippling
+[x] notion
+[x] github
+
+## Set up
+
+[x] - 1440-Media/knowledgehub
+[x] - 1440-Media/landingpages
+* 1440-Media/design
+* 1440-Media/knowledgehub-cm
+
+## Projects
+
+### Firebase
+
+* Hosting for CMS
+* Cache invalidation
+* Active caching (needs?)
+* Diagram for this
+* Data fetching functions (caching needs help)
+
+### 1440-Media/knowledgehub-cms
+
+* What editorial lives
+* Uses firebase CMS
+    * It's _fine_
+    * PayloadCMS (another option) - Next
+* Hosted on firestore (builds on github)
+* Tells KH to clear cache
+
+```
+https://discover.join1440.com/api/revalidate-bulk
+```
+
+### 1440-Media/knowledgehub
+
+* Needs vercel access to pull down secrets and store them in .env.local
+* Reads from knowledge hub
+* Node v18.19.1
+    * Fails to start locally
+    * npm install -g next@latest
+    * Needs to have nextv14 `npm install -f next@14.2.18`
+    * Now issues with firebase/app not being resolved
+
+* Next is out of date
+* Firebase is out of date
+* Node is out of date
+* vitest core dumps
+* vitest is out of date
+
+### 1440-Media/landing-pages
+
+* Secondary (Cam working on this)
+* Standalone
+* Needs vercel access to pull down secrets and store them in .env.local
+* These values may be checked into the repo (consider migrating them)
+* Sam says these are all client side (really?)
+* Vercel -> CF (load balancer) -> DDoS -> Bot Detection
+* Hosted via cloudflare
+    * App Router
+
+## Design
+
+* Draft / Design tokens
+* Base tailwind config
+* OQ: should we mono repo
+
+### Knock List
+
+* Spelunking around data fetching and caching
+    * Get a non-cached curl for https://discover.join1440.com/topics/minimum-wage
+    * /api/revalidate-bulk
+    * Can we set headers for this dynamic?
+
+* Node 22
+* Posthog will 25x (currently at 1.2mil)
+* E2E testing? (maybe)
+* uptime kuma on fly / random domain i have
+* cdnjs / recaptcha weight

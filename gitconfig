@@ -34,6 +34,8 @@
 	gpgsign = true
 [includeIf "gitdir:~/dev/nilcoast/"]
   path = ~/dev/nilcoast/.gitconfig
+[includeIf "gitdir:~/dev/1440-Media/"]
+  path = ~/dev/nilcoast/.gitconfig
 [includeIf "gitdir:~/dev/appfolio/"]
   path = ~/dev/appfolio/.gitconfig
 [pull]

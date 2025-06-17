@@ -1,0 +1,56 @@
+#!/bin/sh
+
+# Start XFCE desktop components
+xfce4-panel &
+xfdesktop &
+xfce4-power-manager &
+xfce4-screensaver &
+
+# Start compositor
+picom &
+
+# Start hotkey daemon
+sxhkd &
+
+# Monitor configuration
+# DP-1 (left, portrait) gets desktops 6-0
+# HDMI-A-1 (main, center) gets desktops 1-5
+if xrandr | grep -q "DP-1 connected"; then
+    if xrandr | grep -q "HDMI-A-1 connected"; then
+        # Dual monitor setup
+        bspc monitor HDMI-A-1 -d 1 2 3 4 5
+        bspc monitor DP-1 -d 6 7 8 9 0
+    else
+        # Single DP monitor
+        bspc monitor DP-1 -d 1 2 3 4 5 6 7 8 9 0
+    fi
+elif xrandr | grep -q "HDMI-A-1 connected"; then
+    # Single main monitor
+    bspc monitor HDMI-A-1 -d 1 2 3 4 5 6 7 8 9 0
+else
+    # Fallback for any other monitor
+    bspc monitor primary -d 1 2 3 4 5 6 7 8 9 0
+fi
+
+# Window management
+bspc config border_width         2
+bspc config window_gap          12
+bspc config split_ratio          0.52
+bspc config borderless_monocle   true
+bspc config gapless_monocle      true
+
+# Colors
+bspc config normal_border_color  "#44475a"
+bspc config active_border_color  "#bd93f9"
+bspc config focused_border_color "#ff79c6"
+
+# Rules for applications
+bspc rule -a Slack desktop='^6' follow=on
+bspc rule -a Google-chrome desktop='^7' follow=on
+bspc rule -a Signal desktop='^8' follow=on
+bspc rule -a Ghostty desktop='^1' follow=on
+
+# Floating windows
+bspc rule -a Xfce4-appfinder state=floating
+bspc rule -a Xfce4-settings-manager state=floating
+bspc rule -a Pavucontrol state=floating

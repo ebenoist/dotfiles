@@ -1,18 +1,13 @@
-# Unix
 alias ln='ln -v'
 alias mkdir='mkdir -p'
 alias vi='nvim'
 alias vim='nvim'
-#alias tar='gtar'
-#alias sed='gsed'
-alias gsed='sed'
-alias bat="batcat"
-alias android-studio="$HOME/android-studio/bin/studio.sh"
 alias pbcopy="xclip -i -selection clipboard"
 alias pbpaste="xclip -o -selection clipboard"
-alias awsume=". awsume"
-alias ls='ls --color'
-alias ls='exa'
+alias ssh='TERM=xterm-256color ssh'
+alias distro='neofetch'
+alias fetch='neofetch'
+alias l='eza'
 
 git-files() {
   git ls-tree --full-tree -r --name-only HEAD
@@ -25,13 +20,14 @@ re-ctags() {
   git-files | xargs ctags -a -f .tags -L
 }
 
-gif() {
- ffmpeg -i $1 -pix_fmt rgb24 -r 10 -f gif - | gifsicle --optimize=4 --delay=3 > $2
+light() {
+  gsettings set org.gnome.desktop.interface gtk-theme Yaru-light && gsettings set org.gnome.desktop.interface color-scheme 'prefer-light'
+}
+
+dark() {
+  gsettings set org.gnome.desktop.interface gtk-theme Yaru-dark && gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
 }
 
 git-clean() {
   git branch --merged | egrep -v "(^\*|master|dev|main)" | xargs git branch -d
 }
-
-alias icat="kitty +kitten icat"
-alias tilt="$HOME/.local/bin/tilt"

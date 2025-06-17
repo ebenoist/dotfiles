@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=XFCE + bspwm
+Comment=XFCE desktop with bspwm window manager
+Exec=/home/erik/dev/dotfiles/bin/start-bspwm-session
+Type=Application
+DesktopNames=XFCE+bspwm

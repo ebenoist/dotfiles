@@ -1,47 +1,32 @@
-EXCLUDE := README.md Makefile Brewfile vscode-settings.json vscode-keybindings.json
-FILES := $(shell ls)
-SOURCES := $(filter-out $(EXCLUDE),$(FILES))
-DOTFILES := $(patsubst %, ${HOME}/.%, $(SOURCES))
-VS_CODE_SETTINGS := ${HOME}/Library/Application\ Support/Code/User/settings.json
-VS_CODE_KEYBINDINGS := ${HOME}/Library/Application\ Support/Code/User/keybindings.json
-VIM_PLUG := ${PWD}/nvim/autoload/plug.vim
+.PHONY: install vim-install bspwm-install update
 
-.PHONY: update vim-install
+install: dotfiles configs vim-install
 
-install: all
+bspwm-install: dotfiles configs
 
-all: $(DOTFILES) ${HOME}/.config/nvim  vim-install ${HOME}/.config/kitty
+dotfiles: home-dotfiles
+configs: config-dirs
 
-$(DOTFILES): $(addprefix ${HOME}/., %) : ${PWD}/%
-	ln -s $< $@
+home-dotfiles:
+	ln -sf ${PWD}/aliases ${HOME}/.aliases
+	ln -sf ${PWD}/bash_profile ${HOME}/.bash_profile
+	ln -sf ${PWD}/bashrc ${HOME}/.bashrc
+	ln -sf ${PWD}/exports ${HOME}/.exports
+	ln -sf ${PWD}/gitconfig ${HOME}/.gitconfig
+	ln -sf ${PWD}/inputrc ${HOME}/.inputrc
+	ln -sf ${PWD}/tmux.conf ${HOME}/.tmux.conf
 
-${HOME}/.config/nvim: ${PWD}/nvim
-	ln -s $< $@
+config-dirs:
+	mkdir -p ${HOME}/.config
+	ln -sf ${PWD}/nvim ${HOME}/.config/nvim
+	ln -sf ${PWD}/kitty ${HOME}/.config/kitty
+	ln -sf ${PWD}/alacritty ${HOME}/.config/alacritty
+	ln -sf ${PWD}/zellij ${HOME}/.config/zellij
+	ln -sf ${PWD}/bspwm ${HOME}/.config/bspwm
+	ln -sf ${PWD}/sxhkd ${HOME}/.config/sxhkd
 
-${HOME}/.config/kitty: ${PWD}/kitty
-	ln -s $< $@
+vim-install:
+	@echo "Plugins will be installed automatically by lazy.nvim on first startup"
 
-${HOME}/.config/alacritty: ${PWD}/alacritty
-	ln -s $< $@
-
-$(VS_CODE_SETTINGS):
-	ln -s $(PWD)/vscode-settings.json "$@"
-
-$(VS_CODE_KEYBINDINGS):
-	ln -s $(PWD)/vscode-keybindings.json "$@"
-
-$(VIM_PLUG):
-	@curl -sfLo $@ --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-
-${HOME}/.gituser:
-	@read -p "Enter Your Full Name for Git Commits: " name; \
-		read -p "Enter Your Email for Git Commits: " email; \
-		git config -f ~/.gituser user.name "$$name"; \
-		git config -f ~/.gituser user.email "$$email"
-
-vim-install: $(VIM_PLUG)
-	@echo "Installing vim plugins"
-	@nvim +PlugInstall +qa
-
-update: all
+update:
 	@git pull

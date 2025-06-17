@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+DOMAIN=$1
+TYPE=$2
+
+if [ -z $DOMAIN ]; then
+  echo "Usage: $0 <domain> <type>"
+  exit 1
+fi
+
+if [ -z $TYPE ]; then
+  TYPE="A"
+  exit 1
+fi
+
+curl -s --header "accept: application/dns-json" "https://cloudflare-dns.com/dns-query?name=${DOMAIN}&type=${TYPE}" | jq .

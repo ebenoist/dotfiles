@@ -1,0 +1,3 @@
+#!/home/erik/.nodenv/shims/node
+
+require('rss-to-json');

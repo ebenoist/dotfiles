@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+curl -s "ipinfo.io/$1?token=733ce8d842f5ad" | jq .

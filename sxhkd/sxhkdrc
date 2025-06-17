@@ -1,0 +1,77 @@
+# Terminal
+super + Return
+    ghostty
+
+# Application launcher
+super + space
+    rofi -show drun
+
+# Alternative launcher (XFCE appfinder)
+super + alt + space
+    xfce4-appfinder
+
+# File manager
+super + e
+    thunar
+
+# Restart/quit bspwm
+super + alt + {q,r}
+    bspc {quit,wm -r}
+
+# Logout
+super + shift + q
+    loginctl terminate-session $XDG_SESSION_ID
+
+# Close window
+super + q
+    bspc node -{c,k}
+
+# Tile/monocle layout toggle
+super + m
+    bspc desktop -l next
+
+# Focus/move window
+super + {_,shift + }{h,j,k,l}
+    bspc node -{f,s} {west,south,north,east}
+
+# Focus desktop
+super + {1-9,0}
+    bspc desktop -f '^{1-9,10}'
+
+# Move window to desktop
+super + shift + {1-9,0}
+    bspc node -d '^{1-9,10}'
+
+# Resize window
+super + alt + {h,j,k,l}
+    bspc node -z {left -20 0,bottom 0 20,top 0 -20,right 20 0}
+
+# Floating toggle
+super + shift + space
+    bspc node -t {tiled,floating}
+
+# Fullscreen toggle
+super + f
+    bspc node -t {tiled,fullscreen}
+
+# Preselect direction
+super + ctrl + {h,j,k,l}
+    bspc node -p {west,south,north,east}
+
+# Cancel preselection
+super + ctrl + space
+    bspc node -p cancel
+
+# Volume controls
+XF86AudioRaiseVolume
+    pactl set-sink-volume @DEFAULT_SINK@ +5%
+XF86AudioLowerVolume
+    pactl set-sink-volume @DEFAULT_SINK@ -5%
+XF86AudioMute
+    pactl set-sink-mute @DEFAULT_SINK@ toggle
+
+# Brightness controls
+XF86MonBrightnessUp
+    brightnessctl set +10%
+XF86MonBrightnessDown
+    brightnessctl set 10%-
