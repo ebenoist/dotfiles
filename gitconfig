@@ -15,7 +15,8 @@
 [core]
   editor = nvim
   autocrlf = input
-	excludesfile = /Users/erik/.gitignore
+  # Use the HOME variable to make this work on both macOS and Linux
+  excludesfile = ~/.gitignore
 [apply]
   whitespace = nowarn
 [web]
@@ -31,7 +32,7 @@
   email = ebenoist@gmail.com
   singingkey = F244E084D30BBBF5
 [commit]
-	gpgsign = true
+  #gpgsign = true
 [includeIf "gitdir:~/dev/nilcoast/"]
   path = ~/dev/nilcoast/.gitconfig
 [includeIf "gitdir:~/dev/1440-Media/"]

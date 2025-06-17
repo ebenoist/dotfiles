@@ -19,8 +19,6 @@ home-dotfiles:
 config-dirs:
 	mkdir -p ${HOME}/.config
 	ln -sf ${PWD}/nvim ${HOME}/.config/nvim
-	ln -sf ${PWD}/kitty ${HOME}/.config/kitty
-	ln -sf ${PWD}/alacritty ${HOME}/.config/alacritty
 	ln -sf ${PWD}/zellij ${HOME}/.config/zellij
 	ln -sf ${PWD}/bspwm ${HOME}/.config/bspwm
 	ln -sf ${PWD}/sxhkd ${HOME}/.config/sxhkd

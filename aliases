@@ -2,12 +2,26 @@ alias ln='ln -v'
 alias mkdir='mkdir -p'
 alias vi='nvim'
 alias vim='nvim'
-alias pbcopy="xclip -i -selection clipboard"
-alias pbpaste="xclip -o -selection clipboard"
-alias ssh='TERM=xterm-256color ssh'
-alias distro='neofetch'
-alias fetch='neofetch'
+
+# Platform-specific aliases
+if [[ "$(uname)" == "Linux" ]]; then
+  alias pbcopy="xclip -i -selection clipboard"
+  alias pbpaste="xclip -o -selection clipboard"
+  alias distro='neofetch'
+  alias fetch='neofetch'
+  command -v batcat >/dev/null 2>&1 && alias bat="batcat"
+  alias android-studio="$HOME/android-studio/bin/studio.sh"
+fi
+
+if [[ "$(uname)" == "Darwin" ]]; then
+  # On macOS, may need GNU tools with g prefix
+  command -v gtar >/dev/null 2>&1 && alias tar='gtar'
+  command -v gsed >/dev/null 2>&1 && alias sed='gsed'
+fi
+
+alias awsume=". awsume"
 alias l='eza'
+alias ssh='TERM=xterm-256color ssh'
 
 git-files() {
   git ls-tree --full-tree -r --name-only HEAD
@@ -20,14 +34,23 @@ re-ctags() {
   git-files | xargs ctags -a -f .tags -L
 }
 
-light() {
-  gsettings set org.gnome.desktop.interface gtk-theme Yaru-light && gsettings set org.gnome.desktop.interface color-scheme 'prefer-light'
-}
+# Linux-specific desktop environment functions
+if [[ "$(uname)" == "Linux" ]]; then
+  light() {
+    gsettings set org.gnome.desktop.interface gtk-theme Yaru-light && gsettings set org.gnome.desktop.interface color-scheme 'prefer-light'
+  }
 
-dark() {
-  gsettings set org.gnome.desktop.interface gtk-theme Yaru-dark && gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
-}
+  dark() {
+    gsettings set org.gnome.desktop.interface gtk-theme Yaru-dark && gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+  }
+fi
 
 git-clean() {
   git branch --merged | egrep -v "(^\*|master|dev|main)" | xargs git branch -d
 }
+
+# Zellij aliases
+alias za="$HOME/bin/za"
+
+# SSH aliases
+alias ssh-bestia="mosh 100.87.45.45"

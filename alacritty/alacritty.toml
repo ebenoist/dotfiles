@@ -1,6 +1,0 @@
-
-[terminal]
-
-[terminal.shell]
-args = ["-l", "-c", "za"]
-program = "/usr/bin/bash"

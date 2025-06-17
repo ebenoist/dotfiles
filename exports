@@ -11,38 +11,63 @@ export VISUAL="nvim"
 export GIT_EDITOR="nvim"
 export EDITOR="$VISUAL"
 
-alias chrome="/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
+# macOS-specific Chrome alias
+if [[ "$(uname)" == "Darwin" ]]; then
+  alias chrome="/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
+fi
 
-# GNU
-export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
+# GNU tools (macOS)
+if [[ "$(uname)" == "Darwin" ]]; then
+  export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
+fi
 
 # GO
 export GOPATH="$HOME/dev/go"
 export PATH="$GOPATH/bin:$PATH"
 
-# Postgres
-export PATH="/usr/local/opt/postgresql@11/bin:$PATH"
-
-# Protobuf 3.6
-# https://github.com/protocolbuffers/protobuf/issues/6209
-export PATH="/usr/local/opt/protobuf@3.6/bin:$PATH"
+# macOS-specific package paths
+if [[ "$(uname)" == "Darwin" ]]; then
+  # Postgres
+  export PATH="/usr/local/opt/postgresql@11/bin:$PATH"
+  
+  # Protobuf 3.6
+  # https://github.com/protocolbuffers/protobuf/issues/6209
+  export PATH="/usr/local/opt/protobuf@3.6/bin:$PATH"
+fi
 
 # prompt
 export PS1="\[$Green\]\$(vcprompt -f '[%b%u%m]')\[$Color_Off\][\w]❥ "
+
+# Ghostty terminal support
+if [ -n "$GHOSTTY_RESOURCES_DIR" ]; then
+  export TERMINFO="$GHOSTTY_RESOURCES_DIR/terminfo"
+fi
+
 if [[ -n $SSH_CLIENT ]]; then
   export PS1="\[$Green\]\$(vcprompt -f '[%b%u%m]')\[$Color_Off\][\w]@\h ❥ "
 fi
 
 export PS0='\033]0;\w\007'
 
-export FLYCTL_INSTALL="/home/erik/.fly"
-export PATH="$FLYCTL_INSTALL/bin:$PATH"
+# Linux-specific fly.io path
+if [[ "$(uname)" == "Linux" ]]; then
+  export FLYCTL_INSTALL="/home/erik/.fly"
+  export PATH="$FLYCTL_INSTALL/bin:$PATH"
+fi
 
 # Include custom aliases
 [[ -f ~/.exports.local ]] && source ~/.exports.local
 
 export DOCKER_COMPOSE_FLAGS=''
 unset LDFLAGS
+
+# Android SDK paths (mainly for Linux)
+if [[ "$(uname)" == "Linux" ]]; then
+  export ANDROID_HOME=${HOME}/Android/Sdk
+  export PATH=${ANDROID_HOME}/tools:${PATH}
+  export PATH=${ANDROID_HOME}/emulator:${PATH}
+  export PATH=${ANDROID_HOME}/platform-tools:${PATH}
+fi
 
 export PATH="$HOME/.tfenv/bin:$PATH"
 export PATH="$HOME/.bun/bin:$PATH"
