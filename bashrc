@@ -98,3 +98,10 @@ esac
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+# Ensure Ghostty allows OSC52 clipboard operations
+if [ -n "${GHOSTTY_RESOURCES_DIR}" ]; then
+    # Ghostty has OSC52 support enabled by default
+    # Make sure our clipboard helper is in PATH
+    export PATH="$HOME/bin:$PATH"
+fi

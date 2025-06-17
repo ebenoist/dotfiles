@@ -20,6 +20,9 @@ vim.opt.rtp:prepend(lazypath)
 -- Settings
 -- ============================================================================
 
+-- Load clipboard configuration
+require('clipboard').setup()
+
 -- essentials
 vim.g.mapleader = ","
 vim.opt.number = true

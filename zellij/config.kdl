@@ -346,9 +346,8 @@ theme "tokyo-night"
 // that will be used by default if this option is not set.
 // Examples:
 //
-// copy_command "xclip -selection clipboard" // x11
-// copy_command "wl-copy"                    // wayland
-// copy_command "pbcopy"                     // osx
+// Dynamically select clipboard command based on platform and connection
+copy_command "$HOME/bin/clip-helper"
 
 // Choose the destination for copied text
 // Allows using the primary selection buffer (on x11/wayland) instead of the system clipboard.
