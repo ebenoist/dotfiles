@@ -13,10 +13,9 @@
   status = auto
   branch = auto
 [core]
-  editor = nvim
+	editor = zellij run -- vim -u NONE
   autocrlf = input
-  # Use the HOME variable to make this work on both macOS and Linux
-  excludesfile = ~/.gitignore
+	excludesfile = ~/.gitignore
 [apply]
   whitespace = nowarn
 [web]
@@ -37,8 +36,8 @@
   path = ~/dev/nilcoast/.gitconfig
 [includeIf "gitdir:~/dev/1440-Media/"]
   path = ~/dev/nilcoast/.gitconfig
-[includeIf "gitdir:~/dev/appfolio/"]
-  path = ~/dev/appfolio/.gitconfig
+[includeIf "gitdir:~/dev/revive/"]
+  path = ~/dev/nilcoast/.gitconfig
 [pull]
 	ff = only
 [init]

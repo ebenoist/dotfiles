@@ -11,13 +11,13 @@ export VISUAL="nvim"
 export GIT_EDITOR="nvim"
 export EDITOR="$VISUAL"
 
-# macOS-specific Chrome alias
-if [[ "$(uname)" == "Darwin" ]]; then
+# macOS-specific chrome alias
+if [[ "$OSTYPE" == "darwin"* ]]; then
   alias chrome="/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
 fi
 
-# GNU tools (macOS)
-if [[ "$(uname)" == "Darwin" ]]; then
+# GNU tools (macOS homebrew)
+if [[ "$OSTYPE" == "darwin"* ]]; then
   export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
 fi
 
@@ -25,13 +25,11 @@ fi
 export GOPATH="$HOME/dev/go"
 export PATH="$GOPATH/bin:$PATH"
 
-# macOS-specific package paths
-if [[ "$(uname)" == "Darwin" ]]; then
+# macOS homebrew paths
+if [[ "$OSTYPE" == "darwin"* ]]; then
   # Postgres
   export PATH="/usr/local/opt/postgresql@11/bin:$PATH"
-  
   # Protobuf 3.6
-  # https://github.com/protocolbuffers/protobuf/issues/6209
   export PATH="/usr/local/opt/protobuf@3.6/bin:$PATH"
 fi
 

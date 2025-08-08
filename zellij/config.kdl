@@ -1,8 +1,7 @@
 // If you'd like to override the default keybindings completely, be sure to change "keybinds" to "keybinds clear-defaults=true"
 keybinds {
     normal {
-        // uncomment this and adjust key if using copy_on_select=false
-        // bind "Alt c" { Copy; }
+        // Copy handled automatically with copy_on_select=true
     }
     locked {
         bind "Ctrl g" { SwitchToMode "Normal"; }
@@ -79,8 +78,7 @@ keybinds {
         bind "Ctrl b" "PageUp" "Left" "h" { PageScrollUp; }
         bind "d" { HalfPageScrollDown; }
         bind "u" { HalfPageScrollUp; }
-        // uncomment this and adjust key if using copy_on_select=false
-        // bind "Alt c" { Copy; }
+        // Copy handled automatically with copy_on_select=true
     }
     search {
         bind "Ctrl s" { SwitchToMode "Normal"; }
@@ -322,14 +320,12 @@ theme "tokyo-night"
 // default_mode "locked"
 
 // Toggle enabling the mouse mode.
-// On certain configurations, or terminals this could
-// potentially interfere with copying text.
-// (Requires restart)
+// Ghostty has excellent mouse support, keep enabled
 // Options:
 //   - true (default)
 //   - false
 //
-// mouse_mode false
+mouse_mode true
 
 // Configure the scroll back buffer size
 // This is the number of lines zellij stores for each pane in the scroll back
@@ -346,8 +342,10 @@ theme "tokyo-night"
 // that will be used by default if this option is not set.
 // Examples:
 //
-// Dynamically select clipboard command based on platform and connection
-copy_command "$HOME/bin/clip-helper"
+// copy_command "xclip -selection clipboard" // x11
+// copy_command "wl-copy"                    // wayland  
+// copy_command "pbcopy"                     // osx
+// Leave copy_command unset to use OSC 52 sequences
 
 // Choose the destination for copied text
 // Allows using the primary selection buffer (on x11/wayland) instead of the system clipboard.
@@ -358,10 +356,8 @@ copy_command "$HOME/bin/clip-helper"
 //
 // copy_clipboard "primary"
 
-// Enable or disable automatic copy (and clear) of selection when releasing mouse
-// Default: true
-//
-// copy_on_select false
+// Enable automatic copy when selecting text - works great with ghostty
+copy_on_select true
 
 // Path to the default editor to use to edit pane scrollbuffer
 // Default: $EDITOR or $VISUAL
@@ -400,8 +396,5 @@ copy_command "$HOME/bin/clip-helper"
 //
 // disable_session_metadata true
 
-// Enable or disable support for the enhanced Kitty Keyboard Protocol (the host terminal must also support it)
-// (Requires restart)
-// Default: true (if the host terminal supports it)
-//
-// support_kitty_keyboard_protocol false
+// Ghostty supports enhanced keyboard protocol - enable for better key handling
+support_kitty_keyboard_protocol true

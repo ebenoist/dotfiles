@@ -20,6 +20,7 @@ config-dirs:
 	mkdir -p ${HOME}/.config
 	ln -sf ${PWD}/nvim ${HOME}/.config/nvim
 	ln -sf ${PWD}/zellij ${HOME}/.config/zellij
+	ln -sf ${PWD}/ghostty ${HOME}/.config/ghostty
 	ln -sf ${PWD}/bspwm ${HOME}/.config/bspwm
 	ln -sf ${PWD}/sxhkd ${HOME}/.config/sxhkd
 

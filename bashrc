@@ -26,10 +26,9 @@ eval "$(pyenv init -)"
 export GPG_TTY=$(tty)
 
 ## completions
-if [[ "$(uname)" == "Linux" ]]; then
-  [[ -r "/usr/share/bash-completion/completions/git" ]] && . "/usr/share/bash-completion/completions/git"
-fi
-
+# Linux
+[[ -r "/usr/share/bash-completion/completions/git" ]] && . "/usr/share/bash-completion/completions/git"
+# macOS homebrew
 [[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
 
 if [ -x "$(command -v brew)" ]; then
@@ -67,9 +66,9 @@ fi
 ## local install paths
 PATH="$HOME/bin:$PATH"
 PATH="$HOME/.local/bin:$PATH"
-if [[ "$(uname)" == "Linux" ]]; then
-  export DISPLAY=${DISPLAY:-:0}
-fi
+export DISPLAY=${DISPLAY:-:0}
+export CLAUDE_CODE_ENABLE_TELEMETRY=0
+export OTEL_EXPORTER_OTLP_PROTOCOL=grpc
 
 complete -C /usr/bin/terraform terraform
 

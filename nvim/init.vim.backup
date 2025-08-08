@@ -45,7 +45,6 @@ Plug 'vim-python/python-syntax', { 'for': 'python' }
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install'  }
 Plug 'hashivim/vim-terraform'
 " Plug 'wakatime/vim-wakatime'
-<<<<<<< Updated upstream:nvim/init.vim.backup
 Plug 'gpanders/vim-medieval'
 
 " Plug
@@ -53,13 +52,9 @@ Plug 'gpanders/vim-medieval'
 "Plug 'gergap/vim-ollama'
 "Plug 'huggingface/llm.nvim'
 Plug 'github/copilot.vim'
-||||||| Stash base:nvim/init.vim
-=======
-Plug 'gpanders/vim-medieval'
 
 " Zellij
 " Plug 'https://github.com/fresh2dev/zellij.vim.git'
->>>>>>> Stashed changes:nvim/init.vim
 
 call plug#end()
 
@@ -300,7 +295,6 @@ let g:mkdp_preview_options = {
     \ 'sequence_diagrams': {}
     \ }
 
-<<<<<<< Updated upstream:nvim/init.vim.backup
 let g:medieval_langs = ['bash', 'ruby', 'sh', 'js=node-eval', 'python']
 
 " nvim-tree configuration
@@ -346,12 +340,6 @@ let s:vrc_auto_format_response_patterns = {
       \ 'html': 'tidy -',
       \}
 let b:vrc_response_default_content_type = 'application/json'
-
-||||||| Stash base:nvim/init.vim
-=======
-let g:medieval_langs = ['bash', 'ruby', 'sh', 'javascript']
-
->>>>>>> Stashed changes:nvim/init.vim
 " AUTOCOMMANDS
 function! <SID>StripTrailingWhitespaces()
   " Preparation: save last search, and cursor position.
