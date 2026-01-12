@@ -1,0 +1,77 @@
+* {
+    bg: #282a36;
+    bg-alt: #44475a;
+    fg: #f8f8f2;
+    fg-alt: #6272a4;
+    purple: #bd93f9;
+    pink: #ff79c6;
+    red: #ff5555;
+
+    background-color: @bg;
+    text-color: @fg;
+    margin: 0;
+    padding: 0;
+    spacing: 0;
+}
+
+window {
+    width: 500px;
+    border: 2px;
+    border-color: @purple;
+    border-radius: 0;
+}
+
+inputbar {
+    padding: 12px;
+    spacing: 12px;
+    children: [prompt, entry];
+}
+
+prompt {
+    text-color: @purple;
+}
+
+entry {
+    placeholder: "Search...";
+    placeholder-color: @fg-alt;
+}
+
+message {
+    border: 1px 0 0;
+    border-color: @bg-alt;
+    padding: 12px;
+}
+
+listview {
+    lines: 8;
+    fixed-height: true;
+    border: 1px 0 0;
+    border-color: @bg-alt;
+}
+
+element {
+    padding: 10px 12px;
+    spacing: 12px;
+}
+
+element normal normal {
+    text-color: @fg;
+}
+
+element normal active {
+    text-color: @purple;
+}
+
+element selected normal, element selected active {
+    background-color: @bg-alt;
+    text-color: @purple;
+}
+
+element-icon {
+    size: 1em;
+    vertical-align: 0.5;
+}
+
+element-text {
+    vertical-align: 0.5;
+}

@@ -21,8 +21,11 @@ if [[ "$is_remote" == "false" ]]; then
   if [[ "$platform" == "Darwin" ]]; then
     # On macOS, use pbcopy
     echo -n "$input" | pbcopy
+  elif [[ -n "$WAYLAND_DISPLAY" ]]; then
+    # On Wayland, use wl-copy
+    echo -n "$input" | wl-copy
   else
-    # On Linux, use xclip
+    # On X11, use xclip
     echo -n "$input" | xclip -selection clipboard
   fi
   exit 0
@@ -39,11 +42,16 @@ if [[ ${#encoded} -gt $max_len ]]; then
 fi
 
 # Send the OSC 52 escape sequence directly to the terminal
-printf "\033]52;c;%s\a" "$encoded"
+# Write to /dev/tty to bypass multiplexers like zellij/tmux
+printf "\033]52;c;%s\a" "$encoded" > /dev/tty
 
 # Also copy to local clipboard as fallback
 if [[ "$platform" == "Linux" ]]; then
-  echo -n "$input" | xclip -selection clipboard
+  if [[ -n "$WAYLAND_DISPLAY" ]]; then
+    echo -n "$input" | wl-copy
+  else
+    echo -n "$input" | xclip -selection clipboard
+  fi
 fi
 
 exit 0

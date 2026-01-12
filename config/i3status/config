@@ -1,0 +1,51 @@
+general {
+    colors = true
+    color_good = "#50fa7b"
+    color_degraded = "#f1fa8c"
+    color_bad = "#ff5555"
+    interval = 5
+}
+
+order += "cpu_usage"
+order += "memory"
+order += "disk /"
+order += "ethernet enp191s0"
+order += "wireless wlp192s0"
+order += "volume master"
+order += "tztime local"
+
+cpu_usage {
+    format = "cpu %usage"
+}
+
+memory {
+    format = "mem %percentage_used"
+    threshold_degraded = "10%"
+    threshold_critical = "5%"
+}
+
+disk "/" {
+    format = "disk %percentage_used"
+}
+
+ethernet enp191s0 {
+    format_up = "eth %speed"
+    format_down = ""
+}
+
+wireless wlp192s0 {
+    format_up = "wifi %essid %quality"
+    format_down = ""
+}
+
+volume master {
+    format = "vol %volume"
+    format_muted = "muted"
+    device = "default"
+    mixer = "Master"
+    mixer_idx = 0
+}
+
+tztime local {
+    format = "%a %b %d  %H:%M"
+}

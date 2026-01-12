@@ -1,0 +1,188 @@
+# Sway config
+
+### Environment
+exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
+exec systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+
+### Variables
+set $mod Mod4
+set $term ghostty
+set $menu fuzzel
+
+# Dracula colors
+set $bg #282a36
+set $fg #f8f8f2
+set $border #bd93f9
+set $border_inactive #44475a
+set $urgent #ff5555
+
+### Output
+# Left monitor (vertical/portrait) - chat apps
+output DP-1 transform 270 scale 1 pos 0 0
+# Right monitor (main) - work
+output DP-4 scale 2 pos 1600 1480
+
+# Font scaling: gsettings text-scaling-factor 1.0
+
+output * bg $bg solid_color
+
+# Workspaces -> outputs
+workspace 1 output DP-4
+workspace 2 output DP-4
+workspace 3 output DP-4
+workspace 4 output DP-4
+workspace 5 output DP-4
+workspace 8 output DP-1
+workspace 9 output DP-1
+
+### Input
+input type:keyboard {
+    xkb_options ctrl:nocaps
+}
+
+input type:touchpad {
+    tap enabled
+    natural_scroll enabled
+}
+
+input type:pointer {
+    natural_scroll enabled
+}
+
+### Appearance
+gaps inner 10
+gaps outer 5
+default_border pixel 2
+smart_borders on
+smart_gaps on
+
+client.focused          $border          $bg $fg $border         $border
+client.focused_inactive $border_inactive $bg $fg $border_inactive $border_inactive
+client.unfocused        $border_inactive $bg $fg $border_inactive $border_inactive
+client.urgent           $urgent          $bg $fg $urgent         $urgent
+
+### Core bindings
+bindsym $mod+Return exec $term
+bindsym $mod+q kill
+bindsym $mod+space exec $menu
+bindsym $mod+Shift+r reload
+bindsym $mod+Shift+e exec swaynag -t warning -m 'Exit sway?' -B 'Yes' 'swaymsg exit'
+### Idle & Lock
+exec swayidle -w \
+    timeout 300 '/usr/bin/swaylock -f' \
+    timeout 600 'swaymsg "output * power off"' \
+    resume 'swaymsg "output * power on"' \
+    before-sleep '/usr/bin/swaylock -f'
+
+bindsym $mod+Escape exec /usr/bin/swaylock -f
+
+### Focus
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
+
+### Move windows
+bindsym $mod+Shift+Left move left
+bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+Right move right
+
+### Workspaces
+bindsym $mod+1 workspace number 1
+bindsym $mod+2 workspace number 2
+bindsym $mod+3 workspace number 3
+bindsym $mod+4 workspace number 4
+bindsym $mod+5 workspace number 5
+bindsym $mod+6 workspace number 6
+bindsym $mod+7 workspace number 7
+bindsym $mod+8 workspace number 8
+bindsym $mod+9 workspace number 9
+bindsym $mod+0 workspace number 10
+
+bindsym $mod+Shift+1 move container to workspace number 1
+bindsym $mod+Shift+2 move container to workspace number 2
+bindsym $mod+Shift+3 move container to workspace number 3
+bindsym $mod+Shift+4 move container to workspace number 4
+bindsym $mod+Shift+5 move container to workspace number 5
+bindsym $mod+Shift+6 move container to workspace number 6
+bindsym $mod+Shift+7 move container to workspace number 7
+bindsym $mod+Shift+8 move container to workspace number 8
+bindsym $mod+Shift+9 move container to workspace number 9
+bindsym $mod+Shift+0 move container to workspace number 10
+
+# Cycle workspaces
+bindsym $mod+Tab workspace next
+bindsym $mod+Shift+Tab workspace prev
+
+### Layout
+bindsym $mod+b splith
+bindsym $mod+v splitv
+bindsym $mod+f fullscreen
+bindsym $mod+Shift+space floating toggle
+bindsym $mod+w layout tabbed
+bindsym $mod+e layout toggle split
+
+### Scratchpad
+bindsym $mod+minus move scratchpad
+bindsym $mod+Shift+minus scratchpad show
+
+### Dropdown terminal (quake-style)
+for_window [app_id="dropdown"] floating enable, sticky enable, resize set 100ppt 40ppt, move position 0 0, move scratchpad, scratchpad show
+bindsym $mod+grave exec swaymsg '[app_id="dropdown"] scratchpad show' || foot --app-id=dropdown
+
+### Resize mode
+mode "resize" {
+    bindsym Left resize shrink width 30px
+    bindsym Down resize grow height 30px
+    bindsym Up resize shrink height 30px
+    bindsym Right resize grow width 30px
+    bindsym Escape mode "default"
+    bindsym Return mode "default"
+}
+bindsym $mod+r mode "resize"
+
+### Media keys
+bindsym XF86AudioRaiseVolume exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+
+bindsym XF86AudioLowerVolume exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
+bindsym XF86AudioMute exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+bindsym XF86AudioMicMute exec wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
+bindsym XF86MonBrightnessDown exec brightnessctl set 5%-
+bindsym XF86MonBrightnessUp exec brightnessctl set 5%+
+
+### Screenshots (save to file + clipboard)
+bindsym $mod+s exec 'f=~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png && grim "$f" && wl-copy -t image/png < "$f"'
+bindsym $mod+Shift+s exec 'f=~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png && grim -g "$(slurp)" "$f" && wl-copy -t image/png < "$f"'
+
+### Window rules
+for_window [app_id="pavucontrol"] floating enable
+
+# Chat apps -> left monitor (workspace 8)
+assign [app_id="signal"] workspace 8
+assign [app_id="Slack"] workspace 8
+assign [app_id="chrome-app.fastmail.com__-Default"] workspace 8
+
+### Bar
+bar {
+    position top
+    status_command ~/.config/sway/status
+    tray_output *
+    colors {
+        background $bg
+        statusline $fg
+        separator $border_inactive
+        focused_workspace $border $border $fg
+        active_workspace $border_inactive $border_inactive $fg
+        inactive_workspace $bg $bg #6272a4
+        urgent_workspace $urgent $urgent $fg
+    }
+}
+
+### Startup
+exec mako
+exec /snap/bin/signal-desktop
+exec google-chrome --app=https://app.fastmail.com
+exec /snap/bin/slack
+exec ghostty
+
+include ~/.config/sway/config.d/*

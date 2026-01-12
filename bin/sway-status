@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Network interface to monitor
+IFACE="enp191s0"
+
+get_traffic() {
+    local rx1=$(cat /sys/class/net/$IFACE/statistics/rx_bytes 2>/dev/null || echo 0)
+    local tx1=$(cat /sys/class/net/$IFACE/statistics/tx_bytes 2>/dev/null || echo 0)
+    sleep 1
+    local rx2=$(cat /sys/class/net/$IFACE/statistics/rx_bytes 2>/dev/null || echo 0)
+    local tx2=$(cat /sys/class/net/$IFACE/statistics/tx_bytes 2>/dev/null || echo 0)
+
+    local rx_rate=$(( (rx2 - rx1) / 1024 ))
+    local tx_rate=$(( (tx2 - tx1) / 1024 ))
+
+    echo "${rx_rate}K/${tx_rate}K"
+}
+
+while true; do
+    # CPU
+    cpu=$(awk '/^cpu / {printf "%.0f", ($2+$4)*100/($2+$4+$5)}' /proc/stat)
+
+    # Memory
+    mem=$(free | awk '/^Mem:/ {printf "%.0f", $3/$2*100}')
+
+    # Disk
+    disk=$(df / | awk 'NR==2 {print $5}' | tr -d '%')
+
+    # Network traffic
+    net=$(get_traffic)
+
+    # Volume
+    vol=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null | awk '{printf "%.0f", $2*100}')
+    [ -z "$vol" ] && vol="--"
+
+    # Date
+    date=$(date +'%a %b %d  %H:%M')
+
+    echo "cpu ${cpu}% | mem ${mem}% | disk ${disk}% | net ${net} | vol ${vol}% | ${date}"
+    sleep 4
+done

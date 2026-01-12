@@ -1,0 +1,20 @@
+max-visible=3
+default-timeout=5000
+ignore-timeout=0
+
+font=monospace 11
+background-color=#282a36
+text-color=#f8f8f2
+border-color=#bd93f9
+border-size=2
+border-radius=0
+padding=10
+margin=10
+width=350
+
+[urgency=low]
+border-color=#6272a4
+
+[urgency=high]
+border-color=#ff5555
+default-timeout=0

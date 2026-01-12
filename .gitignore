@@ -1,5 +1,6 @@
 .DS_Store
 !bin
-nvim/undodir
-nvim/plugged
+config/nvim/undodir
+config/nvim/plugged
+config/nvim/backup/*.md~
 node_modules

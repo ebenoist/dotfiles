@@ -1,31 +1,24 @@
-.PHONY: install vim-install bspwm-install update
+.PHONY: install sway-install update
 
-install: dotfiles configs vim-install
+install: home-dotfiles config-dirs claude-setup
 
-bspwm-install: dotfiles configs
-
-dotfiles: home-dotfiles
-configs: config-dirs
+sway-install: install
 
 home-dotfiles:
-	ln -sf ${PWD}/aliases ${HOME}/.aliases
-	ln -sf ${PWD}/bash_profile ${HOME}/.bash_profile
-	ln -sf ${PWD}/bashrc ${HOME}/.bashrc
-	ln -sf ${PWD}/exports ${HOME}/.exports
-	ln -sf ${PWD}/gitconfig ${HOME}/.gitconfig
-	ln -sf ${PWD}/inputrc ${HOME}/.inputrc
-	ln -sf ${PWD}/tmux.conf ${HOME}/.tmux.conf
+	@for f in ${PWD}/home/*; do \
+		ln -sf "$$f" "${HOME}/.`basename $$f`"; \
+	done
 
 config-dirs:
-	mkdir -p ${HOME}/.config
-	ln -sf ${PWD}/nvim ${HOME}/.config/nvim
-	ln -sf ${PWD}/zellij ${HOME}/.config/zellij
-	ln -sf ${PWD}/ghostty ${HOME}/.config/ghostty
-	ln -sf ${PWD}/bspwm ${HOME}/.config/bspwm
-	ln -sf ${PWD}/sxhkd ${HOME}/.config/sxhkd
+	@mkdir -p ${HOME}/.config
+	@for d in ${PWD}/config/*; do \
+		ln -sf "$$d" "${HOME}/.config/`basename $$d`"; \
+	done
 
-vim-install:
-	@echo "Plugins will be installed automatically by lazy.nvim on first startup"
+claude-setup:
+	@mkdir -p ${HOME}/.claude
+	@rm -rf ${HOME}/.claude/commands
+	@ln -sf ${PWD}/claude/commands ${HOME}/.claude/commands
 
 update:
 	@git pull

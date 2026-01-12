@@ -1,0 +1,85 @@
+set +x
+# Ghostty shell integration
+if [ -n "${GHOSTTY_RESOURCES_DIR}" ]; then
+  builtin source "${GHOSTTY_RESOURCES_DIR}/shell-integration/bash/ghostty.bash"
+fi
+
+# macOS Homebrew path (Apple Silicon)
+if [ -f '/opt/homebrew/bin/brew' ]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
+source ~/.colors;
+source ~/.aliases;
+source ~/.exports;
+
+## language ENV
+export PATH="$HOME/.pyenv/bin:$HOME/.rbenv/bin:$HOME/.nodenv/bin:$PATH"
+eval "$(rbenv init -)"
+eval "$(nodenv init -)"
+eval "$(pyenv init -)"
+[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
+
+## gpg
+export GPG_TTY=$(tty)
+
+## completions
+# Linux
+[[ -r "/usr/share/bash-completion/completions/git" ]] && . "/usr/share/bash-completion/completions/git"
+
+
+### MACOS
+# macOS homebrew
+[[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
+
+if [ -x "$(command -v brew)" ]; then
+  if [ -f $(brew --prefix)/etc/bash_completion ]; then
+  . $(brew --prefix)/etc/bash_completion
+  fi
+
+  if [ -f `brew --prefix`/etc/bash_completion.d/git-completion.bash ]; then
+  . `brew --prefix`/etc/bash_completion.d/git-completion.bash
+  fi
+
+  if [ -f `brew --prefix`/etc/bash_completion.d/git-prompt.sh ]; then
+  . `brew --prefix`/etc/bash_completion.d/git-prompt.sh
+  fi
+fi
+
+## db history stores all of my bash history in a sqlite database
+export HISTSIZE=$HOME/.bash_history
+export HISTFILESIZE=1000
+export HISTSIZE=1000
+export HISTTIMEFORMAT="%s "
+export HISTCONTROL=ignorespace:erasedups
+export DBHISTORY=true
+export DBHISTORYFILE=$HOME/.dbhist.sql
+source ~/.dbhist.sh;
+
+## local install paths
+PATH="$HOME/.bin:$PATH"
+PATH="$HOME/.local/bin:$PATH"
+PATH="$HOME/bin:$PATH"
+
+export CLAUDE_CODE_ENABLE_TELEMETRY=0
+
+complete -C /usr/bin/terraform terraform
+
+# Linux-specific Google Cloud SDK paths
+if [[ "$(uname)" == "Linux" ]]; then
+  if [ -f '/home/erik/google-cloud-sdk/path.bash.inc' ]; then . '/home/erik/google-cloud-sdk/path.bash.inc'; fi
+  if [ -f '/home/erik/google-cloud-sdk/completion.bash.inc' ]; then . '/home/erik/google-cloud-sdk/completion.bash.inc'; fi
+fi
+
+# Check for zellij bash completion
+if [ -f '~/.bash_completion/zellij' ]; then . '~/.bash_completion/zellij'; fi
+
+# pnpm
+export PNPM_HOME="/home/erik/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+
+export GPG_TTY=$(tty)

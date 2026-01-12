@@ -1,0 +1,5 @@
+## one bash
+#source ~/.bashrc;
+
+# Added by `nodenv init` on Mon Dec  8 09:40:02 CST 2025
+eval "$(nodenv init - --no-rehash bash)"
