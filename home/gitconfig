@@ -8,6 +8,8 @@
   l = log --graph --pretty=format:'%an: %s - %Cred%h%Creset %C(yellow)%d%Creset %Cgreen(%cr)%Creset' --abbrev-commit --date=relative
   slog = log --pretty=format:'%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s' --date=short
   slognc = log --pretty=format:'%h %ad %an%d %s' --date=short
+	files = "!git show --name-only --format= \"$@\" #"
+	review = "!f() { sha=${1:-HEAD}; notes=$(mktemp -t review-${sha}-XXXX.md); echo \"# Review: $sha\" > \"$notes\"; echo \"\" >> \"$notes\"; git show \"$sha\" >> \"$notes\"; echo \"Notes: $notes\"; vim -c \"argdo tabnew | Gvdiffsplit ${sha}~1 | botright vsplit ${notes}\" -c \"tabfirst | tabclose\" $(git show --name-only --format= ${sha}); }; f"
 [color]
   diff = auto
   status = auto
@@ -26,12 +28,12 @@
 	smudge = git-lfs smudge %f
 	required = true
 [user]
-  name = Erik Benoist
-  email = ebenoist@gmail.com
+	name = Erik
+	email = erik@localhost
   signingkey = F244E084D30BBBF5
 [commit]
   gpgsign = true
-[includeIf "gitdir:~/dev/nilcoast/*"]
+[includeIf "gitdir:~/dev/nilcoast/"]
   path = ~/dev/nilcoast/.gitconfig
 [includeIf "gitdir:~/dev/1440-Media/"]
   path = ~/dev/1440-Media/.gitconfig
@@ -41,3 +43,11 @@
 	ff = only
 [init]
 	defaultBranch = main
+[safe]
+	directory = /home/erik/dev/1440-Media/dataflow
+[credential "https://github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper =
+	helper = !/usr/bin/gh auth git-credential

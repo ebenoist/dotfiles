@@ -23,7 +23,6 @@ require('clipboard').setup()
 vim.g.mapleader = ","
 vim.opt.number = true
 vim.opt.hlsearch = true
-vim.opt.showmode = true
 vim.opt.cmdheight = 2
 vim.opt.mouse = "a"
 vim.opt.swapfile = false
@@ -35,7 +34,6 @@ vim.opt.shiftwidth = 2
 vim.opt.tabstop = 2
 vim.opt.softtabstop = 2
 vim.opt.expandtab = true
-vim.opt.smarttab = true
 
 -- display
 vim.opt.wrap = false
@@ -59,7 +57,6 @@ vim.opt.termguicolors = true
 local keymap = vim.keymap.set
 
 -- General
-keymap("n", "Y", "y$")
 keymap("i", "jj", "<Esc>")
 
 -- Window navigation
@@ -120,19 +117,16 @@ require("lazy").setup({
     "neovim/nvim-lspconfig",
     dependencies = { "hrsh7th/cmp-nvim-lsp" },
     config = function()
-      local lspconfig = require("lspconfig")
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
+      vim.lsp.config("*", { capabilities = capabilities })
 
-      -- TypeScript/JavaScript LSP
-      lspconfig.ts_ls.setup({
-        capabilities = capabilities,
-        on_attach = function(client, bufnr)
-          -- Disable formatting (let conform.nvim handle it)
+      vim.api.nvim_create_autocmd("LspAttach", {
+        callback = function(ev)
+          local client = vim.lsp.get_client_by_id(ev.data.client_id)
           client.server_capabilities.documentFormattingProvider = false
           client.server_capabilities.documentRangeFormattingProvider = false
 
-          -- LSP keymaps
-          local opts = { buffer = bufnr, silent = true }
+          local opts = { buffer = ev.buf, silent = true }
           keymap("n", "gd", vim.lsp.buf.definition, opts)
           keymap("n", "gD", vim.lsp.buf.declaration, opts)
           keymap("n", "gr", vim.lsp.buf.references, opts)
@@ -140,44 +134,42 @@ require("lazy").setup({
           keymap("n", "K", vim.lsp.buf.hover, opts)
           keymap("n", "<Leader>rn", vim.lsp.buf.rename, opts)
           keymap("n", "<Leader>ca", vim.lsp.buf.code_action, opts)
-          keymap("n", "[d", vim.diagnostic.goto_prev, opts)
-          keymap("n", "]d", vim.diagnostic.goto_next, opts)
+          keymap("n", "[d", function() vim.diagnostic.jump({ count = -1, float = true }) end, opts)
+          keymap("n", "]d", function() vim.diagnostic.jump({ count = 1, float = true }) end, opts)
           keymap("n", "<Leader>e", vim.diagnostic.open_float, opts)
         end,
       })
+
+      vim.lsp.enable({ "vtsls", "biome", "gopls", "ruby_lsp", "basedpyright", "ruff", "zls", "sourcekit" })
     end,
   },
   {
+      -- main branch: master is archived and its query predicates crash on
+      -- nvim 0.12. main has no indent module; built-in indent/*.vim handles it.
       "nvim-treesitter/nvim-treesitter",
-      event = "VeryLazy",
+      branch = "main",
+      lazy = false,  -- main does not support lazy-loading
       build = ":TSUpdate",
-      version = false,
       config = function()
-          ---@diagnostic disable-next-line: missing-fields
-          require("nvim-treesitter.configs").setup({
-              ensure_installed = {
-                  "bash",
-                  "c",
-                  "css",
-                  "html",
-                  "javascript",
-                  "json",
-                  "markdown",
-                  "python",
-                  "regex",
-                  "rust",
-                  "vim",
-                  "ruby",
-                  "lua",
-                  "typescript"
-              },
-              indent = { enable = true },
-              highlight = {
-                  disable = { "latex" },
-                  enable = true,
-                  additional_vim_regex_highlighting = false,
-              },
-              matchup = { enable = true },
+          local langs = {
+              "bash", "c", "css", "html", "javascript", "json", "markdown",
+              "python", "regex", "rust", "vim", "ruby", "lua", "typescript",
+              "tsx", "zig",
+          }
+          require("nvim-treesitter").install(langs)
+
+          -- Neovim owns highlighting; start it per buffer when a parser exists.
+          -- language.add returns nil (no throw) for a missing parser, so check
+          -- its value, not just pcall success.
+          vim.api.nvim_create_autocmd("FileType", {
+              callback = function(ev)
+                  local lang = vim.treesitter.language.get_lang(vim.bo[ev.buf].filetype)
+                  if not lang or lang == "latex" then return end
+                  local ok, added = pcall(vim.treesitter.language.add, lang)
+                  if ok and added then
+                      vim.treesitter.start(ev.buf, lang)
+                  end
+              end,
           })
       end,
   },
@@ -185,7 +177,34 @@ require("lazy").setup({
     "nvim-tree/nvim-tree.lua",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
+      local function on_attach(bufnr)
+        local api = require("nvim-tree.api")
+        local opts = function(desc)
+          return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
+        end
+
+        api.config.mappings.default_on_attach(bufnr)
+
+        -- NERDTree-style m menu
+        vim.keymap.set("n", "m", function()
+          local node = api.tree.get_node_under_cursor()
+          local choices = { "add", "rename", "move", "delete", "copy", "copy path", "copy absolute path" }
+          vim.ui.select(choices, { prompt = "NvimTree > " }, function(choice)
+            if not choice then return end
+            if choice == "add"                then api.fs.create(node)
+            elseif choice == "rename"         then api.fs.rename_basename(node)
+            elseif choice == "move"           then api.fs.rename(node)
+            elseif choice == "delete"         then api.fs.remove(node)
+            elseif choice == "copy"           then api.fs.copy.node(node)
+            elseif choice == "copy path"      then api.fs.copy.relative_path(node)
+            elseif choice == "copy absolute path" then api.fs.copy.absolute_path(node)
+            end
+          end)
+        end, opts("Modify"))
+      end
+
       require("nvim-tree").setup({
+        on_attach = on_attach,
         sort_by = "case_sensitive",
         view = { width = 30 },
         renderer = { group_empty = true },
@@ -193,10 +212,7 @@ require("lazy").setup({
           dotfiles = false,
           custom = { "^\\.git$", "^\\.DS_Store$" },
         },
-        git = {
-          enable = true,
-          ignore = false,
-        },
+        git = { enable = true, ignore = false },
         hijack_netrw = true,
         disable_netrw = true,
         actions = {
@@ -204,7 +220,6 @@ require("lazy").setup({
         },
       })
 
-      -- Key mappings
       keymap("n", "<Leader>N", ":NvimTreeToggle<CR>")
       keymap("n", "<Leader>nf", ":NvimTreeFindFile<CR>")
     end,
@@ -213,7 +228,6 @@ require("lazy").setup({
   -- Telescope (modern fuzzy finder)
   {
     "nvim-telescope/telescope.nvim",
-    branch = "0.1.x",
     dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
       require("telescope").setup({
@@ -230,7 +244,8 @@ require("lazy").setup({
 
       local builtin = require("telescope.builtin")
       keymap("n", "<Leader>t", builtin.find_files, {})
-      keymap("n", "<Leader>fg", builtin.live_grep, {})
+      keymap("n", "<Leader>f", builtin.live_grep, {})
+      keymap("n", "<Leader>s", builtin.grep_string, {})
       keymap("n", "<Leader>fb", builtin.buffers, {})
       keymap("n", "<Leader>fh", builtin.help_tags, {})
       keymap("n", "<Leader>fr", builtin.lsp_references, {})
@@ -239,20 +254,8 @@ require("lazy").setup({
   },
 
   -- Editor enhancements
-  "editorconfig/editorconfig-vim",
   "tpope/vim-unimpaired",
   "tpope/vim-repeat",
-  "jlanzarotta/bufexplorer",
-
-  -- Search and navigation
-  {
-    "mileszs/ack.vim",
-    config = function()
-      vim.g.ackprg = "ag --nogroup --nocolor --column"
-      keymap("n", "<leader>f", ":Ack<Space>")
-      keymap("n", "<leader>s", ":Ack <cword><CR>")
-    end,
-  },
 
   -- Comments
   {
@@ -267,6 +270,30 @@ require("lazy").setup({
   -- Git integration
   "tpope/vim-fugitive",
   "tpope/vim-rhubarb",
+  {
+    "lewis6991/gitsigns.nvim",
+    config = function()
+      require("gitsigns").setup({
+        current_line_blame = true,
+        current_line_blame_opts = {
+          delay = 300,
+          virt_text_pos = "eol",
+        },
+        current_line_blame_formatter = "<author>, <author_time:%Y-%m-%d> · <summary>",
+        on_attach = function(bufnr)
+          local gs = require("gitsigns")
+          local opts = { buffer = bufnr, silent = true }
+          keymap("n", "]c", gs.next_hunk, opts)
+          keymap("n", "[c", gs.prev_hunk, opts)
+          keymap("n", "<Leader>gb", gs.blame_line, opts)
+          keymap("n", "<Leader>gB", gs.toggle_current_line_blame, opts)
+          keymap("n", "<Leader>gp", gs.preview_hunk, opts)
+          keymap("n", "<Leader>gs", gs.stage_hunk, opts)
+          keymap("n", "<Leader>gR", gs.reset_hunk, opts)
+        end,
+      })
+    end,
+  },
 
   -- Formatting and linting
   {
@@ -274,7 +301,7 @@ require("lazy").setup({
     config = function()
       require("conform").setup({
         formatters_by_ft = {
-          python = { "black", "isort" },
+          python = { "ruff_fix", "ruff_format" },
           javascript = { "biome" },
           typescript = { "biome" },
           javascriptreact = { "biome" },
@@ -299,32 +326,14 @@ require("lazy").setup({
   },
 
   -- Language-specific plugins
-  {
-    "pangloss/vim-javascript",
-    ft = { "javascript", "javascriptreact" },
-  },
-  {
-    "mxw/vim-jsx",
-    ft = { "javascript", "javascriptreact" },
-  },
-  "othree/html5.vim",
-
-  -- TypeScript
-  {
-    "peitalin/vim-jsx-typescript",
-    ft = { "typescript", "typescriptreact" },
-  },
-  {
-    "leafgarland/typescript-vim",
-    ft = "typescript",
-  },
 
   -- Go
   {
     "fatih/vim-go",
     ft = "go",
     config = function()
-      vim.g.go_fmt_command = "goimports"
+      vim.g.go_fmt_autosave = 0
+      vim.g.go_gopls_enabled = 0  -- lspconfig owns gopls
       vim.g.go_highlight_build_constraints = 1
       vim.g.go_highlight_extra_types = 1
       vim.g.go_highlight_fields = 1
@@ -333,11 +342,7 @@ require("lazy").setup({
       vim.g.go_highlight_operators = 1
       vim.g.go_highlight_structs = 1
       vim.g.go_highlight_types = 1
-      vim.g.go_def_mode = "gopls"
-      vim.g.go_rename_command = "gopls"
-      vim.g.go_metalinter_autosave_enabled = { "typecheck", "golint" }
 
-      -- Go key mappings
       vim.api.nvim_create_autocmd("FileType", {
         pattern = "go",
         callback = function()
@@ -345,10 +350,6 @@ require("lazy").setup({
           keymap("n", "<leader>gb", "<Plug>(go-build)", { buffer = true })
           keymap("n", "<leader>gt", "<Plug>(go-test)", { buffer = true })
           keymap("n", "<leader>gc", "<Plug>(go-coverage)", { buffer = true })
-          keymap("n", "<Leader>ge", "<Plug>(go-rename)", { buffer = true })
-          keymap("n", "<Leader>gdb", "<Plug>(go-doc-browser)", { buffer = true })
-          keymap("n", "<Leader>gd", "<Plug>(go-doc)", { buffer = true })
-          keymap("n", "<Leader>gv", "<Plug>(go-doc-vertical)", { buffer = true })
         end,
       })
     end,
@@ -381,19 +382,20 @@ require("lazy").setup({
   },
 
   {
-    "gpanders/vim-medieval",
+    "jpalardy/vim-slime",
     config = function()
-      vim.g.medieval_langs = { "bash", "ruby", "sh", "js=node-eval", "python" }
+      vim.g.slime_target = "zellij"
+      vim.g.slime_default_config = { session_id = "current", relative_pane = "right" }
     end,
   },
 
   -- Colorscheme
   {
-    "folke/tokyonight.nvim",
+    "rebelot/kanagawa.nvim",
     lazy = false,
     priority = 1000,
     config = function()
-      vim.cmd("colorscheme tokyonight-night")
+      vim.cmd.colorscheme("kanagawa")
     end,
   },
 })
@@ -412,6 +414,19 @@ vim.api.nvim_create_autocmd("BufWritePre", {
   end,
 })
 
+-- Float the diagnostic under the cursor on rest (updatetime); nvim 0.11+
+-- shows no diagnostic text by default. source = true names the compiler/LSP.
+vim.diagnostic.config({
+  severity_sort = true,
+  float = { border = "rounded", source = true },
+})
+
+vim.api.nvim_create_autocmd("CursorHold", {
+  callback = function()
+    vim.diagnostic.open_float(nil, { focusable = false, scope = "cursor", border = "rounded" })
+  end,
+})
+
 -- File type associations
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
   pattern = { "Gemfile", "Rakefile", "Capfile", "*.rake", "config.ru", "*.god" },
@@ -420,27 +435,11 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
   end,
 })
 
-vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-  pattern = { "*.md", "*.mkd", "*.markdown" },
-  callback = function()
-    vim.bo.filetype = "markdown"
-  end,
-})
-
 -- Terminal mappings
 vim.api.nvim_create_autocmd("TermOpen", {
   pattern = "*",
   callback = function()
     keymap("t", "<Esc>", "<C-\\><C-n>", { buffer = true })
-  end,
-})
-
-vim.api.nvim_create_autocmd("BufEnter", {
-  pattern = "*",
-  callback = function()
-    if vim.bo.buftype == "terminal" then
-      keymap("t", "<Esc>", "<C-\\><C-n>", { buffer = true })
-    end
   end,
 })
 

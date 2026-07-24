@@ -1,28 +1,22 @@
 -- Configure clipboard to work seamlessly in both local and remote sessions
--- Uses Neovim's built-in OSC52 support (v0.10+) for remote sessions
+-- Relies on the terminal (Zellij/Ghostty) handling OSC 52 natively.
 
 local M = {}
 
 M.setup = function()
-  local is_remote = os.getenv("SSH_CLIENT") or os.getenv("SSH_TTY")
+  local is_remote = os.getenv("SSH_CLIENT") or os.getenv("SSH_TTY") or os.getenv("MOSH_SERVER_PID")
 
   if is_remote then
-    -- Cache for yanked text (since OSC 52 paste doesn't work over mosh)
+    -- Use Neovim's built-in OSC 52 (v0.10+) — Zellij forwards it natively
+    local osc52 = require('vim.ui.clipboard.osc52')
+    -- Cache for yanked text (OSC 52 paste doesn't work over mosh)
     local clipboard_cache = {}
-
-    local function osc52_copy(reg)
-      local osc52 = require('vim.ui.clipboard.osc52')
-      return function(lines)
-        clipboard_cache[reg] = lines
-        osc52.copy(reg)(lines)
-      end
-    end
 
     vim.g.clipboard = {
       name = 'OSC 52',
       copy = {
-        ['+'] = osc52_copy('+'),
-        ['*'] = osc52_copy('*'),
+        ['+'] = function(lines) clipboard_cache['+'] = lines; osc52.copy('+')(lines) end,
+        ['*'] = function(lines) clipboard_cache['*'] = lines; osc52.copy('*')(lines) end,
       },
       paste = {
         ['+'] = function() return clipboard_cache['+'] or {} end,

@@ -2,8 +2,10 @@ clipboard-read = allow
 clipboard-write = allow
 copy-on-select = true
 
+keybind = shift+enter=text:\x1b\r
+
 gtk-single-instance = true
 gtk-titlebar = true
 shell-integration = bash
 
-theme = dark:catppuccin-frappe,light:catppuccin-latte
+theme = Kanagawa Wave

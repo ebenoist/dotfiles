@@ -20,6 +20,9 @@ eval "$(nodenv init -)"
 eval "$(pyenv init -)"
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
+## direnv
+eval "$(direnv hook bash)"
+
 ## gpg
 export GPG_TTY=$(tty)
 
@@ -57,7 +60,7 @@ export DBHISTORYFILE=$HOME/.dbhist.sql
 source ~/.dbhist.sh;
 
 ## local install paths
-PATH="$HOME/.bin:$PATH"
+PATH="$HOME/bin:$PATH"
 PATH="$HOME/.local/bin:$PATH"
 PATH="$HOME/bin:$PATH"
 
@@ -83,3 +86,10 @@ esac
 # pnpm end
 
 export GPG_TTY=$(tty)
+. "/home/erik/.deno/env"
+source /home/erik/.local/share/bash-completion/completions/deno.bash
+
+. "$HOME/.local/share/../bin/env"
+
+# swiftly (Swift toolchain manager) — interactive (non-login) shells too
+[ -f "$HOME/.local/share/swiftly/env.sh" ] && . "$HOME/.local/share/swiftly/env.sh"

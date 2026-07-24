@@ -4,3 +4,6 @@ config/nvim/undodir
 config/nvim/plugged
 config/nvim/backup/*.md~
 node_modules
+*.sync-conflict-*
+.stfolder/
+.stignore

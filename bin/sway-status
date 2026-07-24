@@ -3,6 +3,19 @@
 # Network interface to monitor
 IFACE="enp191s0"
 
+format_rate() {
+    local bytes=$1
+    if (( bytes >= 1073741824 )); then
+        printf "%.1fG" "$(echo "scale=1; $bytes / 1073741824" | bc)"
+    elif (( bytes >= 1048576 )); then
+        printf "%.1fM" "$(echo "scale=1; $bytes / 1048576" | bc)"
+    elif (( bytes >= 1024 )); then
+        printf "%dK" "$(( bytes / 1024 ))"
+    else
+        printf "%dB" "$bytes"
+    fi
+}
+
 get_traffic() {
     local rx1=$(cat /sys/class/net/$IFACE/statistics/rx_bytes 2>/dev/null || echo 0)
     local tx1=$(cat /sys/class/net/$IFACE/statistics/tx_bytes 2>/dev/null || echo 0)
@@ -10,10 +23,10 @@ get_traffic() {
     local rx2=$(cat /sys/class/net/$IFACE/statistics/rx_bytes 2>/dev/null || echo 0)
     local tx2=$(cat /sys/class/net/$IFACE/statistics/tx_bytes 2>/dev/null || echo 0)
 
-    local rx_rate=$(( (rx2 - rx1) / 1024 ))
-    local tx_rate=$(( (tx2 - tx1) / 1024 ))
+    local rx_rate=$(( rx2 - rx1 ))
+    local tx_rate=$(( tx2 - tx1 ))
 
-    echo "${rx_rate}K/${tx_rate}K"
+    echo "$(format_rate $rx_rate)/$(format_rate $tx_rate)"
 }
 
 while true; do

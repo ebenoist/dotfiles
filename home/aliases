@@ -2,26 +2,25 @@ alias ln='ln -v'
 alias mkdir='mkdir -p'
 alias vi='nvim'
 alias vim='nvim'
-#alias docker=prodman
+alias ll='eza --color=auto --group-directories-first --icons'
+#alias docker=podman
 
-# Platform-specific aliases
 if [[ "$(uname)" == "Linux" ]]; then
-  # Clipboard: Wayland vs X11
-  if [[ -n "$WAYLAND_DISPLAY" ]]; then
-    alias pbcopy="wl-copy"
-    alias pbpaste="wl-paste"
-  else
-    alias pbcopy="xclip -i -selection clipboard"
-    alias pbpaste="xclip -o -selection clipboard"
-  fi
   alias distro='neofetch'
   alias fetch='neofetch'
-  command -v batcat >/dev/null 2>&1 && alias bat="batcat"
+  alias bat="batcat"
   alias android-studio="$HOME/android-studio/bin/studio.sh"
 fi
 
+# Enhanced coreutils — only in interactive shells (aliases don't expand in scripts)
+# Use \cat or command cat to bypass
+if [[ $- == *i* ]]; then
+  alias cat="batcat --paging=never --style=plain"
+  alias ls="eza --color=auto --group-directories-first --icons"
+  alias tree="eza --tree --icons"
+fi
+
 if [[ "$(uname)" == "Darwin" ]]; then
-  # On macOS, may need GNU tools with g prefix
   command -v gtar >/dev/null 2>&1 && alias tar='gtar'
   command -v gsed >/dev/null 2>&1 && alias sed='gsed'
 fi
@@ -29,6 +28,15 @@ fi
 alias awsume=". awsume"
 alias l='eza'
 alias ssh='TERM=xterm-256color ssh'
+
+clocks() {
+  echo "PST:    $(TZ='America/Los_Angeles' date '+%H:%M %Z')"
+  echo "CST:    $(TZ='America/Chicago' date '+%H:%M %Z')"
+  echo "EST:    $(TZ='America/New_York' date '+%H:%M %Z')"
+  echo "London: $(TZ='Europe/London' date '+%H:%M %Z')"
+  echo "UTC:    $(TZ='UTC' date '+%H:%M %Z')"
+  echo "ARG:    $(TZ='America/Argentina/Buenos_Aires' date '+%H:%M %Z')"
+}
 
 git-files() {
   git ls-tree --full-tree -r --name-only HEAD
@@ -57,7 +65,31 @@ git-clean() {
 }
 
 # Zellij aliases
-alias za="$HOME/.bin/za"
+alias za="$HOME/bin/za"
 
 # SSH aliases
 alias ssh-bestia="mosh 100.87.45.45"
+
+# xkcd-style passphrase: three words hyphenated + two-digit number, copied and printed
+xkcdpw() {
+  local pw="$(xkcdpass -n 3 -d -)-$(printf '%02d' $((RANDOM % 100)))"
+  if command -v wl-copy >/dev/null 2>&1; then
+    printf '%s' "$pw" | wl-copy
+  elif command -v pbcopy >/dev/null 2>&1; then
+    printf '%s' "$pw" | pbcopy
+  elif command -v xclip >/dev/null 2>&1; then
+    printf '%s' "$pw" | xclip -i -selection clipboard
+  fi
+  printf '%s\n' "$pw"
+}
+
+# cmus + fzf integration
+cmus-fzf() {
+  track=$(cat ~/.config/cmus/lib.pl 2>/dev/null | fzf)
+  [ -n "$track" ] && cmus-remote -f "$track"
+}
+
+cmus-queue() {
+  track=$(find /multimedia -type f \( -name "*.mp3" -o -name "*.flac" -o -name "*.ogg" -o -name "*.m4a" \) 2>/dev/null | fzf)
+  [ -n "$track" ] && cmus-remote -q "$track"
+}

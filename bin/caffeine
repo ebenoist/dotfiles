@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+# Toggle idle inhibit (screen lock + dpms) for meetings, remote access, etc.
+# Usage: caffeine [on|off|status]
+
+INHIBIT_PID_FILE="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/caffeine.pid"
+
+if [ -z "$SWAYSOCK" ]; then
+    SWAYSOCK=$(ls /run/user/$(id -u)/sway-ipc.*.sock 2>/dev/null | head -1)
+    export SWAYSOCK
+fi
+
+start() {
+    if [ -f "$INHIBIT_PID_FILE" ] && kill -0 "$(cat "$INHIBIT_PID_FILE")" 2>/dev/null; then
+        echo "already on"
+        return
+    fi
+    swaymsg inhibit_idle open &
+    echo $! > "$INHIBIT_PID_FILE"
+    notify-send -t 3000 "Caffeine" "Idle inhibit on"
+    echo "on"
+}
+
+stop() {
+    if [ -f "$INHIBIT_PID_FILE" ]; then
+        kill "$(cat "$INHIBIT_PID_FILE")" 2>/dev/null
+        rm -f "$INHIBIT_PID_FILE"
+    fi
+    swaymsg inhibit_idle none 2>/dev/null
+    notify-send -t 3000 "Caffeine" "Idle inhibit off"
+    echo "off"
+}
+
+status() {
+    if [ -f "$INHIBIT_PID_FILE" ] && kill -0 "$(cat "$INHIBIT_PID_FILE")" 2>/dev/null; then
+        echo "on"
+    else
+        rm -f "$INHIBIT_PID_FILE"
+        echo "off"
+    fi
+}
+
+case "${1:-toggle}" in
+    on)     start ;;
+    off)    stop ;;
+    status) status ;;
+    toggle)
+        if [ -f "$INHIBIT_PID_FILE" ] && kill -0 "$(cat "$INHIBIT_PID_FILE")" 2>/dev/null; then
+            stop
+        else
+            start
+        fi
+        ;;
+    *) echo "Usage: caffeine [on|off|status|toggle]" >&2; exit 1 ;;
+esac

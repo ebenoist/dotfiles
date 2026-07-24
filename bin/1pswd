@@ -24,5 +24,10 @@ SELECT_ITEM=$(op item list --format=json |\
     created_at
   }' | fzf --ansi --preview="echo {} | jq -r ." | op item get --format=json -)
 
-echo $SELECT_ITEM | jq -c -r '.fields | .[] | { label: .label, value: .value }' |\
-  fzf --ansi --preview="echo {} | jq -C ." | jq -r .value | xclip -i -selection clipboard
+if [[ "$(uname)" == "Darwin" ]]; then
+  echo $SELECT_ITEM | jq -c -r '.fields | .[] | { label: .label, value: .value }' |\
+    fzf --ansi --preview="echo {} | jq -C ." | jq -r .value | pbcopy
+else
+  echo $SELECT_ITEM | jq -c -r '.fields | .[] | { label: .label, value: .value }' |\
+    fzf --ansi --preview="echo {} | jq -C ." | jq -r .value | wl-copy
+fi

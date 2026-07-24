@@ -221,11 +221,13 @@ load_plugins {
   // "https://example.com/my-plugin.wasm"
 }
 
-theme "tokyo-night"
+theme "kanagawa"
 mouse_mode true
 copy_on_select true
-support_kitty_keyboard_protocol true
+// Zellij 0.45 mangles CSI-u key events (visual-mode `j` decodes as
+// <Esc>+j and drops the mode). Ghostty handles it directly instead.
+support_kitty_keyboard_protocol false
 
-// Use OSC 52 for clipboard - works over SSH/mosh
-copy_command "clip-helper"
-copy_clipboard "system"
+// Clipboard: Zellij 0.44+ uses OSC 52 natively when no display server
+// is available (SSH/mosh), sending it directly to the outer terminal.
+// Locally (Sway), it uses wl-copy automatically.

@@ -1,0 +1,10 @@
+[Unit]
+Description=wayvnc - VNC server for Sway (LAN + Tailscale)
+
+[Service]
+Type=simple
+ExecStartPre=swaymsg output HEADLESS-1 enable
+ExecStart=wayvnc --output=HEADLESS-1 --render-cursor 0.0.0.0 5900
+ExecStopPost=swaymsg output HEADLESS-1 disable
+Restart=on-failure
+RestartSec=5

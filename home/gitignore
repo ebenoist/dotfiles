@@ -16,3 +16,7 @@ zeus.json
 tag
 .byebug_history
 .yarn
+*.claude
+CLAUDE.md
+
+**/.claude/settings.local.json

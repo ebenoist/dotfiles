@@ -1,0 +1,23 @@
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "model": "sonnet",
+  "statusLine": {
+    "type": "command",
+    "command": "/home/erik/.claude/statusline.sh"
+  },
+  "enabledPlugins": {
+    "frontend-design@claude-code-plugins": false
+  },
+  "effortLevel": "xhigh",
+  "voice": {
+    "enabled": true,
+    "mode": "hold"
+  },
+  "skipDangerousModePermissionPrompt": true,
+  "theme": "auto",
+  "skipAutoPermissionPrompt": true,
+  "voiceEnabled": true,
+  "defaultMode": "plan"
+}

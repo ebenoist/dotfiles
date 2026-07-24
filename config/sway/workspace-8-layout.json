@@ -1,0 +1,48 @@
+{
+    "layout": "splitv",
+    "type": "con",
+    "nodes": [
+        {
+            "layout": "splitv",
+            "type": "con",
+            "percent": 0.7,
+            "nodes": [
+                {
+                    "type": "con",
+                    "percent": 0.5,
+                    "swallows": [
+                        { "app_id": "^chrome-app\\.fastmail\\.com__-Default$" }
+                    ]
+                },
+                {
+                    "layout": "splith",
+                    "type": "con",
+                    "percent": 0.5,
+                    "nodes": [
+                        {
+                            "type": "con",
+                            "percent": 0.5,
+                            "swallows": [
+                                { "app_id": "^org\\.signal\\.Signal$" }
+                            ]
+                        },
+                        {
+                            "type": "con",
+                            "percent": 0.5,
+                            "swallows": [
+                                { "app_id": "^chrome-bsky\\.app__-Default$" }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "con",
+            "percent": 0.3,
+            "swallows": [
+                { "app_id": "^com\\.slack\\.Slack$" }
+            ]
+        }
+    ]
+}

@@ -1,8 +1,5 @@
 # enable colored output from ls, etc
 export CLICOLOR=1
-
-# pyenv root (must be set before pyenv init)
-export PYENV_ROOT="$HOME/.pyenv"
 export LSCOLORS="Exfxcxdxbxegedabagacad"
 export GPG_TTY=$(tty)
 export COLORTERM=truecolor
@@ -11,11 +8,15 @@ export COLORTERM=truecolor
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
+# nim
+export PATH="$HOME/.nimble/bin:$PATH"
+
 # opencode
 export PATH=/home/erik/.opencode/bin:$PATH
+export PATH=/home/erik/.cargo/bin:$PATH
 
 # load
-export PATH="$HOME/.bin:$HOME/.local/bin:node_modules/.bin:$PATH"
+export PATH="$HOME/bin:$HOME/.local/bin:node_modules/.bin:$PATH"
 export CDPATH=".:$HOME/dev"
 export VISUAL="nvim"
 export GIT_EDITOR="nvim"
@@ -65,8 +66,13 @@ if [[ "$(uname)" == "Linux" ]]; then
   # Font rendering for GTK/Qt on Wayland
   export FREETYPE_PROPERTIES="truetype:interpreter-version=40"
 
-  # Force Electron apps to use native Wayland (fixes blurry rendering)
-  export ELECTRON_OZONE_PLATFORM_HINT=wayland
+  # Note: ELECTRON_OZONE_PLATFORM_HINT was removed in Electron 38+
+  # Wayland flags are now passed via command line in sway config
+
+  # Sway IPC socket (auto-detect if not already set)
+  if [ -z "$SWAYSOCK" ]; then
+    export SWAYSOCK=$(ls /run/user/$(id -u)/sway-ipc.*.sock 2>/dev/null | head -1)
+  fi
 fi
 
 # Include custom aliases

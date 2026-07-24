@@ -1,0 +1,13 @@
+[Unit]
+Description=Flip sway outputs when VNC clients attach/detach
+BindsTo=wayvnc.service
+After=wayvnc.service
+
+[Service]
+Type=simple
+ExecStart=%h/bin/vnc-watch watch
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=wayvnc.service

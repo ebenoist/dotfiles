@@ -1,5 +1,11 @@
 ## one bash
 #source ~/.bashrc;
 
-# Added by `nodenv init` on Mon Dec  8 09:40:02 CST 2025
-eval "$(nodenv init - --no-rehash bash)"
+command -v nodenv >/dev/null && eval "$(nodenv init - --no-rehash bash)"
+command -v mise   >/dev/null && eval "$(mise activate bash)"
+[ -f "$HOME/.deno/env" ] && . "$HOME/.deno/env"
+[ -f "$HOME/.local/share/bash-completion/completions/deno.bash" ] && source "$HOME/.local/share/bash-completion/completions/deno.bash"
+[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
+
+# swiftly (Swift toolchain manager)
+[ -f "$HOME/.local/share/swiftly/env.sh" ] && . "$HOME/.local/share/swiftly/env.sh"

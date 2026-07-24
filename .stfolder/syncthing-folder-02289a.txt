@@ -1,5 +1,0 @@
-# This directory is a Syncthing folder marker.
-# Do not delete.
-
-folderID: zxkpg-oycaw
-created: 2024-11-08T17:11:44-06:00
