@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+# Submit a CCPA deletion request to Leverage Labs via their public ClickUp form.
+# Schema/endpoint discovered by capturing the browser POST — see ~/Notes/1440/ccpa/leverage-labs.md
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+usage: leverage-labs-ccpa-submit --name NAME --email EMAIL [--description TEXT] [--dry-run]
+
+  --name         consumer name (used as the ClickUp task title)
+  --email        consumer email of record (the identifier Leverage Labs deletes by)
+  --description  task body; defaults to "CCPA deletion request"
+  --dry-run      print the JSON payload, don't POST
+
+prints the raw JSON response on stdout.
+EOF
+  exit "${1:-0}"
+}
+
+name=""; email=""; description="CCPA deletion request"; dry=0
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --name) name="$2"; shift 2 ;;
+    --email) email="$2"; shift 2 ;;
+    --description) description="$2"; shift 2 ;;
+    --dry-run) dry=1; shift ;;
+    -h|--help) usage 0 ;;
+    *) echo "unknown arg: $1" >&2; usage 1 ;;
+  esac
+done
+[[ -z "$name" || -z "$email" ]] && usage 1
+
+WORKSPACE_ID=8447601
+FORM_ID="81tkh-188517"
+FORM_TOKEN="HTNDHISABBCQL4VAG0"
+# select-option uuid for the "request type" field — captured from a live submission.
+# If Leverage Labs reorders the form, re-capture (see notes).
+REQUEST_TYPE_FIELD_ID="0c2998ea-eada-4c26-bd79-3c57caf5269c"
+REQUEST_TYPE_OPTION_ID="e0c98b4d-ad79-4f59-b100-b809a5514f9b"
+EMAIL_FIELD_ID="d49bf53c-b750-4970-a408-b6bbab9c8cbf"
+
+payload=$(jq -nc \
+  --arg rt_field "$REQUEST_TYPE_FIELD_ID" \
+  --arg rt_value "$REQUEST_TYPE_OPTION_ID" \
+  --arg email_field "$EMAIL_FIELD_ID" \
+  --arg email "$email" \
+  --arg name "$name" \
+  --arg description "$description" \
+  '{
+    customFields: [
+      {id: $rt_field, value: $rt_value},
+      {id: $email_field, value: ($email + " \n"),
+       value_richtext: ({ops: [{insert: $email}, {attributes: {"block-id": "block-1"}, insert: "\n"}]} | tostring)}
+    ],
+    timezone: "America/Chicago",
+    assignees: [],
+    group_assignees: [],
+    name: $name,
+    content: {ops: [{insert: $description}, {attributes: {"block-id": "block-2"}, insert: "\n"}]}
+  }')
+
+if [[ "$dry" -eq 1 ]]; then
+  echo "$payload" | jq .
+  exit 0
+fi
+
+curl -sS --fail-with-body \
+  "https://prod-us-west-2-3.clickup.com/ui/v3/workspaces/${WORKSPACE_ID}/forms/${FORM_ID}/submit?token=${FORM_TOKEN}&ngsw-bypass=true" \
+  -H 'content-type: application/json' \
+  -H 'origin: https://forms.clickup.com' \
+  -H 'referer: https://forms.clickup.com/' \
+  -H "x-workspace-id: ${WORKSPACE_ID}" \
+  --data-raw "$payload"
+echo

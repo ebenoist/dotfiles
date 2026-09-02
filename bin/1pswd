@@ -1,33 +1,739 @@
-#!/usr/bin/env bash
+#!/usr/bin/env ruby
+# frozen_string_literal: true
 
-TTL=$((20*60))
-NOW=$(date +%s)
-LAST_UPDATED=$(date +%s -r $HOME/.op-cache)
-ELAPSED=$(($NOW - $LAST_UPDATED))
+# 1pswd - typeahead across every 1Password account, copy any field to the clipboard
+#
+#   1pswd [query]        pick an item, then pick a field
+#   1pswd -a 1440media   one account only
+#   1pswd -r             rebuild the item index
+#
+# Written for mosh/ssh, no physical presence. The desktop app cannot raise a
+# prompt on a remote tty, so app integration is off for every child process and
+# auth is always a session token cached in tmpfs. Vault hygiene lives in the
+# sibling script, 1pswd-doctor, which loads this file for its modules.
 
-if [[ ! -f "$HOME/.op-cache" ]]; then
-  echo "no-cache"
-  op signin -f > ~/.op-cache
-elif [[ $ELAPSED -gt $TTL ]]; then
-  echo "cache expired"
-  op signin -f > ~/.op-cache
-else
-  echo "logged in, will expire in $(($TTL - $ELAPSED)) seconds"
-fi
+require "fileutils"
+require "io/console"
+require "json"
+require "open3"
+require "time"
 
-eval $(cat ~/.op-cache)
+module Ansi
+  RESET = "\e[0m"
+  DIM = 244
 
-SELECT_ITEM=$(op item list --format=json |\
-  jq -c -r '.[] | {
-    title,
-    id,
-    created_at
-  }' | fzf --ansi --preview="echo {} | jq -r ." | op item get --format=json -)
+  module_function
 
-if [[ "$(uname)" == "Darwin" ]]; then
-  echo $SELECT_ITEM | jq -c -r '.fields | .[] | { label: .label, value: .value }' |\
-    fzf --ansi --preview="echo {} | jq -C ." | jq -r .value | pbcopy
-else
-  echo $SELECT_ITEM | jq -c -r '.fields | .[] | { label: .label, value: .value }' |\
-    fzf --ansi --preview="echo {} | jq -C ." | jq -r .value | wl-copy
-fi
+  def color(text, code)
+    "\e[38;5;#{code}m#{text}#{RESET}"
+  end
+
+  def dim(text)
+    color(text, DIM)
+  end
+
+  # ✓ "\e[38;5;114mAWS\e[0m" -> "AWS"   ✗ "[38;5;114m" (no ESC, left alone)
+  def strip(text)
+    text.gsub(/\e\[[0-9;]*m/, "")
+  end
+
+  # Pads to a *visible* width, which is the whole reason this is not a colorize
+  # gem -- those count escape bytes and misalign every column.
+  def pad(text, width)
+    text + " " * [width - strip(text).length, 0].max
+  end
+
+  def clamp(text, limit)
+    return text if text.length <= limit
+
+    "#{text[0, limit - 1]}…"
+  end
+end
+
+module Url
+  module_function
+
+  # ✓ "https://www.amazon.com/gp/x" -> "amazon.com"   ✗ "" -> nil
+  def host(url)
+    return nil if url.to_s.empty?
+
+    url.to_s.sub(%r{\A\w+://}, "").sub(/\Awww\./, "")[/\A[^\/:?#]+/]
+  end
+
+  # Naive registrable domain: the last two labels.
+  # ✓ "console.aws.amazon.com" -> "amazon.com"   ✗ "app.foo.co.uk" -> "co.uk"
+  def domain(url)
+    host(url)&.split(".")&.last(2)&.join(".")
+  end
+end
+
+# Session tokens and the item index both belong to this login and no other, so
+# they live in tmpfs and vanish with it.
+module Store
+  module_function
+
+  def dir
+    @_dir ||= begin
+      base = ENV["XDG_RUNTIME_DIR"] || ENV["XDG_CACHE_HOME"] || File.join(Dir.home, ".cache")
+      path = File.join(base, "1pswd")
+      FileUtils.mkdir_p(path, mode: 0o700)
+      path
+    end
+  end
+
+  # Names carry account labels, which come from a URL. Scrub anything that would
+  # walk out of the store directory.
+  # ✓ "session-https://my" -> "session-https---my"   ✗ "session-my" (unchanged)
+  def path_for(name)
+    File.join(dir, name.to_s.gsub(/[^A-Za-z0-9._-]/, "-"))
+  end
+
+  def read(name)
+    path = path_for(name)
+    File.exist?(path) ? File.read(path) : nil
+  end
+
+  def write(name, data)
+    path = path_for(name)
+    File.write(path, data)
+    File.chmod(0o600, path)
+    path
+  end
+
+  def age(name)
+    path = path_for(name)
+    File.exist?(path) ? Time.now - File.mtime(path) : Float::INFINITY
+  end
+end
+
+module OP
+  Failure = Class.new(StandardError)
+  Account = Struct.new(:label, :uuid, :email, :url)
+
+  CHILD_ENV = {"OP_BIOMETRIC_UNLOCK_ENABLED" => "false"}.freeze
+
+  module_function
+
+  # op reports the sign-in address with or without a scheme depending on whether
+  # the desktop app or the local config answered, so the label comes off the
+  # host, never the raw string.
+  def accounts
+    @_accounts ||= JSON.parse(capture(["account", "list", "--format=json"])).map { |a|
+      Account.new(
+        label: Url.host(a["url"]).to_s.split(".").first,
+        uuid: a["user_uuid"],
+        email: a["email"],
+        url: a["url"]
+      )
+    }
+  end
+
+  def capture(args, account: nil)
+    cmd = ["op", *args]
+    cmd += ["--account", account.uuid, "--session", session(account)] if account
+
+    out, err, status = run(cmd)
+    raise Failure, message_from(err) unless status.success?
+
+    out
+  rescue Errno::ENOENT
+    raise Failure, "op not found -- https://developer.1password.com/docs/cli/get-started/"
+  end
+
+  # Not Open3.capture3: it forces its own empty stdin pipe and ignores :in, and
+  # `op item edit` reads a non-tty stdin as a JSON template -- every edit dies on
+  # "invalid JSON provided" before it looks at a single flag. /dev/null fixes it.
+  # Both streams are drained on threads so a 600KB item list cannot deadlock.
+  def run(cmd)
+    out_r, out_w = IO.pipe
+    err_r, err_w = IO.pipe
+    pid = Process.spawn(CHILD_ENV, *cmd, in: File::NULL, out: out_w, err: err_w)
+    [out_w, err_w].each(&:close)
+
+    out = Thread.new { out_r.read }
+    err = Thread.new { err_r.read }
+    _, status = Process.wait2(pid)
+    [out.value, err.value, status]
+  ensure
+    [out_r, err_r].each { |io| io&.close }
+  end
+
+  def session(account)
+    @_sessions ||= {}
+    @_sessions[account.uuid] ||= cached_session(account) || signin(account)
+  end
+
+  # Prompting from two threads at once garbles the tty; callers that fan out
+  # warm every session here first.
+  def warm(accounts)
+    accounts.each { |account| session(account) }
+  end
+
+  def cached_session(account)
+    token = Store.read(session_file(account)).to_s.strip
+    return nil if token.empty?
+    return nil unless alive?(account, token)
+
+    token
+  end
+
+  def alive?(account, token)
+    system(CHILD_ENV, "op", "whoami", "--account", account.uuid, "--session", token,
+      out: File::NULL, err: File::NULL)
+  end
+
+  def signin(account)
+    warn "1pswd: sign in to #{account.label} (#{account.email})"
+    reader, writer = IO.pipe
+    pid = Process.spawn(CHILD_ENV, "op", "signin", "--account", account.uuid, "--raw", out: writer)
+    writer.close
+    token = reader.read.to_s.strip
+    _, status = Process.wait2(pid)
+
+    raise Failure, "signin failed for #{account.label}" unless status.success?
+    raise Failure, "no session token for #{account.label}" if token.empty?
+
+    Store.write(session_file(account), token)
+    token
+  end
+
+  def session_file(account)
+    "session-#{account.label}"
+  end
+
+  # op stamps every error line
+  # ✓ "[ERROR] 2026/08/02 19:44:14 not signed in" ✗ "not signed in" (left alone)
+  ERROR_STAMP = /\A\[ERROR\]\s+\S+\s+\S+\s+/
+
+  def message_from(stderr)
+    line = stderr.to_s.lines.first.to_s.strip.sub(ERROR_STAMP, "")
+    line.empty? ? "op failed" : line
+  end
+end
+
+# 614 items across two accounts costs ~1.2s of `op item list`; reading them back
+# from tmpfs costs 0.07s. That gap is the entire reason this exists.
+module Index
+  FILE = "index.json"
+  TTL = 3600
+
+  Item = Data.define(:id, :account, :title, :subtitle, :vault, :category, :tags, :urls, :updated)
+
+  module_function
+
+  def load(accounts, refresh: false)
+    return build(accounts) if refresh || Store.age(FILE) > TTL
+
+    cached = decode(Store.read(FILE))
+    cached.empty? ? build(accounts) : cached
+  end
+
+  # The index always covers every account so one `-a` run cannot poison it for
+  # the next; the narrowing happens here instead.
+  def for_accounts(accounts, refresh: false)
+    labels = accounts.map(&:label)
+    load(OP.accounts, refresh: refresh).select { |item| labels.include?(item.account) }
+  end
+
+  def build(accounts)
+    OP.warm(accounts)
+    items = accounts.map { |account| Thread.new { fetch(account) } }.flat_map(&:value)
+    Store.write(FILE, JSON.generate(items.map(&:to_h)))
+    items
+  end
+
+  def fetch(account)
+    raw = JSON.parse(OP.capture(["item", "list", "--format=json"], account: account))
+    raw.map { |item| row(item, account) }
+  end
+
+  def row(item, account)
+    Item.new(
+      id: item["id"].to_s,
+      account: account.label,
+      title: oneline(item["title"]),
+      subtitle: subtitle_of(item),
+      vault: oneline(item.dig("vault", "name")),
+      category: item["category"].to_s,
+      tags: Array(item["tags"]).map { |t| oneline(t) },
+      urls: Array(item["urls"]).map { |u| oneline(u["href"]) },
+      updated: item["updated_at"].to_s
+    )
+  end
+
+  # With no username, 1Password puts a creation timestamp in
+  # additional_information. That is noise in the one searchable column an item
+  # gets, so it is dropped here and the host shows instead.
+  # ✓ "Sun Jul 12 16:08:57 UTC 2015" ✓ "Jul 21, 2015 at 11:20:30 AM"
+  # ✗ "erik@benoist.dev"
+  TIMESTAMP = /\A\w{3} \w{3}\s+\d{1,2} \d{2}:\d{2}:\d{2} \w+ \d{4}\z|\A\w{3} \d{1,2}, \d{4} at \d/
+
+  def subtitle_of(item)
+    text = oneline(item["additional_information"])
+    text.match?(TIMESTAMP) ? "" : text
+  end
+
+  # Titles and usernames are free text. A tab or newline in one would split the
+  # fzf record, so they get flattened on the way in and are trusted after.
+  def oneline(text)
+    text.to_s.tr("\t\n\r", " ").strip
+  end
+
+  # An unreadable or outgrown cache is not an error, it is a rebuild.
+  def decode(json)
+    return [] if json.nil?
+
+    JSON.parse(json).map { |h| Item.new(**h.transform_keys(&:to_sym)) }
+  rescue JSON::ParserError, ArgumentError, TypeError
+    []
+  end
+end
+
+# Deliberately not in tmpfs. 1Password exposes no last-used time over the CLI,
+# so the only way to learn which of 594 items are real is to write it down every
+# time one is copied. Which item and which field, never the value.
+module Usage
+  module_function
+
+  def path
+    @_path ||= begin
+      base = ENV["XDG_STATE_HOME"] || File.join(Dir.home, ".local", "state")
+      dir = File.join(base, "1pswd")
+      FileUtils.mkdir_p(dir, mode: 0o700)
+      File.join(dir, "usage.jsonl")
+    end
+  end
+
+  def record(item, field)
+    line = JSON.generate({
+      "at" => Time.now.utc.iso8601,
+      "account" => item.account,
+      "vault" => item.vault,
+      "id" => item.id,
+      "title" => item.title,
+      "field" => field
+    })
+    File.open(path, "a", 0o600) do |log|
+      log.flock(File::LOCK_EX)
+      log.puts(line)
+    end
+  rescue SystemCallError, IOError => e
+    # A copy that worked must not fail because the diary did not.
+    warn "1pswd: could not record usage (#{e.message})"
+  end
+end
+
+module Clip
+  module_function
+
+  def copy(value)
+    sink = target
+    case sink
+    when :wayland then pipe(["wl-copy"], value)
+    when :macos then pipe(["pbcopy"], value)
+    else osc52(value)
+    end
+    sink
+  end
+
+  # OSC 52 first: inside a persistent zellij session the env is whatever it
+  # was at session start, so SSH_CONNECTION/WAYLAND_DISPLAY lie about where
+  # you are sitting -- wl-copy would put the secret on the wrong machine's
+  # clipboard. OSC 52 lands on the terminal attached right now. wl-copy only
+  # remains as the no-tty fallback (cron, editor job pipes).
+  def target
+    return :macos if RUBY_PLATFORM.include?("darwin") && which("pbcopy")
+    return :osc52 if tty?
+    return :wayland if !ENV["WAYLAND_DISPLAY"].to_s.empty? && which("wl-copy")
+
+    :osc52
+  end
+
+  def tty?
+    File.open("/dev/tty", "w") { true }
+  rescue SystemCallError
+    false
+  end
+
+  def osc52(value)
+    payload = [value].pack("m0")
+    File.open("/dev/tty", "w") { |tty| tty.print("\e]52;c;#{payload}\a") }
+  rescue Errno::ENOENT, Errno::ENXIO
+    raise OP::Failure, "no clipboard available"
+  end
+
+  def pipe(cmd, value)
+    Open3.capture2(*cmd, stdin_data: value)
+  end
+
+  def which(bin)
+    ENV["PATH"].to_s.split(File::PATH_SEPARATOR).any? { |d| File.executable?(File.join(d, bin)) }
+  end
+end
+
+# The account glyph is colour, and fzf cannot match colour. Scoping is a key
+# instead: ctrl-a cycles all -> account -> account. fzf can only reload from a
+# command, so each scope's rendered rows are written once at launch and the
+# toggle costs a cat.
+module Scope
+  STATE = "scope-state.json"
+  ALL = "all"
+
+  module_function
+
+  def prepare(items, accounts, marks)
+    labels = accounts.map(&:label)
+    scopes = (labels.length > 1) ? [ALL, *labels] : labels
+
+    scopes.each do |scope|
+      rows = (scope == ALL) ? items : items.select { |i| i.account == scope }
+      Store.write(records_file(scope), rows.map { |i| Picker.line_for(i, marks) }.join("\n"))
+    end
+    write(0, scopes)
+    scopes
+  end
+
+  def advance
+    index, scopes = state
+    index = (index + 1) % scopes.length
+    write(index, scopes)
+    scopes[index]
+  end
+
+  def current
+    index, scopes = state
+    scopes[index]
+  end
+
+  # fzf reads this as an action list, which is how one subprocess both swaps the
+  # rows and relabels the prompt.
+  def toggle_action
+    scope = advance
+    "reload(cat #{records_path(scope)})+change-prompt(#{prompt(scope)})"
+  end
+
+  def records(scope)
+    Store.read(records_file(scope)).to_s
+  end
+
+  def records_path(scope)
+    Store.path_for(records_file(scope))
+  end
+
+  def records_file(scope)
+    "scope-records-#{scope}"
+  end
+
+  def prompt(scope)
+    (scope == ALL) ? "1p " : "1p #{scope} "
+  end
+
+  def state
+    parsed = JSON.parse(Store.read(STATE).to_s)
+    [parsed.fetch("index"), parsed.fetch("scopes")]
+  rescue JSON::ParserError, KeyError, TypeError
+    [0, [ALL]]
+  end
+
+  def write(index, scopes)
+    Store.write(STATE, JSON.generate({"index" => index, "scopes" => scopes}))
+  end
+end
+
+module Picker
+  GLYPHS = %w[● ◆ ■ ▲ ○ ◇].freeze
+  COLORS = [117, 179, 114, 176, 210, 116].freeze
+  ACRONYMS = %w[API SSH URL OTP ID SSN].freeze
+  GAP = 2
+
+  # fzf renders the line it matches -- --nth applies after --with-nth transforms
+  # it, so there is no hiding a wider search blob behind a narrow row. Rows stay
+  # narrow and matching narrows with them; {4} still expands from the original
+  # line, which is why the preview costs no subprocess.
+  ITEM_FZF = [
+    "--ansi", "--delimiter=\t", "--with-nth=3", "--print-query", "--no-multi",
+    "--layout=reverse", "--height=~80%", "--min-height=15", "--info=inline-right",
+    "--cycle", "--preview", "printf '%b' {4}", "--preview-window=right,42%,border-left"
+  ].freeze
+
+  FIELD_FZF = [
+    "--ansi", "--delimiter=\t", "--with-nth=2", "--no-multi", "--layout=reverse",
+    "--height=~60%", "--min-height=8", "--info=inline-right", "--cycle"
+  ].freeze
+
+  Mark = Struct.new(:glyph, :color)
+  Field = Struct.new(:label, :value, :kind)
+
+  module_function
+
+  def run(items, accounts:, query: "")
+    marks = marks_for(accounts)
+    measure(items)
+    scopes = Scope.prepare(items, accounts, marks)
+    by_id = items.to_h { |item| [item.id, item] }
+
+    loop do
+      query, picked = pick_item(query: query, header: legend(accounts, marks), toggle: scopes.length > 1)
+      return unless picked
+
+      return if copy_field(by_id.fetch(picked))
+    end
+  end
+
+  def marks_for(accounts)
+    accounts.each_with_index.to_h { |account, i|
+      [account.label, Mark.new(glyph: GLYPHS[i % GLYPHS.length], color: COLORS[i % COLORS.length])]
+    }
+  end
+
+  def legend(accounts, marks)
+    return "" if accounts.length < 2
+
+    accounts.map { |a| Ansi.color("#{marks[a.label].glyph} #{a.label}", marks[a.label].color) }.join("   ")
+  end
+
+  def line_for(item, marks)
+    record(item.id, item.account, display_for(item, marks), preview_for(item))
+  end
+
+  # The one invariant the picker rests on: four tab-separated fields per line.
+  # Everything reaching here is flattened at ingest or encoded above, so a tab
+  # getting through means a new source of text bypassed both.
+  def record(*fields)
+    bad = fields.find { |f| f.include?("\t") }
+    raise OP::Failure, "tab in a picker field: #{bad.inspect}" if bad
+
+    fields.join("\t")
+  end
+
+  # Nothing here is truncated on purpose: fzf matches the string it renders, so
+  # a trimmed title is a title you can no longer find. Overlong rows get cut by
+  # fzf at draw time, which costs nothing -- it still matches the full text.
+  def display_for(item, marks)
+    mark = marks.fetch(item.account)
+    title = Ansi.pad(item.title, title_width)
+
+    "#{Ansi.color(mark.glyph, mark.color)} #{title}#{" " * GAP}#{Ansi.dim(context_for(item))}"
+  end
+
+  # Only what is on screen is searchable, so the second column carries the most
+  # specific thing the item has. Without it you would type a host or a vault and
+  # get nothing back.
+  def context_for(item)
+    return item.subtitle unless item.subtitle.empty?
+
+    Url.host(item.urls.first) || item.vault
+  end
+
+  # p90, not max: this vault's titles run p50=10, p90=19, max=48, so sizing to
+  # the longest one leaves a canyon in front of every ordinary row. The ~10%
+  # that overrun push their own context column right and stay legible.
+  def measure(items)
+    lengths = items.map { |item| item.title.length }.sort
+    p90 = lengths[(lengths.length * 0.9).floor].to_i
+    @_title_width = p90.clamp(18, [(columns * 0.5).floor, 24].max)
+  end
+
+  def title_width
+    @_title_width
+  end
+
+  def columns
+    @_columns ||= IO.console&.winsize&.last || ENV["COLUMNS"].to_i.nonzero? || 100
+  end
+
+  def preview_for(item)
+    lines = [Ansi.color(item.title, 255), ""]
+    lines << field("account", item.account)
+    lines << field("vault", item.vault)
+    lines << field("category", humanize(item.category))
+    lines << field("user", item.subtitle) unless item.subtitle.empty?
+    lines << field("updated", relative(item.updated))
+    lines << field("tags", item.tags.join(", ")) unless item.tags.empty?
+    item.urls.each_with_index { |url, i| lines << field(i.zero? ? "url" : "", url) }
+    encode(lines.join("\n"))
+  end
+
+  def field(label, value)
+    "#{Ansi.dim(Ansi.pad(label, 9))}#{value}"
+  end
+
+  # printf '%b' unescapes this back into a multi-line preview; a literal tab or
+  # newline here would split the fzf record.
+  def encode(text)
+    text.gsub(/[\\\t\n]/) { |c| {"\\" => "\\\\", "\t" => " ", "\n" => "\\n"}.fetch(c) }
+  end
+
+  def humanize(category)
+    category.to_s.split("_").map { |w| ACRONYMS.include?(w) ? w : w.capitalize }.join(" ")
+  end
+
+  def relative(stamp)
+    time = Time.parse(stamp)
+    days = ((Time.now - time) / 86_400).floor
+    return "today" if days <= 0
+    return "#{days}d ago" if days < 60
+    return "#{(days / 30.0).round}mo ago" if days < 730
+
+    "#{(days / 365.0).round}y ago"
+  rescue ArgumentError, TypeError
+    stamp.to_s
+  end
+
+  def pick_item(query:, header:, toggle:)
+    scope = Scope.current
+    args = ITEM_FZF + ["--prompt=#{Scope.prompt(scope)}", "--query=#{query}"]
+    args += ["--bind", "ctrl-a:transform(#{File.expand_path($PROGRAM_NAME)} --scope-next)"] if toggle
+    args += ["--header", toggle ? "#{header}   #{Ansi.dim("ctrl-a scope")}" : header] unless header.empty?
+
+    typed, chosen = fzf(Scope.records(scope), args).lines.map(&:chomp)
+    [typed.to_s, chosen&.split("\t")&.first]
+  end
+
+  def copy_field(item)
+    fields = fields_for(item)
+    if fields.empty?
+      warn "1pswd: #{item.title} has no readable fields"
+      return true
+    end
+
+    lines = fields.each_with_index.map { |f, i| record(i.to_s, field_display(f)) }
+    chosen = fzf(lines.join("\n"), FIELD_FZF + ["--prompt=#{item.title} "]).lines.first&.chomp
+    return false if chosen.nil? || chosen.empty?
+
+    picked = fields.fetch(chosen.split("\t").first.to_i)
+    sink = Clip.copy(picked.value)
+    label = Ansi.strip(picked.label)
+    Usage.record(item, label)
+    puts "✓ #{item.account}/#{item.title} · #{label} copied (#{sink})"
+    true
+  end
+
+  def fields_for(item)
+    account = OP.accounts.find { |a| a.label == item.account }
+    detail = JSON.parse(OP.capture(["item", "get", item.id, "--format=json", "--reveal"], account: account))
+
+    rows = ranked(Array(detail["fields"])).filter_map { |f| to_field(f) }
+    rows + Array(detail["urls"]).map { |u|
+      Field.new(label: u["label"].to_s.empty? ? "website" : u["label"], value: u["href"].to_s, kind: :url)
+    }
+  end
+
+  # Password first so enter-enter stays the fast path, then the live code, then
+  # the username. Everything else keeps 1Password's own order.
+  def ranked(fields)
+    fields.each_with_index.sort_by { |f, i| [rank(f), i] }.map(&:first)
+  end
+
+  def rank(f)
+    return 0 if f["purpose"] == "PASSWORD"
+    return 1 if f["type"] == "OTP"
+    return 2 if f["purpose"] == "USERNAME"
+    return 3 if f["type"] == "CONCEALED"
+
+    4
+  end
+
+  def to_field(f)
+    value = (f["type"] == "OTP") ? f["totp"].to_s : f["value"].to_s
+    return nil if value.empty?
+
+    Field.new(label: field_label(f), value: value, kind: kind_of(f))
+  end
+
+  # 1Password labels a note field "notesPlain"; nothing else needs renaming.
+  def field_label(f)
+    label = f["label"].to_s.empty? ? f["id"].to_s : f["label"].to_s
+    label = "note" if label == "notesPlain"
+    section = f.dig("section", "label").to_s
+    section.empty? ? label : "#{Ansi.dim("#{section} /")} #{label}"
+  end
+
+  def kind_of(f)
+    return :otp if f["type"] == "OTP"
+    return :secret if f["type"] == "CONCEALED" || f["purpose"] == "PASSWORD"
+
+    :plain
+  end
+
+  def field_display(f)
+    "#{Ansi.pad(f.label, 26)}  #{Ansi.dim(field_hint(f))}"
+  end
+
+  def field_hint(f)
+    case f.kind
+    when :secret then "#{"•" * 8} #{f.value.length}"
+    when :otp then f.value
+    else Ansi.clamp(f.value.tr("\n", "⏎"), 48)
+    end
+  end
+
+  def fzf(input, args)
+    out, = Open3.capture2("fzf", *args, stdin_data: input)
+    out
+  rescue Errno::ENOENT
+    raise OP::Failure, "fzf not found"
+  end
+end
+
+# One entry point, human driven. Flags are few enough to read straight off ARGV.
+module CLI
+  USAGE = <<~TEXT
+    usage: 1pswd [query]        pick an item, then pick a field
+           1pswd -a ACCOUNT     limit to one account
+           1pswd -r             rebuild the item index
+           1pswd-doctor         vault hygiene report
+
+    in the picker: ctrl-a cycles scope (all -> account -> account)
+  TEXT
+
+  module_function
+
+  def main(argv)
+    options = parse(argv)
+    return puts(USAGE) if options[:help]
+    # fzf calls back into us for the scope toggle; it needs no vault access.
+    return puts(Scope.toggle_action) if options[:scope_next]
+
+    accounts = select_accounts(options[:account])
+    items = Index.for_accounts(accounts, refresh: options[:refresh])
+    raise OP::Failure, "no items -- try 1pswd -r" if items.empty?
+
+    Picker.run(items, accounts: accounts, query: options[:query])
+  rescue OP::Failure => e
+    abort "1pswd: #{e.message}"
+  rescue JSON::ParserError => e
+    abort "1pswd: unreadable op output -- #{e.message}"
+  rescue Interrupt
+    exit 130
+  end
+
+  def parse(argv)
+    options = {query: []}
+    argv = argv.dup
+
+    until argv.empty?
+      case (arg = argv.shift)
+      when "-h", "--help" then options[:help] = true
+      when "-r", "--refresh" then options[:refresh] = true
+      when "-a", "--account" then options[:account] = argv.shift
+      when "--scope-next" then options[:scope_next] = true
+      when /\A-/ then raise OP::Failure, "unknown flag #{arg}\n#{USAGE}"
+      else options[:query] << arg
+      end
+    end
+
+    options.merge(query: options[:query].join(" "))
+  end
+
+  def select_accounts(label)
+    return OP.accounts if label.nil?
+
+    found = OP.accounts.select { |a| a.label == label }
+    raise OP::Failure, "unknown account #{label} (have: #{OP.accounts.map(&:label).join(", ")})" if found.empty?
+
+    found
+  end
+end
+
+CLI.main(ARGV) if $PROGRAM_NAME == __FILE__

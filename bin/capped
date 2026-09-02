@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# capped - run a heavy build in a cgroup that leaves the box reachable
+#
+# Saturating every core is what wedged work-1440 during a seed build: ping still
+# answered (the kernel does that from interrupt context) while sshd could not get
+# scheduled long enough to finish a banner exchange, and the qemu guest agent
+# went with it. The box looked dead from outside and was only busy.
+#
+# Leaving one core and some memory headroom keeps it diagnosable while the build
+# runs, at a few percent of throughput.
+#
+#   capped make seeds
+#   capped -- cargo build --release
+#   CAPPED_RESERVE=2 capped ./heavy-thing
+
+set -euo pipefail
+
+[ $# -gt 0 ] || { echo "usage: capped [--] <command> [args...]" >&2; exit 64; }
+[ "${1:-}" = "--" ] && shift
+
+reserve="${CAPPED_RESERVE:-1}"
+cores="$(nproc)"
+quota=$(( (cores - reserve) * 100 ))
+[ "$quota" -ge 100 ] || quota=100
+
+exec systemd-run --user --scope --quiet --collect \
+    -p "CPUQuota=${quota}%" \
+    -p "MemoryHigh=80%" \
+    -- "$@"

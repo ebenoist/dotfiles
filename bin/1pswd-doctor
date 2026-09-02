@@ -1,0 +1,316 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# 1pswd-doctor - vault hygiene across every 1Password account
+#
+#   1pswd-doctor          coverage + metadata checks, instant, straight off the index
+#   1pswd-doctor --deep   also read every item to compare password values
+#   1pswd-doctor --check NAME   list one check in full
+#   1pswd-doctor --json   machine readable
+#   1pswd-doctor -a ACCT  one account only
+#   1pswd-doctor -r       rebuild the index first
+#
+# Read only. It names what to clean; the cleaning happens in the app.
+#
+# Reused and weak passwords are what Watchtower already reports, so they sit
+# behind --deep. What it has no opinion on -- duplicates, missing and junk URLs,
+# hostname titles, tag coverage -- needs no secret values and is instant.
+
+require "digest"
+
+load File.expand_path("1pswd", __dir__)
+
+module Doctor
+  WORKERS = 8
+  WEAK_LENGTH = 12
+
+  # Five years, not two. At two this vault reports 350 of 614 items stale, which
+  # is a description of the vault rather than a list of things to do.
+  STALE_DAYS = 1825
+
+  # Past this a section prints its count and how to see it, not 200 lines.
+  LIST_LIMIT = 40
+
+  DEEP_CHECKS = %w[reused_passwords weak_passwords no_password].freeze
+
+  # Titles that mean "I meant to come back to this"
+  # ✓ "GitHub (copy)" ✓ "old aws" ✓ "Login"   ✗ "Copyright registration"
+  JUNK_TITLE = /\b(copy|old|test|temp|untitled)\b|\A(login|sign ?in|account|new item)\z/i
+
+  # Matching any dotted word flagged "J.Crew", so the suffix has to be a real TLD.
+  TLDS = %w[com org net io ai so dev co us tv me app cloud info edu gov uk ca].freeze
+
+  # A title that is really just the address bar
+  # ✓ "www.irccloud.com" ✓ "Wayfair.com" ✓ "192.168.100.1"   ✗ "J.Crew" ✗ "Wave"
+  HOSTNAME_TITLE = /\A(https?:\/\/|www\.)|\A[a-z0-9-]+\.(#{TLDS.join("|")})\z|\A\d{1,3}(\.\d{1,3}){3}\z/i
+
+  # A URL that can never autofill anywhere: an app scheme or a host with no dot.
+  # Private addresses are NOT junk here -- the LAN boxes are real logins.
+  # ✓ "chrome://chrome-signin" ✓ "app://com.google.chrome"
+  # ✗ "http://192.168.1.106" ✗ "https://bestbuy.com"
+  JUNK_URL = /\A(android|chrome|app):/i
+
+  USAGE = <<~TEXT
+    usage: 1pswd-doctor [--deep] [--check NAME] [--json] [-a ACCOUNT] [-r]
+      --check  list one check in full (implies --deep when it needs values)
+      --deep   read every item to compare password values (~50s for 600 items)
+      --json   machine-readable report, never capped
+      -a       limit to one account
+      -r       rebuild the item index first
+  TEXT
+
+  Secret = Data.define(:item, :password)
+
+  # Every check reports groups. A flat check is groups of one, which is what
+  # tells the report whether to print members together or as a list.
+  Check = Data.define(:name, :groups) do
+    def items
+      groups.flatten
+    end
+
+    def grouped?
+      groups.any? { |g| g.length > 1 }
+    end
+  end
+
+  module_function
+
+  def main(argv)
+    options = parse(argv)
+    return puts(USAGE) if options[:help]
+
+    accounts = CLI.select_accounts(options[:account])
+    items = Index.for_accounts(accounts, refresh: options[:refresh])
+    raise OP::Failure, "no items -- try 1pswd -r" if items.empty?
+
+    checks = run_checks(items, deep: options[:deep])
+    validate!(checks, options[:check])
+    if options[:json]
+      puts JSON.pretty_generate(payload(items, checks))
+    else
+      print_report(items, checks, only: options[:check])
+    end
+  rescue OP::Failure => e
+    abort "1pswd-doctor: #{e.message}"
+  rescue Interrupt
+    exit 130
+  end
+
+  def run_checks(items, deep:)
+    logins = items.select { |i| i.category == "LOGIN" }
+    checks = [
+      grouped("duplicate_titles", duplicate_groups(items)),
+      flat("junk_urls", items.select { |i| i.urls.any? { |u| junk_url?(u) } }),
+      flat("hostname_titles", items.select { |i| i.title.match?(HOSTNAME_TITLE) }),
+      flat("junk_titles", items.select { |i| i.title.match?(JUNK_TITLE) }),
+      flat("no_url", logins.select { |i| i.urls.empty? }),
+      flat("stale", items.select { |i| stale?(i) }),
+      grouped("shared_domain", domain_groups(logins))
+    ]
+    return checks unless deep
+
+    secrets = fetch_secrets(items)
+    checks + [
+      grouped("reused_passwords", reused_groups(secrets)),
+      flat("weak_passwords", secrets.select { |s| (1...WEAK_LENGTH).cover?(s.password.length) }.map(&:item)),
+      flat("no_password", secrets.select { |s| s.item.category == "LOGIN" && s.password.empty? }.map(&:item))
+    ]
+  end
+
+  def flat(name, items)
+    Check.new(name: name, groups: items.zip)
+  end
+
+  def grouped(name, groups)
+    Check.new(name: name, groups: groups)
+  end
+
+  def duplicate_groups(items)
+    items.group_by { |i| [i.account, i.title.downcase] }
+      .values.select { |group| group.length > 1 }
+      .sort_by { |group| group.first.title.downcase }
+  end
+
+  def domain_groups(logins)
+    logins.group_by { |i| Url.domain(i.urls.first) }
+      .reject { |domain, group| domain.nil? || group.length < 2 }
+      .values
+  end
+
+  def reused_groups(secrets)
+    secrets
+      .reject { |s| s.password.empty? }
+      .group_by { |s| Digest::SHA256.hexdigest(s.password) }
+      .values.select { |group| group.length > 1 }
+      .map { |group| group.map(&:item) }
+  end
+
+  def junk_url?(url)
+    host = Url.host(url).to_s
+    host.empty? || !host.include?(".") || url.match?(JUNK_URL)
+  end
+
+  def stale?(item)
+    Time.now - Time.parse(item.updated) > STALE_DAYS * 86_400
+  rescue ArgumentError, TypeError
+    false
+  end
+
+  # `op item get -` reads a whole list on stdin but resolves it serially: 105s
+  # for 500 items against 5.4s for 63 across 8 threads. So the pool stays.
+  def fetch_secrets(items)
+    by_label = OP.accounts.to_h { |a| [a.label, a] }
+    OP.warm(by_label.values)
+
+    queue = Queue.new
+    items.each { |item| queue << item }
+    queue.close
+
+    done = 0
+    lock = Mutex.new
+    secrets = []
+
+    Array.new(WORKERS) {
+      Thread.new do
+        while (item = queue.pop)
+          secret = secret_for(item, by_label.fetch(item.account))
+          lock.synchronize do
+            secrets << secret if secret
+            done += 1
+            # \r only overwrites on a terminal; piped, it would emit one line per item.
+            $stderr.print "\r1pswd-doctor: reading #{done}/#{items.length}" if $stderr.tty?
+          end
+        end
+      end
+    }.each(&:join)
+    warn "" if $stderr.tty?
+
+    secrets
+  end
+
+  def secret_for(item, account)
+    raw = JSON.parse(OP.capture(["item", "get", item.id, "--format=json", "--reveal"], account: account))
+    Secret.new(item: item, password: password_of(raw))
+  rescue OP::Failure, JSON::ParserError
+    nil
+  end
+
+  def password_of(raw)
+    fields = Array(raw["fields"])
+    field = fields.find { |f| f["purpose"] == "PASSWORD" } || fields.find { |f| f["type"] == "CONCEALED" }
+    field&.fetch("value", nil).to_s
+  end
+
+  def validate!(checks, name)
+    return if name.nil? || checks.any? { |c| c.name == name }
+
+    raise OP::Failure, "unknown check #{name} (have: #{checks.map(&:name).join(", ")})"
+  end
+
+  def print_report(items, checks, only:)
+    print_coverage(items) unless only
+    print_summary(checks)
+
+    shown, held = checks.reject { |c| c.items.empty? }
+      .partition { |c| only == c.name || (only.nil? && c.items.length <= LIST_LIMIT) }
+
+    shown.each { |check| print_check(check) }
+    return if only || held.empty?
+
+    puts
+    puts "list one: #{held.map { |c| "1pswd-doctor --check #{c.name}" }.join(" · ")}"
+  end
+
+  # The coverage block is the diagnosis; the checks below it are the worklist.
+  def print_coverage(items)
+    tagged = items.count { |i| !i.tags.empty? }
+    with_url = items.count { |i| !i.urls.empty? }
+    vaults = items.group_by { |i| "#{i.account}/#{i.vault}" }.transform_values(&:length).sort_by { |_, n| -n }
+
+    puts "1pswd-doctor · #{items.length} items"
+    puts
+    puts format("  tagged        %d  (%d%%)", tagged, percent(tagged, items.length))
+    puts format("  with a url    %d  (%d%%)", with_url, percent(with_url, items.length))
+    puts format("  vaults        %s", vaults.map { |name, n| "#{name} #{n}" }.join("  "))
+  end
+
+  def print_summary(checks)
+    puts
+    checks.each do |check|
+      count = check.items.length
+      detail = check.grouped? ? " in #{check.groups.length} groups" : ""
+      puts format("  %-18s %d%s", check.name.tr("_", " "), count, detail)
+    end
+  end
+
+  def print_check(check)
+    puts
+    puts "#{check.name.tr("_", " ")} (#{check.items.length})"
+    check.grouped? ? print_groups(check) : print_flat(check)
+  end
+
+  def print_groups(check)
+    check.groups.each do |group|
+      lead = group.first
+      puts "  #{lead.title}  #{Ansi.dim("#{lead.account}/#{lead.vault}")}"
+      group.sort_by { |i| [i.urls.empty? ? 1 : 0, i.updated] }.reverse_each do |i|
+        puts "    #{Ansi.pad(site(i), 34)} #{Ansi.pad(Picker.relative(i.updated), 10)} #{i.subtitle}"
+      end
+    end
+  end
+
+  # Newest first: the item you last touched is the one you actually use, and the
+  # one worth fixing rather than deleting.
+  def print_flat(check)
+    check.items.sort_by(&:updated).reverse_each do |i|
+      puts format("  %-24s %-32s %-10s %s",
+        "#{i.account}/#{i.vault}"[0, 24], i.title[0, 32], Picker.relative(i.updated), site(i))
+    end
+  end
+
+  def site(item)
+    return Ansi.dim("-- no url --") if item.urls.empty?
+
+    Url.host(item.urls.first).to_s
+  end
+
+  def percent(part, total)
+    total.zero? ? 0 : (100.0 * part / total).round
+  end
+
+  def payload(items, checks)
+    {
+      "items" => items.length,
+      "tagged" => items.count { |i| !i.tags.empty? },
+      "with_url" => items.count { |i| !i.urls.empty? },
+      "checks" => checks.to_h { |check|
+        [check.name, check.groups.map { |group|
+          group.map { |i| i.to_h.slice(:id, :account, :vault, :title, :category, :updated, :urls) }
+        }]
+      }
+    }
+  end
+
+  def parse(argv)
+    options = {}
+    argv = argv.dup
+
+    until argv.empty?
+      case (arg = argv.shift)
+      when "-h", "--help" then options[:help] = true
+      when "--deep" then options[:deep] = true
+      when "--json" then options[:json] = true
+      when "--check" then options[:check] = argv.shift
+      when "-r", "--refresh" then options[:refresh] = true
+      when "-a", "--account" then options[:account] = argv.shift
+      else raise OP::Failure, "unknown argument #{arg}\n#{USAGE}"
+      end
+    end
+
+    # Asking for a check that needs values is asking for --deep.
+    options[:deep] = true if DEEP_CHECKS.include?(options[:check])
+    options
+  end
+end
+
+Doctor.main(ARGV) if $PROGRAM_NAME == __FILE__

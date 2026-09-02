@@ -5,6 +5,36 @@ alias vim='nvim'
 alias ll='eza --color=auto --group-directories-first --icons'
 #alias docker=podman
 
+c() { curl -sSL -m 30 -H 'User-Agent: curl' "$@"; }
+
+cv() {
+  local body ctype bat
+  body=$(mktemp) || return 1
+  ctype=$(curl -sSL -m 30 -H 'User-Agent: curl' -o "$body" -w '%{content_type}' "$@")
+  ctype=${ctype%%;*}
+
+  if [ ! -t 1 ]; then
+    cat "$body"
+    rm -f "$body"
+    return
+  fi
+
+  bat=$(command -v batcat || command -v bat)
+  case "$ctype" in
+    */json|*+json)                 jq -C . <"$body" | less -R ;;
+    text/html|*+html)              w3m -dump -T text/html <"$body" | less -R ;;
+    */xml|*+xml)                   xmllint --format - <"$body" | "$bat" --style=plain -l xml ;;
+    text/markdown|text/x-markdown) glow -p <"$body" ;;
+    */yaml|*/x-yaml)               "$bat" --style=plain -l yaml <"$body" ;;
+    */javascript)                  "$bat" --style=plain -l js <"$body" ;;
+    text/css)                      "$bat" --style=plain -l css <"$body" ;;
+    text/csv)                      column -s, -t <"$body" | less -R ;;
+    text/*|"")                     "$bat" --style=plain -l txt <"$body" ;;
+    *)                             printf '%s -- %s\n' "$ctype" "$(file -b "$body")" ;;
+  esac
+  rm -f "$body"
+}
+
 if [[ "$(uname)" == "Linux" ]]; then
   alias distro='neofetch'
   alias fetch='neofetch'

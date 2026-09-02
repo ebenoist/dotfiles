@@ -1,0 +1,163 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+#
+# sway-palette - searchable command palette / chord cheatsheet for sway
+#
+# Parses the *live* sway config (swaymsg -t get_config, includes merged) so it
+# never drifts from your real bindings. Groups by the `### Section` headers in
+# the config. In fuzzel you can type to filter; picking a single binding runs it
+# via swaymsg.
+#
+# Usage:
+#   sway-palette         fuzzel overlay (bind this to $mod+slash)
+#   sway-palette --list  plain aligned table to stdout
+
+require "json"
+
+MODIFIERS = {"Mod4" => "Super", "Mod1" => "Alt", "Mod5" => "AltGr"}.freeze
+SOV_APPEND = /\s*;\s*exec\s+"echo \d+ > \/tmp\/sovpipe"/
+SOV_TOGGLE = /\Aexec\s+"echo \d+ > \/tmp\/sovpipe"\z/
+
+Chord = Struct.new(:section, :keys, :command, :executable)
+
+def live_config
+  raw = `swaymsg -t get_config`
+  abort "sway-palette: no sway IPC (is sway running?)" unless $?.success?
+  JSON.parse(raw).fetch("config")
+end
+
+# Walk the config top to bottom, tracking the current `### Section` header and
+# any `mode "x" {` block, collecting bindsym lines as we go.
+def parse(config)
+  vars = {}
+  section = "General"
+  mode = nil
+  bindings = []
+
+  config.each_line do |raw|
+    line = raw.rstrip
+
+    if (m = line.match(/^\s*set\s+(\$\S+)\s+(.+)$/))
+      vars[m[1]] = unquote(m[2])
+      next
+    end
+
+    if (m = line.match(/^###\s+(.+)$/))
+      section = strip_note(m[1])
+      next
+    end
+
+    if (m = line.match(/^\s*mode\s+"([^"]+)"\s*\{/))
+      mode = m[1]
+      next
+    end
+    if mode && line =~ /^\s*\}/
+      mode = nil
+      next
+    end
+
+    chord = parse_binding(line, vars:, section: mode ? "#{mode} (mode)" : section)
+    bindings << chord if chord
+  end
+
+  collapse_numeric_runs(bindings)
+end
+
+def parse_binding(line, vars:, section:)
+  m = line.match(/^\s*bindsym\s+((?:--\S+\s+)*)(\S+)\s+(.+)$/)
+  return nil unless m
+
+  flags, keys, command = m.captures
+  return nil if flags.include?("--release") # sov off-pulses; pure noise on a cheatsheet
+
+  command = expand(command, vars:).gsub(SOV_APPEND, "").strip
+  command = "overview (sov)" if command.match?(SOV_TOGGLE)
+
+  Chord.new(
+    section:,
+    keys: pretty_keys(expand(keys, vars:)),
+    command:,
+    executable: true
+  )
+end
+
+def unquote(value)
+  value.gsub(/\A"|"\z/, "")
+end
+
+def strip_note(title)
+  title.sub(/\s*\(.*\)\s*$/, "")
+end
+
+def expand(text, vars:)
+  text.gsub(/\$\w+/) { |var| vars[var] || var }
+end
+
+def pretty_keys(keys)
+  keys.split("+").map { |part| MODIFIERS[part] || part }.join("+")
+end
+
+# A run like Super+1..Super+0 -> "workspace number {1..10}" is 10 near-identical
+# rows. Fold each such run (>=3 entries differing only in their digits) into one.
+def collapse_numeric_runs(bindings)
+  bindings.chunk_while { |a, b| same_numeric_run?(a, b) }.flat_map do |group|
+    (group.size >= 3) ? [fold_run(group)] : group
+  end
+end
+
+def same_numeric_run?(a, b)
+  a.section == b.section &&
+    masked(a.keys) == masked(b.keys) &&
+    masked(a.command) == masked(b.command)
+end
+
+def masked(text)
+  text.gsub(/\d+/, "#")
+end
+
+def fold_run(group)
+  first = group.first
+  Chord.new(
+    section: first.section,
+    keys: first.keys.gsub(/\d+/, "N"),
+    command: first.command.gsub(/\d+/, "N"),
+    executable: false # which number would we pick?
+  )
+end
+
+def rows(bindings)
+  section_width = bindings.map { |b| b.section.length }.max
+  keys_width = bindings.map { |b| b.keys.length }.max
+  bindings.map do |b|
+    [format("%-#{section_width}s  %-#{keys_width}s  %s", b.section, b.keys, b.command), b]
+  end
+end
+
+def run_fuzzel(bindings)
+  table = rows(bindings)
+  chosen = IO.popen(
+    ["fuzzel", "--dmenu", "--font=monospace:size=11", "--width=90",
+      "--prompt=chord  ", "--lines=20"],
+    "r+"
+  ) do |io|
+    io.write(table.map(&:first).join("\n"))
+    io.close_write
+    io.read
+  end.to_s.strip
+  return if chosen.empty?
+
+  chord = table.find { |line, _| line == chosen }&.last
+  system("swaymsg", chord.command) if chord&.executable
+end
+
+def print_list(bindings)
+  rows(bindings).each { |line, _| puts line }
+end
+
+bindings = parse(live_config)
+if ARGV.include?("--list")
+  print_list(bindings)
+else
+  run_fuzzel(bindings)
+end

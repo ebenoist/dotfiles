@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+gsettings set org.gnome.desktop.interface color-scheme prefer-dark
+sed -i 's/^theme ".*"$/theme "kanagawa"/' "$HOME/.config/zellij/config.kdl"

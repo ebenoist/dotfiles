@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+# kvm-mirror - mirror the main display onto the JetKVM capture output
+#
+# Runs wl-mirror only while that output is actually connected. wl-mirror
+# displayed on the output it mirrors is an infinite feedback loop: recursive
+# nested frames and a comet-trail cursor. So an absent or yanked HDMI-A-1 has
+# to stop the mirror, not let it drift onto a real panel -- which is what a
+# bare `exec_always wl-mirror` does.
+# Usage: kvm-mirror [watch|on|off|status]  (watch is the default; on/off force)
+
+KVM_OUTPUT=${KVM_OUTPUT:-HDMI-A-1}
+# Connectors shuffle between boots (DP-4 vs DP-5), so resolve the source by
+# EDID the same way the main sway config does.
+SOURCE_EDID=${SOURCE_EDID:-"Dell Inc. DELL U2725QE 3CLD984"}
+WATCH_PID_FILE="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/kvm-mirror.pid"
+
+kvm_present() {
+    swaymsg -t get_outputs |
+        jq -e --arg o "$KVM_OUTPUT" 'any(.[]; .name == $o and .active)' >/dev/null
+}
+
+source_output() {
+    swaymsg -t get_outputs |
+        jq -r --arg e "$SOURCE_EDID" \
+            'first(.[] | select("\(.make) \(.model) \(.serial)" == $e) | .name) // empty'
+}
+
+mirror_running() {
+    pgrep -x wl-mirror >/dev/null
+}
+
+mirror_on() {
+    if ! kvm_present; then
+        echo "$KVM_OUTPUT absent; not mirroring" >&2
+        return 1
+    fi
+    local src
+    src=$(source_output)
+    if [ -z "$src" ]; then
+        echo "no output matching EDID '$SOURCE_EDID'" >&2
+        return 1
+    fi
+    if [ "$src" = "$KVM_OUTPUT" ]; then
+        echo "source resolved to $KVM_OUTPUT; refusing to mirror onto itself" >&2
+        return 1
+    fi
+    mirror_off
+    wl-mirror --fullscreen-output "$KVM_OUTPUT" "$src" &
+    echo "mirroring $src -> $KVM_OUTPUT"
+}
+
+mirror_off() {
+    mirror_running || return 0
+    pkill -x wl-mirror
+    echo "mirror stopped"
+}
+
+sync_state() {
+    if kvm_present; then
+        mirror_running || mirror_on
+    else
+        mirror_off
+    fi
+}
+
+# Claim the watcher slot by pidfile rather than pkill: sway's exec_always line
+# carries `kvm-mirror watch` in its own argv, so a `pkill -f` there kills the
+# shell that is about to start the replacement.
+stop_watcher() {
+    local prev
+    prev=$(cat "$WATCH_PID_FILE" 2>/dev/null)
+    [ -n "$prev" ] || return 0
+    # sway exec's into a new session, so the watcher leads its process group --
+    # kill the group and the subscribe child goes with it.
+    kill -- "-$prev" 2>/dev/null || kill "$prev" 2>/dev/null
+    rm -f "$WATCH_PID_FILE"
+}
+
+# Only clear the pidfile if it's still ours; a replacement watcher may already
+# have claimed it while we were being killed.
+release_watcher() {
+    if [ "$(cat "$WATCH_PID_FILE" 2>/dev/null)" = "$$" ]; then
+        rm -f "$WATCH_PID_FILE"
+    fi
+}
+
+watch() {
+    stop_watcher
+    echo $$ > "$WATCH_PID_FILE"
+    trap release_watcher EXIT
+
+    sync_state
+    # Process substitution, not a pipe: the loop has to run in this shell so
+    # the group kill above reaches it.
+    while read -r _; do
+        sync_state
+    done < <(swaymsg -t subscribe -m '["output"]')
+}
+
+case "${1:-watch}" in
+    watch)  watch ;;
+    on)     mirror_on ;;
+    off)    mirror_off ;;
+    status)
+        kvm_present && echo "$KVM_OUTPUT connected" || echo "$KVM_OUTPUT absent"
+        echo "source: $(source_output)"
+        mirror_running && echo "mirror: running" || echo "mirror: stopped"
+        ;;
+    *) echo "Usage: kvm-mirror [watch|on|off|status]" >&2; exit 1 ;;
+esac

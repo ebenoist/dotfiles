@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2034  # upstream tput palette kept whole; most entries unused here
 
 # Coloring/sed by katta https://gist.github.com/1027800
 
@@ -23,7 +24,7 @@ BACKGROUND_CYAN=`tput setab 6`
 BACKGROUND_WHITE=`tput setab 7`
 RESET_FORMATTING=`tput sgr0`
 
-while read data; do
+while read -r _; do
   sed -e "s/\(\[INFO\]\ \-.*\)/${TEXT_BLUE}${BOLD}\1/g" \
     -e "s/\(\[INFO\]\ \[.*\)/${RESET_FORMATTING}${BOLD}\1${RESET_FORMATTING}/g" \
     -e "s/\(\[INFO\]\ BUILD SUCCESSFUL\)/${BOLD}${TEXT_GREEN}\1${RESET_FORMATTING}/g" \

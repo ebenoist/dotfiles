@@ -9,15 +9,13 @@ if [ -f '/opt/homebrew/bin/brew' ]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
+eval "$(~/.local/bin/mise activate bash)"
+
 source ~/.colors;
 source ~/.aliases;
 source ~/.exports;
 
 ## language ENV
-export PATH="$HOME/.pyenv/bin:$HOME/.rbenv/bin:$HOME/.nodenv/bin:$PATH"
-eval "$(rbenv init -)"
-eval "$(nodenv init -)"
-eval "$(pyenv init -)"
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
 ## direnv
@@ -29,6 +27,8 @@ export GPG_TTY=$(tty)
 ## completions
 # Linux
 [[ -r "/usr/share/bash-completion/completions/git" ]] && . "/usr/share/bash-completion/completions/git"
+# regenerate after an omp upgrade: omp completions bash > ~/.local/share/bash-completion/completions/omp.bash
+[[ -r "$HOME/.local/share/bash-completion/completions/omp.bash" ]] && . "$HOME/.local/share/bash-completion/completions/omp.bash"
 
 
 ### MACOS
@@ -68,13 +68,11 @@ export CLAUDE_CODE_ENABLE_TELEMETRY=0
 
 complete -C /usr/bin/terraform terraform
 
-# Linux-specific Google Cloud SDK paths
 if [[ "$(uname)" == "Linux" ]]; then
   if [ -f '/home/erik/google-cloud-sdk/path.bash.inc' ]; then . '/home/erik/google-cloud-sdk/path.bash.inc'; fi
   if [ -f '/home/erik/google-cloud-sdk/completion.bash.inc' ]; then . '/home/erik/google-cloud-sdk/completion.bash.inc'; fi
 fi
 
-# Check for zellij bash completion
 if [ -f '~/.bash_completion/zellij' ]; then . '~/.bash_completion/zellij'; fi
 
 # pnpm
@@ -87,7 +85,8 @@ esac
 
 export GPG_TTY=$(tty)
 . "/home/erik/.deno/env"
-source /home/erik/.local/share/bash-completion/completions/deno.bash
+
+#source /home/erik/.local/share/bash-completion/completions/deno.bash
 
 . "$HOME/.local/share/../bin/env"
 

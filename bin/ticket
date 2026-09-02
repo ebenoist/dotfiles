@@ -1,0 +1,414 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Create a ticket in the configured system.
+# Configure via .envrc:
+#   TICKET_SYSTEM        notion (default)
+#   NOTION_TOKEN         Notion API token
+#   NOTION_DATABASE_ID   Notion database ID
+
+require "json"
+require "net/http"
+require "uri"
+require "rainbow"
+
+STATUS_STYLE = {
+  "Dev Inbox" => {icon: "󰏫", color: :yellow},
+  "Backlog" => {icon: "", color: :blue},
+  "This Week" => {icon: "󰃭", color: :cyan},
+  "In Progress" => {icon: "", color: :magenta},
+  "On Hold" => {icon: "", color: :yellow},
+  "Ready to Go Live" => {icon: "󰄬", color: :green}
+}.freeze
+
+TAG_STYLE = {
+  "Bug" => :red,
+  "New Feature" => :green,
+  "Enhancement" => :magenta,
+  "Tech Debt" => :yellow,
+  "Spike" => :cyan,
+  "Performance" => :blue,
+  "Blocked" => :red,
+  "AI" => :magenta,
+  "security" => :red,
+  "CMS" => :blue,
+  "SEO" => :yellow,
+  "Caching" => :green,
+  "Feed" => :cyan
+}.freeze
+
+TICKET_CACHE = File.join(ENV.fetch("XDG_CACHE_HOME", File.join(Dir.home, ".cache")), "ticket-ids")
+
+SYSTEMS = {
+  "notion" => {create: :create_notion_ticket, ls: :list_notion_tickets, show: :show_notion_ticket}
+}.freeze
+
+def usage
+  warn <<~USAGE
+    Usage: ticket "Title"
+           ticket "Title" -t bug,enhancement -s "Backlog"
+           ticket -e "Title"       # open $EDITOR for description
+           ticket ls               # list your tickets
+           ticket show <id>        # show ticket details
+
+    Options:
+      -t TAGS     comma-separated tags (bug, enhancement, spike, etc.)
+      -s STATUS   status (Dev Inbox, Backlog, This Week)
+      -e          open editor for description
+  USAGE
+  exit 1
+end
+
+def parse_args(argv)
+  opts = {tags: [], status: "Backlog", edit: false, title: nil, description: ""}
+
+  i = 0
+  while i < argv.length
+    case argv[i]
+    when "-t"
+      i += 1
+      opts[:tags] = argv[i].split(",").map(&:strip)
+    when "-s"
+      i += 1
+      opts[:status] = argv[i]
+    when "-e"
+      opts[:edit] = true
+    when /\A-/
+      usage
+    else
+      opts[:title] = argv[i]
+    end
+    i += 1
+  end
+
+  opts[:edit] = true if opts[:title].nil?
+  opts[:title] ||= "New Ticket"
+  opts
+end
+
+TEMPLATE = <<~MD
+  ---
+  title: %{title}
+  status: Backlog
+  tags:
+  ---
+
+  ## Description
+
+
+  ## Acceptance Criteria
+
+  -
+
+  ## Notes
+
+MD
+
+def edit_template(title)
+  tmpfile = "/tmp/ticket-#{$$}.md"
+  File.write(tmpfile, TEMPLATE % {title: title})
+
+  editor = ENV.fetch("EDITOR", "nvim")
+  system(editor, tmpfile) || abort("Editor exited with error")
+
+  content = File.read(tmpfile)
+  File.delete(tmpfile)
+
+  # Parse frontmatter
+  if content.start_with?("---\n")
+    parts = content.split("---\n", 3)
+    frontmatter = parts[1]
+    body = (parts[2] || "").strip
+
+    meta = {}
+    frontmatter.each_line do |line|
+      key, val = line.split(":", 2).map(&:strip)
+      meta[key] = val if key && val && !val.empty?
+    end
+  else
+    meta = {}
+    body = content.strip
+  end
+
+  {
+    title: meta.fetch("title", title),
+    status: meta.fetch("status", "Dev Inbox"),
+    tags: (meta["tags"] || "").split(",").map(&:strip).reject(&:empty?),
+    description: body
+  }
+end
+
+def create_notion_ticket(opts)
+  token = ENV.fetch("NOTION_TOKEN") { abort "Set NOTION_TOKEN in .envrc" }
+  db_id = ENV.fetch("NOTION_DATABASE_ID") { abort "Set NOTION_DATABASE_ID in .envrc" }
+
+  children = []
+  unless opts[:description].empty?
+    children << {
+      object: "block",
+      type: "paragraph",
+      paragraph: {
+        rich_text: [{type: "text", text: {content: opts[:description]}}]
+      }
+    }
+  end
+
+  payload = {
+    parent: {database_id: db_id},
+    properties: {
+      "Task" => {title: [{text: {content: opts[:title]}}]},
+      "Status" => {status: {name: opts[:status]}}
+    },
+    children: children
+  }
+
+  unless opts[:tags].empty?
+    payload[:properties]["Tags"] = {
+      multi_select: opts[:tags].map { |t| {name: t} }
+    }
+  end
+
+  user_id = ENV["NOTION_USER_ID"]
+  if user_id
+    payload[:properties]["Assign"] = {
+      people: [{object: "user", id: user_id}]
+    }
+  end
+
+  uri = URI("https://api.notion.com/v1/pages")
+  http = Net::HTTP.new(uri.host, uri.port)
+  http.use_ssl = true
+
+  req = Net::HTTP::Post.new(uri)
+  req["Authorization"] = "Bearer #{token}"
+  req["Content-Type"] = "application/json"
+  req["Notion-Version"] = "2022-06-28"
+  req.body = JSON.generate(payload)
+
+  res = http.request(req)
+  body = JSON.parse(res.body)
+
+  unless res.is_a?(Net::HTTPSuccess) && body["url"]
+    warn "Error: #{body["message"] || res.code}"
+    exit 1
+  end
+
+  puts "Created: #{body["url"]}"
+
+  # Notion Tasks DBs override status on create — patch after a delay
+  page_id = body["id"]
+  Process.fork do
+    sleep 3
+    patch_uri = URI("https://api.notion.com/v1/pages/#{page_id}")
+    patch_req = Net::HTTP::Patch.new(patch_uri)
+    patch_req["Authorization"] = "Bearer #{token}"
+    patch_req["Content-Type"] = "application/json"
+    patch_req["Notion-Version"] = "2022-06-28"
+    patch_req.body = JSON.generate({
+      properties: {"Status" => {status: {name: opts[:status]}}}
+    })
+    http.request(patch_req)
+  end
+end
+
+def notion_http
+  http = Net::HTTP.new("api.notion.com", 443)
+  http.use_ssl = true
+  http
+end
+
+def notion_headers(token)
+  {
+    "Authorization" => "Bearer #{token}",
+    "Content-Type" => "application/json",
+    "Notion-Version" => "2022-06-28"
+  }
+end
+
+def list_notion_tickets(opts)
+  token = ENV.fetch("NOTION_TOKEN") { abort "Set NOTION_TOKEN in .envrc" }
+  db_id = ENV.fetch("NOTION_DATABASE_ID") { abort "Set NOTION_DATABASE_ID in .envrc" }
+  user_id = ENV["NOTION_USER_ID"]
+
+  filters = [
+    {property: "Status", status: {does_not_equal: "Done"}},
+    {property: "Status", status: {does_not_equal: "Won't Do"}},
+    {property: "Status", status: {does_not_equal: "Archived"}}
+  ]
+
+  if user_id
+    filters << {property: "Assign", people: {contains: user_id}}
+  end
+
+  filter = {and: filters}
+
+  payload = {
+    filter: filter,
+    sorts: [{property: "Status", direction: "ascending"}],
+    page_size: 50
+  }
+
+  uri = URI("https://api.notion.com/v1/databases/#{db_id}/query")
+  req = Net::HTTP::Post.new(uri)
+  notion_headers(token).each { |k, v| req[k] = v }
+  req.body = JSON.generate(payload)
+
+  res = notion_http.request(req)
+  data = JSON.parse(res.body)
+
+  unless res.is_a?(Net::HTTPSuccess)
+    warn "Error: #{data["message"] || res.code}"
+    exit 1
+  end
+
+  results = data["results"]
+  if results.empty?
+    puts Rainbow("No tickets found.").dimgray
+    return
+  end
+
+  # Cache short_id → full_id mapping
+  cache = {}
+
+  results.each do |page|
+    props = page["properties"]
+    full_id = page["id"]
+    short_id = full_id.delete("-")[-8..]
+    cache[short_id] = full_id
+
+    title = props.dig("Task", "title", 0, "plain_text") || "(untitled)"
+    status = props.dig("Status", "status", "name") || "?"
+    tags = (props.dig("Tags", "multi_select") || []).map { |t| t["name"] }
+    due = props.dig("Due", "date", "start")
+    created = page["created_time"]&.slice(0, 10)
+
+    style = STATUS_STYLE.fetch(status, {icon: "", color: :white})
+
+    tag_str = tags.map { |t|
+      Rainbow(t).color(TAG_STYLE.fetch(t, :white))
+    }.join(Rainbow(" · ").dimgray)
+
+    parts = [
+      Rainbow(short_id).yellow,
+      Rainbow(created).red,
+      "#{Rainbow(style[:icon]).color(style[:color])} #{Rainbow(status).color(style[:color])}",
+      title
+    ]
+    line = parts.join(" ")
+    line += "  #{tag_str}" unless tags.empty?
+    line += "  #{Rainbow("󰃭 #{due}").dimgray}" if due
+    puts line
+  end
+
+  File.write(TICKET_CACHE, JSON.generate(cache))
+end
+
+def show_notion_ticket(id)
+  token = ENV.fetch("NOTION_TOKEN") { abort "Set NOTION_TOKEN in .envrc" }
+
+  # Resolve short id from cache
+  full_id = id
+  if id.length <= 8 && File.exist?(TICKET_CACHE)
+    cache = JSON.parse(File.read(TICKET_CACHE))
+    match = cache.keys.select { |k| k.start_with?(id) }
+    if match.size == 1
+      full_id = cache[match.first]
+    elsif match.size > 1
+      abort "Ambiguous id '#{id}', matches: #{match.join(", ")}"
+    end
+  end
+
+  uri = URI("https://api.notion.com/v1/pages/#{full_id}")
+  req = Net::HTTP::Get.new(uri)
+  notion_headers(token).each { |k, v| req[k] = v }
+
+  res = notion_http.request(req)
+  data = JSON.parse(res.body)
+
+  unless res.is_a?(Net::HTTPSuccess)
+    warn "Error: #{data["message"] || res.code}"
+    exit 1
+  end
+
+  props = data["properties"]
+  title = props.dig("Task", "title", 0, "plain_text") || "(untitled)"
+  status = props.dig("Status", "status", "name") || "?"
+  tags = (props.dig("Tags", "multi_select") || []).map { |t| t["name"] }
+  due = props.dig("Due", "date", "start")
+  created = data["created_time"]&.slice(0, 10)
+  assignees = (props.dig("Assign", "people") || []).map { |p| p["name"] }
+  urgent = props.dig("Urgent", "checkbox")
+  important = props.dig("Important ", "checkbox")
+
+  style = STATUS_STYLE.fetch(status, {icon: "", color: :white})
+  short_id = full_id.delete("-")[-8..]
+
+  puts
+  puts "#{Rainbow(style[:icon]).color(style[:color])} #{Rainbow(title).bright}"
+  puts
+  puts "  #{Rainbow("ID").dimgray}       #{Rainbow(short_id).yellow}"
+  puts "  #{Rainbow("Status").dimgray}   #{Rainbow(status).color(style[:color])}"
+  puts "  #{Rainbow("Created").dimgray}  #{Rainbow(created).red}" if created
+  puts "  #{Rainbow("Due").dimgray}      #{due || Rainbow("none").dimgray}"
+  puts "  #{Rainbow("Assign").dimgray}   #{assignees.empty? ? Rainbow("unassigned").dimgray : assignees.join(", ")}"
+
+  unless tags.empty?
+    tag_str = tags.map { |t| Rainbow(t).color(TAG_STYLE.fetch(t, :white)) }.join(Rainbow(" · ").dimgray)
+    puts "  #{Rainbow("Tags").dimgray}     #{tag_str}"
+  end
+
+  puts "  #{Rainbow("Urgent").dimgray}   #{Rainbow("yes").red.bright}" if urgent
+  puts "  #{Rainbow("Important").dimgray} #{Rainbow("yes").yellow.bright}" if important
+
+  # Fetch page content
+  blocks_uri = URI("https://api.notion.com/v1/blocks/#{full_id}/children?page_size=50")
+  blocks_req = Net::HTTP::Get.new(blocks_uri)
+  notion_headers(token).each { |k, v| blocks_req[k] = v }
+  blocks_res = notion_http.request(blocks_req)
+  blocks_data = JSON.parse(blocks_res.body)
+
+  if blocks_res.is_a?(Net::HTTPSuccess)
+    texts = (blocks_data["results"] || []).filter_map { |b|
+      rt = b.dig(b["type"], "rich_text") || []
+      text = rt.map { |t| t["plain_text"] }.join
+      text unless text.empty?
+    }
+    unless texts.empty?
+      puts
+      puts "  #{Rainbow("───────────────────────────────────").dimgray}"
+      texts.each { |t| puts "  #{t}" }
+    end
+  end
+
+  puts
+  puts "  #{Rainbow(data["url"]).dimgray.underline}"
+  puts
+end
+
+# --- main ---
+
+sys_name = ENV.fetch("TICKET_SYSTEM", "notion")
+sys = SYSTEMS[sys_name] || abort("Unknown ticket system: #{sys_name}")
+
+case ARGV[0]
+when "ls"
+  ARGV.shift
+  opts = parse_args(["_placeholder"] + ARGV)
+  send(sys[:ls], opts)
+when "show"
+  ARGV.shift
+  abort "Usage: ticket show <id>" unless ARGV[0]
+  send(sys[:show], ARGV[0])
+else
+  opts = parse_args(ARGV)
+
+  if opts[:edit]
+    parsed = edit_template(opts[:title])
+    opts[:title] = parsed[:title]
+    opts[:status] = parsed[:status]
+    opts[:tags] = parsed[:tags] unless parsed[:tags].empty?
+    opts[:description] = parsed[:description]
+  end
+
+  send(sys[:create], opts)
+end

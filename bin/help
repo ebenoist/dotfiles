@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# help - list custom commands in ~/bin with their descriptions
+# Usage:
+#   help            list all scripts
+#   help <query>    filter by name/description substring
+
+set -euo pipefail
+
+bin="${HOME}/bin"
+query="${1:-}"
+
+for f in "$bin"/*; do
+    [ -f "$f" ] && [ -x "$f" ] || continue
+    name=$(basename "$f")
+
+    # pull a `# name - description` header from the first comment lines
+    desc=$(grep -m1 -E "^# *${name} +- +" "$f" 2>/dev/null | sed -E "s/^# *${name} +- +//") || true
+
+    line=$(printf '%-22s %s' "$name" "$desc")
+    if [ -n "$query" ]; then
+        printf '%s\n' "$line" | grep -i -- "$query" || true
+    else
+        printf '%s\n' "$line"
+    fi
+done

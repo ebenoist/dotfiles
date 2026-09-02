@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# Paste is the weak half of OSC 52 in this stack: zellij swallows the query
+# (grid.rs "TBD: currently unsupported", zellij#2647) and mosh has no reply
+# channel at all. Compositor clipboard when there is a display, OSC 52 query
+# only in a bare terminal (ghostty answers it: clipboard-read = allow),
+# otherwise the real paste path is the terminal's own ctrl+shift+v.
+if [[ "$(uname)" == "Darwin" ]]; then
+  exec /usr/bin/pbpaste
+fi
+
+if [[ -n "$WAYLAND_DISPLAY" ]] && command -v wl-paste >/dev/null 2>&1; then
+  exec wl-paste --no-newline
+fi
+
+if [[ -n "$ZELLIJ" ]]; then
+  echo "pbpaste: zellij swallows the OSC 52 query (zellij#2647)" >&2
+  echo "pbpaste: paste with the terminal instead (ctrl+shift+v)" >&2
+  exit 1
+fi
+
+if ! { true > /dev/tty; } 2>/dev/null; then
+  echo "pbpaste: no display and no tty" >&2
+  exit 1
+fi
+
+old_stty=$(stty -g < /dev/tty)
+trap 'stty "$old_stty" < /dev/tty' EXIT
+stty raw -echo < /dev/tty
+printf '\033]52;c;?\a' > /dev/tty
+
+# Reply: ESC ] 52 ; c ; <base64> terminated by BEL or ESC \
+reply=""
+while IFS= read -r -n1 -t 2 ch < /dev/tty; do
+  [[ "$ch" == $'\a' ]] && break
+  reply+="$ch"
+  if [[ "$reply" == *$'\e\\' ]]; then
+    reply="${reply%$'\e\\'}"
+    break
+  fi
+done
+stty "$old_stty" < /dev/tty
+trap - EXIT
+
+b64="${reply##*;}"
+if [[ -z "$b64" ]]; then
+  echo "pbpaste: no OSC 52 reply from terminal" >&2
+  exit 1
+fi
+
+printf '%s' "$b64" | base64 -d

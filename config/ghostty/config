@@ -9,3 +9,4 @@ gtk-titlebar = true
 shell-integration = bash
 
 theme = Kanagawa Wave
+mouse-scroll-multiplier = 0.3

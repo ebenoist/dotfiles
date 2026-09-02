@@ -2,4 +2,5 @@
 
 echo "Reloading"
 reset
+# shellcheck source=/dev/null
 source ~/.bashrc

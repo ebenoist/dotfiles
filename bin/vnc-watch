@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# Flip sway outputs when VNC clients come and go: first client in -> physical
+# monitors off, headless output sized for the laptop; last client out ->
+# monitors back on, headless returns to idle size.
+# Usage: vnc-watch [watch|on|off|status]  (watch is the default; on/off force)
+
+# MacBook Pro 14" at default macOS scaling. TigerVNC renders 1x, so the full
+# 3024x1964 panel res shows 2x zoomed — this is just the starting size anyway:
+# wayvnc auto-resizes the output when the client window resizes (TigerVNC:
+# "Resize remote session to the local window").
+REMOTE_RES=${REMOTE_RES:-1512x982}
+REMOTE_SCALE=${REMOTE_SCALE:-1}
+IDLE_RES=2560x1440
+
+# Holds the outputs we disabled, one per line; presence = remote mode is on.
+STATE_FILE="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/vnc-watch.outputs"
+
+client_count() {
+    wayvncctl --json client-list 2>/dev/null | jq length
+}
+
+remote_on() {
+    swaymsg -t get_outputs |
+        jq -r '.[] | select(.active and (.name | startswith("HEADLESS") | not)) | .name' \
+        > "$STATE_FILE"
+    swaymsg output HEADLESS-1 resolution "$REMOTE_RES" scale "$REMOTE_SCALE"
+    while read -r out; do
+        swaymsg output "$out" disable
+    done < "$STATE_FILE"
+    swaymsg workspace 1
+    echo "remote on ($REMOTE_RES @ ${REMOTE_SCALE}x)"
+}
+
+remote_off() {
+    if [ -f "$STATE_FILE" ]; then
+        while read -r out; do
+            swaymsg output "$out" enable
+        done < "$STATE_FILE"
+        rm -f "$STATE_FILE"
+    fi
+    swaymsg output HEADLESS-1 resolution "$IDLE_RES" scale 1
+    echo "remote off"
+}
+
+sync_state() {
+    if [ "$(client_count)" -gt 0 ]; then
+        [ -f "$STATE_FILE" ] || remote_on
+    else
+        [ -f "$STATE_FILE" ] && remote_off
+    fi
+}
+
+watch() {
+    sync_state
+    wayvncctl --wait --reconnect --json event-receive | while read -r event; do
+        case "$(jq -r .method <<< "$event")" in
+            client-connected|client-disconnected) sync_state ;;
+        esac
+    done
+}
+
+case "${1:-watch}" in
+    watch)  watch ;;
+    on)     remote_on ;;
+    off)    remote_off ;;
+    status)
+        [ -f "$STATE_FILE" ] && echo "remote on" || echo "remote off"
+        echo "clients: $(client_count)"
+        ;;
+    *) echo "Usage: vnc-watch [watch|on|off|status]" >&2; exit 1 ;;
+esac

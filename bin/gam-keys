@@ -1,0 +1,181 @@
+#!/usr/bin/env bash
+# gam-keys - inspect Google Ad Manager custom targeting keys and values
+
+set -euo pipefail
+
+API=https://admanager.googleapis.com/v1
+# GAM_WRITE=1 asks for the read-write scope at login. Read-only by default so a
+# routine inspection cannot hold a token that mutates the ad server.
+ADM=https://www.googleapis.com/auth/admanager
+[ -n "${GAM_WRITE:-}" ] || ADM=$ADM.readonly
+SCOPES=$ADM,https://www.googleapis.com/auth/cloud-platform
+CLIENT="${GAM_CLIENT_ID_FILE:-$HOME/.config/gam-keys/client.json}"
+CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/gam-network"
+
+usage() {
+    cat <<'USAGE'
+Usage: gam-keys                 list every custom targeting key
+       gam-keys <key>           one key, its values, and what is wrong with it
+       gam-keys networks        networks your login can see
+       gam-keys raw <path>      GET any v1 path (raw networks/123/orders)
+
+Config:
+  GAM_NETWORK_CODE     network to query; auto-resolved and cached when unique
+  GAM_CLIENT_ID_FILE   OAuth desktop client JSON (~/.config/gam-keys/client.json)
+
+The admanager scope is sensitive, so Workspace app access control blocks
+gcloud's built-in OAuth client. An Internal-audience client in our own GCP
+project is not a third-party app, so it is not blocked and needs no
+verification. Create one under Google Auth Platform -> Clients.
+USAGE
+    exit 1
+}
+
+die() {
+    printf 'gam-keys: %s\n' "$1" >&2
+    exit 1
+}
+
+# The default ADC login carries cloud-platform, which the Ad Manager API
+# rejects, so a token existing is not the same as a token that works.
+relogin() {
+    local login="gcloud auth application-default login --scopes=$SCOPES"
+    if [ -r "$CLIENT" ]; then
+        login="$login --client-id-file=$CLIENT"
+    else
+        printf 'gam-keys: no OAuth client at %s -- run '\''gam-keys help'\''\n' \
+            "$CLIENT" >&2
+    fi
+
+    if printf '%s' "$login" | pbcopy 2>/dev/null; then
+        printf 'gam-keys: login command is on your clipboard.\n' >&2
+    else
+        printf 'gam-keys: run:\n  %s\n' "$login" >&2
+    fi
+    exit 1
+}
+
+# sets TOKEN
+token() {
+    TOKEN=$(gcloud auth application-default print-access-token 2>/dev/null) ||
+        relogin
+}
+
+api() {
+    local out err
+    out=$(curl -s -H "Authorization: Bearer $TOKEN" "$API/$1" "${@:2}")
+    err=$(jq -r '.error.message // empty' <<<"$out" 2>/dev/null || true)
+    [ -z "$err" ] || case "$err" in
+        *'authentication scope'*) relogin ;;
+        *) die "$err" ;;
+    esac
+    printf '%s' "$out"
+}
+
+# paged <path> <collection field> [curl args...] -> one merged JSON array
+paged() {
+    local path=$1 field=$2 next='' page all='[]'
+    shift 2
+    local -a args
+    while :; do
+        args=(--get --data-urlencode 'pageSize=200' "$@")
+        [ -z "$next" ] || args+=(--data-urlencode "pageToken=$next")
+        page=$(api "$path" "${args[@]}")
+        all=$(jq --argjson prev "$all" --arg f "$field" '$prev + (.[$f] // [])' <<<"$page")
+        next=$(jq -r '.nextPageToken // empty' <<<"$page")
+        [ -n "$next" ] || break
+    done
+    printf '%s' "$all"
+}
+
+# sets NET. A global rather than a return value because die() inside a command
+# substitution only kills the subshell.
+network() {
+    if [ -n "${GAM_NETWORK_CODE:-}" ]; then
+        NET=$GAM_NETWORK_CODE
+        return
+    fi
+    if [ -s "$CACHE" ]; then
+        NET=$(cat "$CACHE")
+        return
+    fi
+
+    local codes
+    codes=$(api networks | jq -r '.networks[]?.networkCode') || exit 1
+    [ -n "$codes" ] || die 'your login sees no Ad Manager networks'
+    if [ "$(wc -l <<<"$codes")" -ne 1 ]; then
+        printf 'gam-keys: set GAM_NETWORK_CODE. you can see:\n%s\n' "$codes" >&2
+        exit 1
+    fi
+
+    mkdir -p "$(dirname "$CACHE")"
+    printf '%s' "$codes" >"$CACHE"
+    NET=$codes
+}
+
+networks() {
+    local rows
+    rows=$(api networks | jq -r '.networks[]?
+        | [.networkCode, .displayName, .currencyCode, .timeZone] | @tsv') || exit 1
+
+    { printf 'CODE\tNAME\tCURRENCY\tTIMEZONE\n'; printf '%s\n' "$rows"; } |
+        column -t -s"$(printf '\t')"
+}
+
+keys() {
+    local rows
+    # list responses carry no id field; it is the last segment of .name
+    rows=$(paged "networks/$1/customTargetingKeys" customTargetingKeys |
+        jq -r 'sort_by(.adTagName)[]
+            | [.adTagName, .displayName, .type, .status, .reportableType,
+               (.name | split("/") | last)] | @tsv') || exit 1
+
+    { printf 'KEY\tNAME\tTYPE\tSTATUS\tREPORTING\tID\n'; printf '%s\n' "$rows"; } |
+        column -t -s"$(printf '\t')"
+}
+
+key() {
+    local net=$1 name=$2 found resource values
+
+    found=$(paged "networks/$net/customTargetingKeys" customTargetingKeys |
+        jq --arg k "$name" 'map(select(.adTagName == $k)) | first // empty') || exit 1
+    [ -n "$found" ] || die "no key '$name' in network $net -- it was never created"
+
+    jq -r '"key        \(.adTagName)
+name       \(.displayName)
+id         \(.customTargetingKeyId)
+type       \(.type)
+status     \(.status)
+reporting  \(.reportableType)"' <<<"$found"
+
+    jq -r '[
+        if .status != "ACTIVE"
+            then "status is \(.status) -- GAM drops this key off ad requests" else empty end,
+        if .reportableType == "OFF"
+            then "reporting is OFF -- values never show up in reports" else empty end,
+        if .type == "PREDEFINED"
+            then "PREDEFINED -- only registered values are accepted, anything else is dropped" else empty end
+    ] | .[] | "\nwarn: \(.)"' <<<"$found"
+
+    # values filter on the key's resource name, not its bare id
+    resource=$(jq -r '.name' <<<"$found")
+    values=$(paged "networks/$net/customTargetingValues" customTargetingValues \
+        --data-urlencode "filter=customTargetingKey = \"$resource\"") || exit 1
+
+    printf '\nvalues (%s)\n' "$(jq 'length' <<<"$values")"
+    jq -r 'sort_by(.adTagName)[] | "  \(.adTagName)\t\(.status)"' <<<"$values" |
+        column -t -s"$(printf '\t')"
+}
+
+case "${1:-keys}" in
+    -h | --help | help) usage ;;
+esac
+
+token
+
+case "${1:-keys}" in
+    networks) networks ;;
+    keys) network && keys "$NET" ;;
+    raw) api "${2:?gam-keys raw <path>}" | jq . ;;
+    *) network && key "$NET" "$1" ;;
+esac

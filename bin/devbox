@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+# devbox — on-demand isolated client VMs (Lima). One VM per client: work-<client>.
+# Isolated disk + creds + Tailscale node. Secrets resolved from 1Password at create time.
+set -euo pipefail
+
+REPO="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
+TEMPLATE="$REPO/lima/devbox.yaml"
+CLIENTS="$REPO/lima/clients"
+
+die() { echo "devbox: $*" >&2; exit 1; }
+vm()  { echo "work-$1"; }
+exists() { limactl list -q 2>/dev/null | grep -qx "$(vm "$1")"; }
+
+deps() {
+  local missing=0
+  command -v limactl >/dev/null            || { missing=1; cat >&2 <<'EOF'
+missing: limactl
+  install (Linux):
+    VERSION=$(curl -fsSL https://api.github.com/repos/lima-vm/lima/releases/latest | jq -r .tag_name)
+    curl -fsSL "https://github.com/lima-vm/lima/releases/download/${VERSION}/lima-${VERSION#v}-Linux-$(uname -m).tar.gz" | sudo tar -C /usr/local -xz
+EOF
+  }
+  command -v qemu-system-x86_64 >/dev/null || { missing=1; echo "missing: qemu -> sudo apt-get install -y qemu-system-x86 qemu-utils" >&2; }
+  command -v op >/dev/null                 || { missing=1; echo "missing: op (1Password CLI) -> https://developer.1password.com/docs/cli/get-started/" >&2; }
+  return $missing
+}
+
+doctor() {
+  if deps; then echo "deps ok: limactl, qemu, op"; else die "install the above, then re-run"; fi
+  op whoami >/dev/null 2>&1 || die "1Password not signed in -> run: eval \$(op signin)"
+  echo "op: signed in"
+}
+
+manifest() {
+  local f="$CLIENTS/$1.env"
+  [ -f "$f" ] || die "no manifest for '$1' (expected $f)"
+  set -a
+  # shellcheck source=/dev/null
+  . "$f"
+  set +a
+}
+
+create() {
+  local c="${1:?usage: devbox create <client>}"
+  deps || die "missing deps — run: devbox doctor"
+  exists "$c" && die "$(vm "$c") already exists — use: devbox up $c"
+  manifest "$c"
+  [ -n "${OP_AUTHKEY_REF:-}" ] || die "$c.env missing OP_AUTHKEY_REF"
+  local key; key="$(op read "$OP_AUTHKEY_REF")" || die "op read failed for $OP_AUTHKEY_REF (signed in? eval \$(op signin))"
+  echo "creating $(vm "$c") ..."
+  limactl start --tty=false --name "$(vm "$c")" \
+    --set ".param.TsAuthKey=\"$key\"" \
+    --set ".param.TsTag=\"${TS_TAG:-tag:work}\"" \
+    --set ".param.Hostname=\"$(vm "$c")\"" \
+    --set ".param.DotfilesRepo=\"${DOTFILES_REPO:-}\"" \
+    --set ".cpus=${CPUS:-8}" \
+    --set ".memory=\"${MEMORY:-32GiB}\"" \
+    --set ".disk=\"${DISK:-120GiB}\"" \
+    "$TEMPLATE"
+  echo "done. enter with: devbox shell $c"
+}
+
+up()      { limactl start "$(vm "${1:?usage: devbox up <client>}")"; }
+shell()   { limactl shell "$(vm "${1:?usage: devbox shell <client>}")"; }
+stop()    { limactl stop  "$(vm "${1:?usage: devbox stop <client>}")"; }
+list()    { limactl list 2>/dev/null | awk 'NR==1 || $1 ~ /^work-/'; }
+
+destroy() {
+  local c="${1:?usage: devbox destroy <client>}"
+  exists "$c" || die "$(vm "$c") does not exist"
+  read -rp "destroy $(vm "$c")? this deletes its disk [y/N] " a
+  [ "$a" = y ] || { echo "aborted"; return; }
+  limactl delete --force "$(vm "$c")"
+}
+
+usage() {
+  cat <<'EOF'
+devbox — isolated per-client work VMs (Lima)
+
+  devbox create  <client>   create + boot work-<client> from lima/clients/<client>.env
+  devbox up      <client>   boot an existing VM
+  devbox shell   <client>   shell into a VM
+  devbox stop    <client>   stop a VM
+  devbox list               list devbox VMs
+  devbox destroy <client>   delete a VM (and its disk)
+  devbox doctor             check deps (limactl, qemu, op) + 1Password login
+
+Add a client: cp lima/clients/1440.env lima/clients/<name>.env and edit.
+EOF
+}
+
+cmd="${1:-help}"; shift || true
+case "$cmd" in
+  create)  create "$@";;
+  up)      up "$@";;
+  shell)   shell "$@";;
+  stop)    stop "$@";;
+  list)    list;;
+  destroy) destroy "$@";;
+  doctor)  doctor;;
+  help|-h|--help) usage;;
+  *) usage; exit 1;;
+esac

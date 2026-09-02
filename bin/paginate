@@ -5,12 +5,13 @@ QUERY=$1
 shift
 
 next() {
-  local url=$(grep Link: ${PWD}/.headers | sed -nE 's/Link:.*<(.*)>; rel="next".*/\1/p')
+  local url
+  url=$(grep Link: "${PWD}/.headers" | sed -nE 's/Link:.*<(.*)>; rel="next".*/\1/p')
   if [ -z "$url" ]; then
     echo "done" 1>&2
   else
     echo "page: $url" 1>&2
-    curl $url "$@"
+    curl "$url" "$@"
     next "$@"
   fi
 }

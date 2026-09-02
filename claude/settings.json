@@ -2,7 +2,7 @@
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
-  "model": "sonnet",
+  "model": "opus[1m]",
   "statusLine": {
     "type": "command",
     "command": "/home/erik/.claude/statusline.sh"

@@ -312,10 +312,21 @@ require("lazy").setup({
           ruby = { "standardrb" },
           go = { "gofmt", "goimports" },
         },
-        format_on_save = {
-          timeout_ms = 500,
-          lsp_fallback = true,
-        },
+        -- standardrb cold-boots rubocop in ~2s, four times the sync budget, so
+        -- ruby formats asynchronously after the write instead of timing out on
+        -- every save. Everything else is fast enough to block on.
+        format_on_save = function(bufnr)
+          if vim.bo[bufnr].filetype == "ruby" then
+            return nil
+          end
+          return { timeout_ms = 500, lsp_fallback = true }
+        end,
+        format_after_save = function(bufnr)
+          if vim.bo[bufnr].filetype ~= "ruby" then
+            return nil
+          end
+          return { lsp_fallback = true }
+        end,
       })
 
       -- Manual format command

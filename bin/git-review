@@ -1,0 +1,179 @@
+#!/usr/bin/env bash
+# git-review [<rev> | <from>..<to>]
+#
+# Review a change in nvim, one tab per touched file.
+#
+# In a jj repo (colocated or not), <rev> is any jj revset: a change ID,
+# a bookmark (erik/feed-phase-3), @-, etc. A <from>..<to> argument reviews
+# the combined diff between the two revisions — e.g. review a whole phase
+# with `git-review erik/feed-phase-2..erik/feed-phase-3`, or everything
+# claude stacked on your commit with `git-review main..@`.
+# With no argument: reviews the whole unmerged series, trunk()..@.
+#
+# Outside a jj repo, falls back to git: <rev> is a commit-ish (default HEAD),
+# diffed against its parent.
+#
+# Left split: the working-tree file, editable. Save inline review comments
+# here; the file stays dirty until you :w (revert later with `jj restore --
+# <file>`, or `git checkout -- <file>` in git mode).
+# Right split: read-only diff of that file for the revision(s) under review.
+#
+# In a source pane:
+#   :Done   (or <Leader>n)   write if dirty, close this tab, advance to next
+#                            (exits nvim when reviewing the last file)
+#   :Done!                   discard changes, close tab, advance
+#
+# Scrolling: when the cursor moves in the source pane, the diff pane scrolls
+# to the hunk covering the source line (hunk-level granularity).
+
+set -euo pipefail
+
+arg="${1:-}"
+
+if root=$(jj workspace root 2>/dev/null); then
+  cd "$root"
+  [[ -n "$arg" ]] || arg="trunk()..@"
+  if [[ "$arg" == *..* ]]; then
+    from="${arg%%..*}"
+    to="${arg#*..}"
+    diffcmd="jj diff --git --from $(printf %q "$from") --to $(printf %q "$to") --"
+    names=$(jj diff --name-only --from "$from" --to "$to")
+  else
+    diffcmd="jj diff --git -r $(printf %q "$arg") --"
+    names=$(jj diff --name-only -r "$arg")
+  fi
+  label="$arg"
+else
+  root=$(git rev-parse --show-toplevel)
+  cd "$root"
+  sha=$(git rev-parse --verify "${arg:-HEAD}^{commit}")
+  diffcmd="git diff $sha~1..$sha --"
+  names=$(git diff-tree --no-commit-id --name-only -r "$sha")
+  label="$sha"
+fi
+
+# skip vendored Go deps — not ours to review
+names=$(grep -vE '(^|/)vendor/' <<< "$names" || true)
+
+[[ -n "$names" ]] || { echo "no files changed in $label" >&2; exit 1; }
+mapfile -t files <<< "$names"
+
+vim_str() {
+  local s=${1//\'/\'\'}
+  printf "'%s'" "$s"
+}
+
+script=$(mktemp -t git-review-XXXXXX.vim)
+trap 'rm -f "$script"' EXIT
+
+cat > "$script" <<'VIM'
+let g:review_syncing = 0
+
+function! s:ParseHunks(bufnr) abort
+  let hunks = []
+  let lines = getbufline(a:bufnr, 1, '$')
+  let i = 0
+  for line in lines
+    let i += 1
+    let m = matchlist(line, '^@@ -\d\+\(,\d\+\)\? +\(\d\+\)\(,\(\d\+\)\)\? @@')
+    if !empty(m)
+      let start = str2nr(m[2])
+      let count = empty(m[4]) ? 1 : str2nr(m[4])
+      if count == 0
+        call add(hunks, [start, start, i])
+      else
+        call add(hunks, [start, start + count - 1, i])
+      endif
+    endif
+  endfor
+  return hunks
+endfunction
+
+function! s:SyncDiffToSource() abort
+  if g:review_syncing | return | endif
+  " the win_gotoid round-trip below would kill an active visual selection
+  if mode() !=# 'n' | return | endif
+  if !exists('b:review_diff_winid') | return | endif
+  let diff_winid = b:review_diff_winid
+  if win_id2win(diff_winid) == 0 | return | endif
+  let diff_bufnr = winbufnr(diff_winid)
+  if !exists('b:review_hunks')
+    let b:review_hunks = s:ParseHunks(diff_bufnr)
+  endif
+  if empty(b:review_hunks) | return | endif
+  let src_line = line('.')
+  let target = -1
+  for h in b:review_hunks
+    if src_line <= h[1]
+      let target = h[2]
+      break
+    endif
+  endfor
+  if target < 0
+    let target = b:review_hunks[-1][2]
+  endif
+  let g:review_syncing = 1
+  let cur = win_getid()
+  call win_gotoid(diff_winid)
+  execute 'normal! ' . target . 'Gzt'
+  call win_gotoid(cur)
+  let g:review_syncing = 0
+endfunction
+
+function! s:ReviewNext(bang) abort
+  if !a:bang && &modified
+    silent write
+  endif
+  if tabpagenr('$') == 1
+    if a:bang | qa! | else | qa | endif
+  else
+    if a:bang | tabclose! | else | tabclose | endif
+  endif
+endfunction
+
+" :Next is a builtin (E841), so :Done it is
+command! -bang Done call s:ReviewNext(<bang>0)
+
+function! s:OpenDiff(file) abort
+  let src_winid = win_getid()
+  rightbelow vnew
+  execute 'silent 0read !' . g:review_diffcmd . ' ' . shellescape(a:file, 1)
+  if line('$') > 1 | $delete _ | endif
+  call cursor(1, 1)
+  setlocal buftype=nofile bufhidden=wipe nomodifiable readonly
+  setlocal filetype=diff nobuflisted
+  " noautocmd: renaming to *.lua etc would re-run filetype detection
+  execute 'noautocmd file' fnameescape('[diff] ' . a:file)
+  let diff_winid = win_getid()
+  call win_gotoid(src_winid)
+  let b:review_diff_winid = diff_winid
+  unlet! b:review_hunks
+  augroup ReviewSync
+    autocmd! * <buffer>
+    autocmd CursorMoved,BufEnter <buffer> call s:SyncDiffToSource()
+  augroup END
+  nnoremap <buffer> <silent> <Leader>n :Done<CR>
+  nnoremap <buffer> <silent> <Leader>N :Done!<CR>
+  nnoremap <buffer> <silent> ZZ :Done<CR>
+  nnoremap <buffer> <silent> ZQ :Done!<CR>
+endfunction
+VIM
+
+{
+  printf 'let g:review_diffcmd = %s\n' "$(vim_str "$diffcmd")"
+  first=1
+  for f in "${files[@]}"; do
+    fs=$(vim_str "$f")
+    if (( first )); then
+      printf 'execute "edit" fnameescape(%s)\n' "$fs"
+      first=0
+    else
+      printf 'execute "tabnew" fnameescape(%s)\n' "$fs"
+    fi
+    printf 'call s:OpenDiff(%s)\n' "$fs"
+  done
+  echo 'tabfirst'
+  echo 'doautocmd CursorMoved'
+} >> "$script"
+
+exec nvim -S "$script"

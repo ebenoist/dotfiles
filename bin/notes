@@ -3,11 +3,11 @@
 while getopts ":n:sh" opt; do
   case ${opt} in
     n) # new note
-      nvim ~/Notes/$OPTARG
+      nvim "$HOME/Notes/$OPTARG"
       exit 0
       ;;
     s) # search in notes
-      nvim $(ls -t ~/Notes/* | fzf --preview="batcat --color=always {}")
+      nvim "$(ls -t ~/Notes/* | fzf --preview="batcat --color=always {}")"
       exit 0
       ;;
     h) echo "Usage: notes [-n] [-s]"
@@ -19,4 +19,4 @@ while getopts ":n:sh" opt; do
   esac
 done
 
-nvim $(ls -t ~/Notes/* | fzf --preview="batcat --color=always {}")
+nvim "$(ls -t ~/Notes/* | fzf --preview="batcat --color=always {}")"

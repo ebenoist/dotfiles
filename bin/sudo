@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
+# sudo - confirm before handing off to the real sudo
 
-echo "sudo $@, eh? are you sure (y|n)"
-read doit
+echo "sudo $*, eh? are you sure (y|n)"
+read -r doit
 
-if [ $doit == "y" ]; then
- /usr/bin/sudo $@
+if [ "$doit" = "y" ]; then
+    /usr/bin/sudo "$@"
 else
-  echo "yeah didn't think so... maybe try taking a walk"
+    echo "yeah didn't think so... maybe try taking a walk"
 fi

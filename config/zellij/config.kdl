@@ -131,6 +131,13 @@ keybinds {
             };
             SwitchToMode "Normal"
         }
+        bind "s" {
+            LaunchOrFocusPlugin "zellij:share" {
+                floating true
+                move_to_focused_tab true
+            };
+            SwitchToMode "Normal"
+        }
     }
     tmux {
         bind "[" { SwitchToMode "Scroll"; }
@@ -228,6 +235,21 @@ copy_on_select true
 // <Esc>+j and drops the mode). Ghostty handles it directly instead.
 support_kitty_keyboard_protocol false
 
-// Clipboard: Zellij 0.44+ uses OSC 52 natively when no display server
-// is available (SSH/mosh), sending it directly to the outer terminal.
-// Locally (Sway), it uses wl-copy automatically.
+// Clipboard: with no copy_command set, zellij re-emits every copy (its
+// own and app OSC 52) as OSC 52 to the attached client -- local or
+// remote, the bytes land on the terminal you're looking at. There is no
+// display-server detection or wl-copy fallback (tab/clipboard.rs).
+// copy_clipboard defaults to "system" (52;c;), the only form mosh
+// forwards -- do not set it to "primary". OSC 52 *reads* are swallowed
+// (zellij#2647), so paste into panes is the terminal's ctrl+shift+v.
+
+// Web client for the phones, fronted by homelab Traefik at
+// zellij.hl1.benoist.dev. zellij forces TLS on any non-local bind, so the
+// backend cert is self-signed and Traefik skips verification -- the hop is
+// already inside the tailnet and the browser only sees the LE wildcard.
+// Key deliberately outside this repo.
+web_server_ip "100.78.38.25"
+web_server_port 8082
+web_sharing "on"
+web_server_cert "/home/erik/.local/share/zellij/web-tls/cert.pem"
+web_server_key "/home/erik/.local/share/zellij/web-tls/key.pem"

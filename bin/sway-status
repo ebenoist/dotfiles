@@ -3,6 +3,10 @@
 # Network interface to monitor
 IFACE="enp191s0"
 
+# Weather via wthr.cloud JSON api
+WTHR_LAT="41.8781"
+WTHR_LON="-87.6298"
+
 format_rate() {
     local bytes=$1
     if (( bytes >= 1073741824 )); then
@@ -16,12 +20,20 @@ format_rate() {
     fi
 }
 
+get_weather() {
+    curl -sf --max-time 5 \
+        "https://wthr.cloud/forecast?latitude=${WTHR_LAT}&longitude=${WTHR_LON}" |
+        jq -r '.conditions | "\(.temperature | round)°F \(.shortForecast[0:24])"'
+}
+
 get_traffic() {
-    local rx1=$(cat /sys/class/net/$IFACE/statistics/rx_bytes 2>/dev/null || echo 0)
-    local tx1=$(cat /sys/class/net/$IFACE/statistics/tx_bytes 2>/dev/null || echo 0)
+    local stats="/sys/class/net/$IFACE/statistics"
+    local rx1 tx1 rx2 tx2
+    rx1=$(cat "$stats/rx_bytes" 2>/dev/null || echo 0)
+    tx1=$(cat "$stats/tx_bytes" 2>/dev/null || echo 0)
     sleep 1
-    local rx2=$(cat /sys/class/net/$IFACE/statistics/rx_bytes 2>/dev/null || echo 0)
-    local tx2=$(cat /sys/class/net/$IFACE/statistics/tx_bytes 2>/dev/null || echo 0)
+    rx2=$(cat "$stats/rx_bytes" 2>/dev/null || echo 0)
+    tx2=$(cat "$stats/tx_bytes" 2>/dev/null || echo 0)
 
     local rx_rate=$(( rx2 - rx1 ))
     local tx_rate=$(( tx2 - tx1 ))
@@ -29,9 +41,25 @@ get_traffic() {
     echo "$(format_rate $rx_rate)/$(format_rate $tx_rate)"
 }
 
+# busy = user+nice+system+irq+softirq+steal, idle = idle+iowait (same split as btop)
+read_cpu() {
+    awk '/^cpu / {print $2+$3+$4+$7+$8+$9, $5+$6}' /proc/stat
+}
+
+read prev_busy prev_idle < <(read_cpu)
+weather=""
+next_weather=0
+
 while true; do
-    # CPU
-    cpu=$(awk '/^cpu / {printf "%.0f", ($2+$4)*100/($2+$4+$5)}' /proc/stat)
+    # Network traffic (sleeps 1s, which also spaces the CPU samples)
+    net=$(get_traffic)
+
+    # CPU % since last iteration
+    read busy idle < <(read_cpu)
+    total=$(( (busy - prev_busy) + (idle - prev_idle) ))
+    (( total > 0 )) || total=1
+    cpu=$(( (busy - prev_busy) * 100 / total ))
+    prev_busy=$busy prev_idle=$idle
 
     # Memory
     mem=$(free | awk '/^Mem:/ {printf "%.0f", $3/$2*100}')
@@ -39,8 +67,16 @@ while true; do
     # Disk
     disk=$(df / | awk 'NR==2 {print $5}' | tr -d '%')
 
-    # Network traffic
-    net=$(get_traffic)
+    # Weather, refreshed every ~5 min (server caches upstream)
+    if (( SECONDS >= next_weather )); then
+        w=$(get_weather)
+        if [ -n "$w" ]; then
+            weather="$w"
+            next_weather=$(( SECONDS + 300 ))
+        else
+            next_weather=$(( SECONDS + 60 ))
+        fi
+    fi
 
     # Volume
     vol=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null | awk '{printf "%.0f", $2*100}')
@@ -49,6 +85,16 @@ while true; do
     # Date
     date=$(date +'%a %b %d  %H:%M')
 
-    echo "cpu ${cpu}% | mem ${mem}% | disk ${disk}% | net ${net} | vol ${vol}% | ${date}"
+    # Now playing
+    music=""
+    if [ -f /tmp/mu-now-playing ]; then
+        music=$(head -1 /tmp/mu-now-playing)
+        [ -n "$music" ] && music="${music} | "
+    fi
+
+    wthr=""
+    [ -n "$weather" ] && wthr="${weather} | "
+
+    echo "${music}cpu ${cpu}% | mem ${mem}% | disk ${disk}% | net ${net} | vol ${vol}% | ${wthr}${date}"
     sleep 4
 done

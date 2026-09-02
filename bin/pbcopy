@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# OSC 52 copy. A persistent zellij session makes env-based local/remote
+# detection lie (SSH_TTY is whatever it was when the session started), so
+# never sniff env: OSC 52 always lands on the terminal attached right now.
+# Every layer forwards it: zellij 0.44+, mosh 1.4+, ghostty (clipboard-write).
+if [[ "$(uname)" == "Darwin" ]]; then
+  exec /usr/bin/pbcopy
+fi
+
+data=$(base64 -w0)
+
+# mosh accumulates OSC payloads into a 16KB buffer and silently drops the
+# rest (terminaldispatcher.cc MAXIMUM_CLIPBOARD_SIZE); the truncated base64
+# then fails to decode at the terminal, so the copy is lost without a trace.
+if (( ${#data} > 16000 )); then
+  echo "pbcopy: $(( ${#data} / 1024 ))KB payload exceeds mosh's 16KB cap," \
+       "will not survive a mosh hop" >&2
+fi
+
+if { true > /dev/tty; } 2>/dev/null; then
+  printf '\033]52;c;%s\a' "$data" > /dev/tty
+  exit 0
+fi
+
+# No controlling terminal (cron, editor job pipes): local clipboard or bust.
+# wl-copy forks a child that holds the selection; detach its fds or anyone
+# reading our stdout/stderr hangs on the pipe the child keeps open.
+if [[ -n "$WAYLAND_DISPLAY" ]] && command -v wl-copy >/dev/null 2>&1; then
+  base64 -d <<<"$data" | wl-copy >/dev/null 2>&1
+  exit 0
+fi
+
+echo "pbcopy: no tty and no display" >&2
+exit 1

@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# workvm - open the 1440 work VM desktop in remmina (sway workspace 5)
+#
+# The profile carries `:3390` in its server field, which is load-bearing:
+# work-1440.hl1.benoist.dev resolves to nuc, and RDP's default 3389 there is
+# nuc's own xrdp -- connecting by bare hostname silently gets you the wrong box.
+
+set -euo pipefail
+
+profile="${HOME}/.local/share/remmina/work-1440.remmina"
+list_title='^Remmina Remote Desktop Client$'
+
+if [ ! -f "$profile" ]; then
+    echo "workvm: no profile at $profile -- see homelab docs/work-vms.md" >&2
+    exit 1
+fi
+
+# --park is for the sway autostart only. `remmina -c` also opens the connection
+# list, which would otherwise be left sitting on whichever workspace sway
+# happens to start on. Parking it behind the session rather than in the
+# scratchpad, which already holds the quake terminal.
+if [ "${1:-}" = "--park" ]; then
+    remmina -c "$profile" &
+    for _ in $(seq 20); do
+        sleep 0.5
+        swaymsg -t get_tree | grep -q 'work-1440' && break
+    done
+    swaymsg "[app_id=\"org.remmina.Remmina\" title=\"$list_title\"] move container to workspace number 5" >/dev/null
+    exit 0
+fi
+
+exec remmina -c "$profile"

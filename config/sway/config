@@ -49,6 +49,9 @@ workspace 10 output $center
 # Dedicated filler so sway never borrows one of the numbered workspaces
 # above to keep the always-on headless output non-empty (see vnc-watch).
 workspace 11 output HEADLESS-1
+# Same for the JetKVM capture dongle on HDMI-A-1; without this it steals
+# the lowest free numbered workspace (2, then 4) at boot.
+workspace 12 output HDMI-A-1
 
 ### Input
 input type:keyboard {

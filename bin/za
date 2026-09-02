@@ -47,7 +47,7 @@ function create_session {
 
 function delete_session {
 	zellij ls | fzf -m --header "Select sessions to delete" \
-		| awk '{print $1}' | xargs -I {} zellij delete-session {}
+		| awk '{print $1}' | xargs -I {} zellij delete-session --force {}
 	exit 0
 }
 

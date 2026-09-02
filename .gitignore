@@ -1,5 +1,6 @@
 .DS_Store
 !bin
+.make/
 config/nvim/undodir
 config/nvim/plugged
 config/nvim/backup/*.md~
