@@ -432,11 +432,9 @@ vim.diagnostic.config({
   float = { border = "rounded", source = true },
 })
 
-vim.api.nvim_create_autocmd("CursorHold", {
-  callback = function()
-    vim.diagnostic.open_float(nil, { focusable = false, scope = "cursor", border = "rounded" })
-  end,
-})
+-- No CursorHold float. updatetime is 300ms and clicking moves the cursor, so it
+-- fired constantly and read as a hover popup. On demand instead:
+vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "diagnostic under cursor" })
 
 -- File type associations
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {

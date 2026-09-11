@@ -1,0 +1,10 @@
+[Unit]
+Description=Watch for new screenshots to push to the work box
+
+[Path]
+# The save directory, not the $mod+s keybind. Non-recursive, which is all that
+# is needed: swappy writes flat into Pictures.
+PathChanged=%h/Pictures
+
+[Install]
+WantedBy=default.target

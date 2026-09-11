@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# shots-push - copy new screenshots to the work box so agents there can see them
+#
+# Triggered by shots-push.path watching swappy's save dir rather than by the
+# $mod+s binding: swappy also saves from its own panel, and wrapping the keybind
+# would couple taking a screenshot to a box that is often down.
+set -uo pipefail
+
+host="${SHOTS_HOST:-1440.wrk.nilcoast.com}"
+src="${SHOTS_SRC:-$HOME/Pictures}"
+
+command -v rsync >/dev/null || exit 0
+
+# --mkpath so a rebuilt box needs no hand-made ~/shots (rsync 3.2.3+ both ends).
+# Always exit 0: the box is down often enough that a failed unit would be noise,
+# and a missed screenshot costs nothing -- rsync's stderr still hits the journal.
+rsync -a --mkpath -e 'ssh -o ConnectTimeout=5 -o BatchMode=yes' \
+    --include='screenshot-*.png' --exclude='*' \
+    "$src/" "erik@${host}:shots/" || exit 0

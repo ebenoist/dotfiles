@@ -1,0 +1,6 @@
+[Unit]
+Description=Push new screenshots to the work box
+
+[Service]
+Type=oneshot
+ExecStart=%h/bin/shots-push
