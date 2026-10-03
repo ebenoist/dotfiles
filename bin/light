@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
+# light -- OS-wide light mode. ghostty's dark:/light: theme pair and GTK
+# apps follow this live; nothing else to do.
 set -euo pipefail
 
 gsettings set org.gnome.desktop.interface color-scheme prefer-light
-sed -i 's/^theme ".*"$/theme "kanagawa-light"/' "$HOME/.config/zellij/config.kdl"

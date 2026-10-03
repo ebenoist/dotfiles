@@ -38,13 +38,16 @@ ${HOME}/.local/bin/tree-sitter:
 	@curl -fsSL https://github.com/tree-sitter/tree-sitter/releases/download/v${TREE_SITTER_VERSION}/tree-sitter-${TS_OS}-${TS_ARCH}.gz | gunzip > $@
 	@chmod +x $@
 
+# -type f skips the symlinks into other projects (~/music/bin, build outputs);
+# linting through them imposes this repo's style on code that sets its own.
 # -I skips the downloaded binaries in bin/ — without it grep matches a shebang
 # in ELF bytes and shellcheck tries to parse chainlink.
-RUBY_SCRIPTS := $(shell grep -lIE '^\#!.*ruby' bin/* 2>/dev/null)
+BIN_FILES := $(shell find bin -maxdepth 1 -type f)
+RUBY_SCRIPTS := $(shell grep -lIE '^\#!.*ruby' $(BIN_FILES) 2>/dev/null)
 
 # rpxc is vendored upstream; linting it means linting someone else's style.
 VENDOR_SCRIPTS := bin/rpxc
-SH_SCRIPTS := $(filter-out $(VENDOR_SCRIPTS),$(shell grep -lIE '^\#!.*(bash|sh)\b' bin/* 2>/dev/null))
+SH_SCRIPTS := $(filter-out $(VENDOR_SCRIPTS),$(shell grep -lIE '^\#!.*(bash|sh)\b' $(BIN_FILES) 2>/dev/null))
 
 check: .make/standardrb .make/shellcheck
 

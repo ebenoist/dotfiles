@@ -1,0 +1,84 @@
+#!/usr/bin/env ruby
+# agent - register this zellij pane as a named claude agent
+# Usage:
+#   agent                        list registered agents
+#   agent <name>                 register this pane as <name>, rename it in zellij
+#   agent remote <name> <host>   register this pane, then ssh into <host>
+#   agent -d <name>              forget a registration
+#   agent --names                bare names, for shell and vim completion
+#
+# nvim reads the registry: `:Watch <name>` in a markdown buffer pastes its `eb:`
+# lines into that pane. See config/nvim/lua/planwatch.lua.
+#
+# remote registers before the ssh hop because rename-pane needs the local
+# zellij socket -- env vars don't cross ssh, and a remote host has no path
+# back to it. The pane's foreground process afterward doesn't matter: `alive`
+# checks the pane name via dump-layout, not what's running in it.
+
+require "fileutils"
+require "json"
+
+CACHE = File.join(ENV["XDG_CACHE_HOME"] || File.join(Dir.home, ".cache"), "plan-watch")
+AGENTS = File.join(CACHE, "agents")
+NAME = /\A[a-z0-9][a-z0-9_-]*\z/i
+
+def path_for(name) = File.join(AGENTS, "#{name}.json")
+
+def all
+  Dir[File.join(AGENTS, "*.json")].filter_map do |f|
+    JSON.parse(File.read(f))
+  rescue JSON::ParserError
+    nil
+  end.sort_by { it["name"] }
+end
+
+def register(name, host: nil)
+  pane = ENV["ZELLIJ_PANE_ID"]
+  abort "agent: not inside zellij" if pane.to_s.empty?
+
+  session = ENV["ZELLIJ_SESSION_NAME"]
+  FileUtils.mkdir_p(AGENTS)
+  File.write(path_for(name), JSON.pretty_generate(
+    "name" => name, "pane" => pane, "session" => session, "cwd" => Dir.pwd, "host" => host
+  ))
+
+  cmd = ["zellij"]
+  cmd.push("-s", session) if session
+  cmd.push("action", "rename-pane", "-p", pane, name)
+  warn "agent: pane renamed failed" unless system(*cmd, out: File::NULL, err: File::NULL)
+
+  puts "#{name}  pane #{pane}  session #{session}  #{host ? "#{Dir.pwd} -> #{host}" : Dir.pwd}"
+end
+
+def forget(name)
+  abort "agent: no agent named #{name}" unless File.exist?(path_for(name))
+  FileUtils.rm_f(path_for(name))
+  puts "agent: forgot #{name}"
+end
+
+def list
+  return puts("agent: none registered") if all.empty?
+  all.each do |a|
+    loc = a["host"] ? "#{a["cwd"]} -> #{a["host"]}" : a["cwd"]
+    puts format("%-14s pane %-4s %s", a["name"], a["pane"], loc)
+  end
+end
+
+case ARGV.first
+when nil then list
+when "--names" then puts(all.map { it["name"] })
+when "-h", "--help" then puts(File.readlines(__FILE__).grep(/\A#/).drop(1).map { it.sub(/\A# ?/, "") })
+when "-d"
+  abort "agent: usage: agent -d <name>" unless ARGV[1]
+  forget(ARGV[1])
+when "remote"
+  name, host = ARGV[1], ARGV[2]
+  abort "agent: usage: agent remote <name> <host> [ssh-args...]" unless name && host
+  abort "agent: bad name #{name.inspect} -- letters, digits, _ and - only" unless name.match?(NAME)
+  register(name, host: host)
+  exec("ssh", host, *ARGV[3..])
+else
+  abort "agent: bad name #{ARGV.first.inspect} -- letters, digits, _ and - only" unless
+    ARGV.first.match?(NAME)
+  register(ARGV.first)
+end

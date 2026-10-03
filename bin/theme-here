@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# theme-here -- OSC-paint the current ghostty window to a profile's colors,
+# independent of the process-wide `theme` (which only sets defaults for new
+# windows). Never touches ghostty's config; writes OSC 4/10/11/12 straight
+# to this pty. ghostty is always 1:1 with a zellij session here, so painting
+# the pane repaints the whole instance.
+#
+# usage: theme-here personal|work|prod
+#        theme-here off
+
+set -euo pipefail
+
+THEME_DIRS=("$HOME/.config/ghostty/themes" "$HOME/.local/share/ghostty/themes")
+
+usage() {
+	echo "usage: theme-here personal|work|prod | theme-here off" >&2
+	exit 2
+}
+
+current_mode() {
+	case "$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null)" in
+	*prefer-dark*) echo dark ;;
+	*) echo light ;;
+	esac
+}
+
+# custom themes (Prod Console Dark/Light) live in the config dir; ghostty's
+# bundled ones (Kanagawa Wave, TokyoNight Storm, ...) ship as the same plain
+# format under its share dir.
+find_theme_file() {
+	local dir
+	for dir in "${THEME_DIRS[@]}"; do
+		[ -f "$dir/$1" ] && echo "$dir/$1" && return 0
+	done
+	return 1
+}
+
+# reads a ghostty theme file (palette/background/foreground/cursor-color
+# lines) and emits it as OSC 4/10/11/12 for this pty only.
+paint() {
+	local file pairs bg fg cursor
+	file="$(find_theme_file "$1")" || {
+		echo "theme-here: no theme file: $1" >&2
+		exit 1
+	}
+
+	pairs="$(sed -En 's/^palette = ([0-9]+)=(#[0-9a-fA-F]{6})/\1;\2/p' "$file" | paste -sd ';')"
+	bg="$(sed -n 's/^background = //p' "$file")"
+	fg="$(sed -n 's/^foreground = //p' "$file")"
+	cursor="$(sed -n 's/^cursor-color = //p' "$file")"
+
+	printf '\033]4;%s\033\\' "$pairs"
+	printf '\033]11;%s\033\\' "$bg"
+	printf '\033]10;%s\033\\' "$fg"
+	printf '\033]12;%s\033\\' "$cursor"
+}
+
+reset() {
+	printf '\033]110\033\\\033]111\033\\\033]112\033\\\033]104\033\\'
+}
+
+[ $# -eq 1 ] || usage
+
+case "$1" in
+off)
+	reset
+	;;
+personal | work | prod)
+	pair="$(theme "$1")"
+	IFS='|' read -r g_dark g_light _ _ <<<"$pair"
+	name="$g_dark"
+	[ "$(current_mode)" = light ] && name="$g_light"
+	paint "$name"
+	;;
+*)
+	usage
+	;;
+esac

@@ -5,11 +5,11 @@ exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DE
 exec systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP SWAYSOCK
 exec systemctl --user start wayvnc.service
 exec systemctl --user start sunshine.service
+exec systemctl --user start shots-clip.service
 exec /home/erik/bin/lan-mouse --capture-backend layer-shell --emulation-backend wlroots daemon
 
 ### Variables
 set $mod Mod4
-set $term ghostty
 set $menu fuzzel
 
 # Dracula colors
@@ -82,7 +82,7 @@ client.unfocused        $border_inactive $bg $fg $border_inactive $border_inacti
 client.urgent           $urgent          $bg $fg $urgent         $urgent
 
 ### Core bindings
-bindsym $mod+Return exec $term
+bindsym $mod+Return exec /home/erik/bin/ghostty-session
 bindsym $mod+q kill
 bindsym $mod+space exec $menu
 bindsym $mod+d exec $menu
@@ -193,8 +193,12 @@ bindsym XF86MonBrightnessDown exec brightnessctl set 5%-
 bindsym XF86MonBrightnessUp exec brightnessctl set 5%+
 
 ### Screenshots (annotate with swappy, Ctrl+c to copy, Ctrl+s to save)
-bindsym $mod+s exec 'grim -s 1 - | swappy -f -'
-bindsym $mod+Shift+s exec 'grim -s 1 -g "$(slurp)" - | swappy -f -'
+#
+# -o always dumps the final annotated surface to Pictures on exit, whether
+# you copy, save, or just quit (swappy's on_destroy runs regardless) -- that
+# file landing there is what shots-push.path is watching for.
+bindsym $mod+s exec 'grim -s 1 - | swappy -f - -o "$HOME/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png"'
+bindsym $mod+Shift+s exec 'grim -s 1 -g "$(slurp)" - | swappy -f - -o "$HOME/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png"'
 
 ### Window rules
 for_window [app_id="pavucontrol"] floating enable

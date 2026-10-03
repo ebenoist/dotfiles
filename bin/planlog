@@ -1,0 +1,40 @@
+#!/usr/bin/env ruby
+# planlog - append a reply summary to an agent's nvim log
+# Usage:
+#   planlog <agent> <text>...   append text to <watched file>.log.md
+#   planlog <agent> -           read the text from stdin
+#
+# `:Watch` records the nvim RPC socket when it binds a buffer, so this reaches
+# the right editor. See config/nvim/lua/planwatch.lua.
+
+require "json"
+require "tempfile"
+
+CACHE = File.join(ENV["XDG_CACHE_HOME"] || File.join(Dir.home, ".cache"), "plan-watch")
+BOUND = File.join(CACHE, "bound")
+
+agent = ARGV.shift
+abort "planlog: usage: planlog <agent> <text>..." if agent.nil? || ARGV.empty?
+
+bound = File.join(BOUND, "#{agent}.json")
+abort "planlog: #{agent} has no bound buffer -- :Watch #{agent} in nvim first" unless File.exist?(bound)
+
+info = JSON.parse(File.read(bound))
+text = (ARGV == ["-"]) ? $stdin.read : ARGV.join(" ")
+abort "planlog: nothing to log" if text.strip.empty?
+
+Tempfile.create("planlog") do |file|
+  file.puts(agent)
+  file.puts(text)
+  file.flush
+
+  expr = %(luaeval("require('planwatch').log(_A)", "#{file.path}"))
+  cmd = ["nvim", "--server", info["server"], "--remote-expr", expr]
+  out = IO.popen(cmd, err: [:child, :out], &:read)
+
+  unless $?.success?
+    abort "planlog: #{info["server"]} unreachable -- #{out.strip}"
+  end
+  abort "planlog: #{agent} is not bound in that nvim" if out.strip == "v:false"
+  puts "planlog: #{text.lines.count} line(s) -> #{info["log"]}"
+end

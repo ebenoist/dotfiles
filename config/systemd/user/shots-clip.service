@@ -1,0 +1,7 @@
+[Unit]
+Description=Push copied images to the work box
+
+[Service]
+ExecStart=/usr/bin/wl-paste --watch %h/bin/shots-clip
+Restart=on-failure
+RestartSec=5

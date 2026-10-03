@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+# ghostty-session -- fuzzel-pick a zellij session; focus its window if one's
+# already open, otherwise open a new ghostty window attached to it.
+#
+# Per-session color isn't set here -- see theme-here, run from inside the
+# session once attached. ghostty is always 1:1 with a session (no tabs), so
+# recoloring the window from within covers it; there's no live equivalent
+# for zellij's own chrome (zellij only supports toggling a pair configured
+# at attach time, not switching to an arbitrary profile), so that's left
+# alone rather than forced via a disruptive detach/reattach.
+#
+# sway's exec runs with the bare gdm/systemd PATH (no ~/bin, no
+# ~/.local/bin), so zellij/ghostty are called by absolute path here -- a
+# bare name would silently resolve to nothing (there's no longer a snap
+# fallback either) and this whole script would no-op.
+set -euo pipefail
+
+ZELLIJ="$HOME/bin/zellij"
+GHOSTTY="$HOME/.local/bin/ghostty"
+
+# tab-separate name from a tight "<age> live|dead|here" context. Without
+# --with-nth, fuzzel shows (and matches against) the whole line -- name
+# included -- so typing the session name still filters correctly;
+# --accept-nth=1 then outputs just the name regardless of what's displayed.
+# (--with-nth=2 alone was wrong: it hides column 1 entirely, so the session
+# name never showed up in the list at all.) free-typed text for a new
+# session has no tab, so field 1 of it is just the whole typed string.
+# zellij's own "[Created 6months 15days 54m 6s ago] (EXITED - ...)" is too
+# long to be useful here, so just the single largest unit + a one-word
+# status survives.
+session="$(
+	"$ZELLIJ" ls -n 2>/dev/null | awk '
+		{
+			name = $1
+			rest = $0
+			sub(/^[^ ]+ /, "", rest)
+
+			split(rest, f, " ")
+			age = f[2]
+			gsub(/months?/, "mo", age)
+			gsub(/days?/, "d", age)
+
+			status = "live"
+			if (rest ~ /EXITED/) status = "dead"
+			if (rest ~ /\(current\)/) status = "here"
+
+			printf "%s\t%-5s %s\n", name, age, status
+		}' \
+		| fuzzel --dmenu --accept-nth=1 --prompt='session: '
+)"
+[ -n "$session" ] || exit 0
+
+# find a ghostty window with `zellij attach ... $session` running under it
+# (direct child from ghostty-session, or deeper if attached by hand from a
+# plain shell) and print its sway con_id. Matches by exact argv, not
+# regex, since session names are free text.
+find_window() {
+	local ghostty_pids zpid args last pid
+	ghostty_pids=" $(pgrep -x ghostty | tr '\n' ' ') "
+	[ "$ghostty_pids" != "  " ] || return 1
+
+	for zpid in $(pgrep -x zellij); do
+		mapfile -d '' args <"/proc/$zpid/cmdline" 2>/dev/null || continue
+		case "${args[1]:-}" in attach | a) ;; *) continue ;; esac
+		last="${args[${#args[@]} - 1]}"
+		[ "$last" = "$session" ] || continue
+
+		pid="$zpid"
+		while [ -n "$pid" ] && [ "$pid" != 1 ]; do
+			case "$ghostty_pids" in
+			*" $pid "*)
+				swaymsg -t get_tree | jq -r --arg pid "$pid" \
+					'.. | objects | select(.pid? == ($pid | tonumber)) | .id' \
+					| head -1
+				return 0
+				;;
+			esac
+			pid="$(awk '/^PPid:/{print $2}' "/proc/$pid/status" 2>/dev/null)"
+		done
+	done
+	return 1
+}
+
+if id="$(find_window)" && [ -n "$id" ]; then
+	exec swaymsg "[con_id=$id] focus"
+fi
+
+exec "$GHOSTTY" -e "$ZELLIJ" attach --create "$session"

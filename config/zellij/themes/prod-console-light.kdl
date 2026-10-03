@@ -1,0 +1,132 @@
+// prod-console-light -- Zellij chrome for Ghostty's "Prod Console Light"
+// Light counterpart of prod-console-dark: same red-forward signal on cream.
+// Single `0` means terminal default (transparent).
+
+themes {
+  prod-console-light {
+    text_unselected {
+      base 74 44 48             // warm stone
+      background 244 228 225    // terminal bg (matches Ghostty Prod Console Light)
+      emphasis_0 150 105 28     // amber
+      emphasis_1 95 112 48      // olive
+      emphasis_2 163 74 104     // rose
+      emphasis_3 122 80 112     // mauve
+    }
+    text_selected {
+      base 53 32 28
+      background 236 214 210    // widget surface
+      emphasis_0 176 58 52      // brick red
+      emphasis_1 95 112 48
+      emphasis_2 163 74 104
+      emphasis_3 122 80 112
+    }
+    ribbon_unselected {
+      base 74 44 48
+      background 236 214 210    // raised surface
+      emphasis_0 150 105 28
+      emphasis_1 95 112 48
+      emphasis_2 163 74 104
+      emphasis_3 122 80 112
+    }
+    ribbon_selected {
+      base 244 228 225          // bg
+      background 176 58 52      // brick red pill -- the profile landmark
+      emphasis_0 244 228 225
+      emphasis_1 150 105 28     // gold
+      emphasis_2 120 40 30      // deep red
+      emphasis_3 244 228 225
+    }
+    table_title {
+      base 150 105 28
+      background 0
+      emphasis_0 176 58 52
+      emphasis_1 163 74 104
+      emphasis_2 95 112 48
+      emphasis_3 122 80 112
+    }
+    table_cell_unselected {
+      base 66 38 42
+      background 0
+      emphasis_0 150 105 28
+      emphasis_1 163 74 104
+      emphasis_2 95 112 48
+      emphasis_3 122 80 112
+    }
+    table_cell_selected {
+      base 66 38 42
+      background 232 208 204    // line-highlight
+      emphasis_0 150 105 28
+      emphasis_1 163 74 104
+      emphasis_2 95 112 48
+      emphasis_3 122 80 112
+    }
+    list_unselected {
+      base 66 38 42
+      background 0
+      emphasis_0 150 105 28
+      emphasis_1 163 74 104
+      emphasis_2 95 112 48
+      emphasis_3 122 80 112
+    }
+    list_selected {
+      base 66 38 42
+      background 232 208 204
+      emphasis_0 150 105 28
+      emphasis_1 163 74 104
+      emphasis_2 95 112 48
+      emphasis_3 122 80 112
+    }
+    frame_unselected {
+      base 205 180 175          // recessed stone
+      background 0
+      emphasis_0 74 44 48
+      emphasis_1 95 112 48
+      emphasis_2 163 74 104
+      emphasis_3 122 80 112
+    }
+    frame_selected {
+      base 158 42 36            // brick red focus frame
+      background 0
+      emphasis_0 150 105 28
+      emphasis_1 163 74 104
+      emphasis_2 150 105 28
+      emphasis_3 0
+    }
+    frame_highlight {
+      base 150 105 28           // amber mode signal
+      background 0
+      emphasis_0 150 105 28
+      emphasis_1 150 105 28
+      emphasis_2 150 105 28
+      emphasis_3 150 105 28
+    }
+    exit_code_success {
+      base 95 112 48
+      background 0
+      emphasis_0 74 92 32
+      emphasis_1 66 38 42
+      emphasis_2 163 74 104
+      emphasis_3 150 140 120
+    }
+    exit_code_error {
+      base 156 42 36
+      background 0
+      emphasis_0 150 105 28
+      emphasis_1 0
+      emphasis_2 0
+      emphasis_3 0
+    }
+    multiplayer_user_colors {
+      player_1 176 58 52
+      player_2 163 74 104
+      player_3 95 112 48
+      player_4 122 80 112
+      player_5 74 92 32
+      player_6 150 105 28
+      player_7 120 20 20
+      player_8 140 50 80
+      player_9 130 95 25
+      player_10 120 40 30
+    }
+  }
+}

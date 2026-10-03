@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# shots-clip - push image clipboard contents to the work box
+#
+# Run per clipboard change by shots-clip.service (wl-paste --watch). Claude Code
+# on the box reads images by shelling out to xclip there, never through the
+# terminal, so ssh/mosh/zellij cannot carry a pasted image. The box-side xclip
+# stand-in is lab ansible/roles/workvm/files/xclip.
+set -uo pipefail
+
+host="${SHOTS_HOST:-1440.wrk.nilcoast.com}"
+
+wl-paste --list-types 2>/dev/null | grep -qx image/png || exit 0
+
+# Always exit 0: see shots-push.
+wl-paste --type image/png |
+  ssh -o ConnectTimeout=5 -o BatchMode=yes "erik@${host}" \
+    'mkdir -p shots && cat > shots/.clip.tmp && mv shots/.clip.tmp shots/clip.png' ||
+  exit 0

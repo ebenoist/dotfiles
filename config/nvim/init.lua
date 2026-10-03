@@ -18,6 +18,7 @@ vim.opt.rtp:prepend(lazypath)
 
 -- Load clipboard configuration
 require('clipboard').setup()
+require('planwatch').setup()
 
 -- essentials
 vim.g.mapleader = ","

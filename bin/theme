@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# theme -- profile -> ghostty/zellij theme names. Pure lookup, no side
+# effects: theme-here is the one place a theme actually gets applied
+# (per-window, on demand); this just answers "what are prod's colors
+# called". dark/light are OS-wide dark/light mode only, unrelated to
+# profile -- ghostty's own dark:/light: config pair follows gsettings live.
+#
+# usage: theme personal|work|prod
+#   prints: ghostty-dark|ghostty-light|zellij-dark|zellij-light
+set -euo pipefail
+
+case "${1:-}" in
+personal) echo "Kanagawa Wave|Kanagawa Lotus|kanagawa|kanagawa-light" ;;
+work) echo "TokyoNight Storm|TokyoNight Day|tokyo-night-storm|tokyo-night-light" ;;
+prod) echo "Prod Console Dark|Prod Console Light|prod-console-dark|prod-console-light" ;;
+*)
+	echo "usage: theme personal|work|prod" >&2
+	exit 2
+	;;
+esac

@@ -8,5 +8,5 @@ gtk-single-instance = true
 gtk-titlebar = true
 shell-integration = bash
 
-theme = Kanagawa Wave
+theme = TokyoNight Storm
 mouse-scroll-multiplier = 0.3

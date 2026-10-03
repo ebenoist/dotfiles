@@ -17,6 +17,9 @@ export PATH=/home/erik/.cargo/bin:$PATH
 
 # load
 export PATH="$HOME/bin:$HOME/.local/bin:node_modules/.bin:$PATH"
+
+# ~/music is its own project with its own style; it stays off ~/bin
+export PATH="$HOME/music/bin:$PATH"
 export CDPATH=".:$HOME/dev"
 export VISUAL="nvim"
 export GIT_EDITOR="nvim"

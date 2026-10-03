@@ -1,0 +1,87 @@
+#!/usr/bin/env ruby
+# vimbuf - read and edit buffers in the live nvim session over RPC
+# Usage:
+#   vimbuf ls                    bufnr  modified  filetype  name
+#   vimbuf cat <bufnr>           buffer content, line-numbered
+#   vimbuf markers               file:line: text, one per eb: marker
+#   vimbuf apply <json-file>     send an edit batch, print per-edit result
+#   vimbuf log <file> <text>...  append to <file>.log.md ('-' reads stdin)
+#
+# Talks to the nvim hosting this terminal over msgpack-rpc via
+# `nvim --server "$NVIM" --remote-expr`, calling into
+# config/nvim/lua/vimbridge.lua's dispatch(request_path). Every call writes
+# one {fn, arg} JSON request to a tempfile and runs a single fixed
+# --remote-expr template -- the only thing ever substituted into it is the
+# tempfile path, never a function name or argument value, so there's no
+# vimscript/lua quoting to get wrong per call.
+
+require "json"
+require "tempfile"
+
+NVIM = ENV["NVIM"]
+abort "vimbuf: not inside an nvim terminal ($NVIM unset)" if NVIM.to_s.empty?
+
+BRIDGE = File.expand_path("~/dev/dotfiles/config/nvim/lua/vimbridge.lua")
+
+def remote_expr(expr)
+  out = IO.popen(["nvim", "--server", NVIM, "--remote-expr", expr], err: [:child, :out], &:read)
+  abort "vimbuf: nvim unreachable -- #{out.strip}" unless $?.success?
+  out
+end
+
+# dofile, not require -- require's module index is built once at nvim
+# startup and won't see vimbridge.lua change or even exist yet, since it's
+# routinely edited in the same session that's calling it. dofile re-reads
+# from disk every call, so edits land without restarting nvim.
+def call(fn, arg = nil)
+  Tempfile.create("vimbuf-req") do |req|
+    req.write({ fn: fn, arg: arg }.to_json)
+    req.flush
+    expr = %(luaeval("dofile('#{BRIDGE}').dispatch(_A)", "#{req.path}"))
+    response = JSON.parse(remote_expr(expr))
+    abort "vimbuf: #{response["error"]}" unless response["ok"]
+    response["result"]
+  end
+end
+
+case ARGV[0]
+when "ls"
+  call("buffers").each do |b|
+    mark = b["modified"] ? "+" : " "
+    puts format("%-4s %s %-10s %s", b["bufnr"], mark, b["filetype"], b["name"])
+  end
+
+when "cat"
+  bufnr = ARGV[1] or abort "vimbuf: usage: vimbuf cat <bufnr>"
+  buf = call("read", bufnr.to_i)
+  buf["lines"].each_with_index { |l, i| puts format("%4d  %s", i + 1, l) }
+
+when "markers"
+  found = call("markers")
+  if found.empty?
+    puts "vimbuf: no eb: markers"
+  else
+    found.each { |m| puts "#{m["file"]}:#{m["line"]}: #{m["text"]}  (buf #{m["bufnr"]})" }
+  end
+
+when "apply"
+  path = ARGV[1] or abort "vimbuf: usage: vimbuf apply <json-file>"
+  abort "vimbuf: no such file: #{path}" unless File.exist?(path)
+  edits = JSON.parse(File.read(path))
+  call("apply", edits)["results"].each do |r|
+    status = r["ok"] ? "ok" : "FAILED: #{r["error"]}"
+    puts "buf #{r["bufnr"]}: #{status}"
+  end
+
+when "log"
+  file = ARGV[1] or abort "vimbuf: usage: vimbuf log <file> <text>..."
+  text = (ARGV[2..] == ["-"]) ? $stdin.read : ARGV[2..].join(" ")
+  abort "vimbuf: nothing to log" if text.to_s.strip.empty?
+  result = call("log", { "file" => file, "lines" => text.each_line.map(&:chomp) })
+  puts "vimbuf: logged -> #{result["path"]}"
+
+when "-h", "--help", nil
+  puts File.readlines(__FILE__).grep(/\A#/).drop(1).map { |l| l.sub(/\A# ?/, "") }
+else
+  abort "vimbuf: unknown command #{ARGV[0].inspect} -- see vimbuf -h"
+end

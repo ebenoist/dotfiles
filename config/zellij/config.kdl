@@ -228,7 +228,7 @@ load_plugins {
   // "https://example.com/my-plugin.wasm"
 }
 
-theme "kanagawa"
+theme "prod-console-dark"
 mouse_mode true
 copy_on_select true
 // Zellij 0.45 mangles CSI-u key events (visual-mode `j` decodes as

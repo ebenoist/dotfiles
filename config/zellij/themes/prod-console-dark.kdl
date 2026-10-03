@@ -1,0 +1,133 @@
+// prod-console-dark -- Zellij chrome for Ghostty's "Prod Console Dark"
+// Red-forward variant of the warm-burnout spec: red is the profile signal,
+// so the active tab pill, focus frame and error color all read red.
+// Single `0` means terminal default (transparent).
+
+themes {
+  prod-console-dark {
+    text_unselected {
+      base 222 196 188          // raised stone
+      background 32 15 16       // terminal bg (matches Ghostty Prod Console Dark)
+      emphasis_0 224 161 94     // amber
+      emphasis_1 170 184 110    // olive
+      emphasis_2 196 122 154    // rose
+      emphasis_3 176 143 165    // mauve
+    }
+    text_selected {
+      base 238 224 216
+      background 58 34 33       // widget surface
+      emphasis_0 232 117 107    // bright red
+      emphasis_1 170 184 110
+      emphasis_2 196 122 154
+      emphasis_3 176 143 165
+    }
+    ribbon_unselected {
+      base 222 196 188
+      background 52 30 29       // raised surface
+      emphasis_0 224 161 94
+      emphasis_1 170 184 110
+      emphasis_2 196 122 154
+      emphasis_3 176 143 165
+    }
+    ribbon_selected {
+      base 32 15 16             // bg
+      background 213 80 78      // red pill -- the profile landmark
+      emphasis_0 32 15 16
+      emphasis_1 238 188 126    // gold
+      emphasis_2 150 58 52      // deep red
+      emphasis_3 32 15 16
+    }
+    table_title {
+      base 224 161 94
+      background 0
+      emphasis_0 213 80 78
+      emphasis_1 196 122 154
+      emphasis_2 170 184 110
+      emphasis_3 176 143 165
+    }
+    table_cell_unselected {
+      base 230 211 204
+      background 0
+      emphasis_0 224 161 94
+      emphasis_1 196 122 154
+      emphasis_2 170 184 110
+      emphasis_3 176 143 165
+    }
+    table_cell_selected {
+      base 230 211 204
+      background 58 34 33
+      emphasis_0 224 161 94
+      emphasis_1 196 122 154
+      emphasis_2 170 184 110
+      emphasis_3 176 143 165
+    }
+    list_unselected {
+      base 230 211 204
+      background 0
+      emphasis_0 224 161 94
+      emphasis_1 196 122 154
+      emphasis_2 170 184 110
+      emphasis_3 176 143 165
+    }
+    list_selected {
+      base 230 211 204
+      background 58 34 33
+      emphasis_0 224 161 94
+      emphasis_1 196 122 154
+      emphasis_2 170 184 110
+      emphasis_3 176 143 165
+    }
+    frame_unselected {
+      base 120 74 70            // muted red border
+      background 0
+      emphasis_0 140 110 100
+      emphasis_1 170 184 110
+      emphasis_2 196 122 154
+      emphasis_3 176 143 165
+    }
+    frame_selected {
+      base 213 80 78            // red focus frame
+      background 0
+      emphasis_0 224 161 94
+      emphasis_1 196 122 154
+      emphasis_2 238 188 126
+      emphasis_3 0
+    }
+    frame_highlight {
+      base 224 161 94           // amber mode signal
+      background 0
+      emphasis_0 224 161 94
+      emphasis_1 224 161 94
+      emphasis_2 224 161 94
+      emphasis_3 224 161 94
+    }
+    exit_code_success {
+      base 170 184 110
+      background 0
+      emphasis_0 138 154 91
+      emphasis_1 230 211 204
+      emphasis_2 196 122 154
+      emphasis_3 140 110 100
+    }
+    exit_code_error {
+      base 232 117 107
+      background 0
+      emphasis_0 238 188 126
+      emphasis_1 0
+      emphasis_2 0
+      emphasis_3 0
+    }
+    multiplayer_user_colors {
+      player_1 213 80 78
+      player_2 196 122 154
+      player_3 170 184 110
+      player_4 176 143 165
+      player_5 138 154 91
+      player_6 238 188 126
+      player_7 255 120 120
+      player_8 216 140 120
+      player_9 222 178 126
+      player_10 150 58 52
+    }
+  }
+}
