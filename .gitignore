@@ -8,3 +8,6 @@ node_modules
 *.sync-conflict-*
 .stfolder/
 .stignore
+# ~/.gitignore ignores CLAUDE.md everywhere; this one is the global
+# instructions claude-setup links to ~/CLAUDE.md, so it has to travel.
+!claude/CLAUDE.md
